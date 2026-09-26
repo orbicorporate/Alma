@@ -122,13 +122,13 @@ export default function Diario() {
         <div className="glass dz-moon-card">
           <div className="dz-moon-big"><Moon f={adv.phase.frac} size={64} /><div className="dz-moon-glow" /></div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-            <span className="kicker" style={{ fontSize: 10 }}>{WD_FULL[selDate.getDay()]}, {selDate.getDate()} de {MO_FULL[selDate.getMonth()]}</span>
+            <span className="kicker" style={{ fontSize: 11.5 }}>{WD_FULL[selDate.getDay()]}, {selDate.getDate()} de {MO_FULL[selDate.getMonth()]}</span>
             <span className="dz-phase">{adv.phase.name} · {adv.phase.lit}% iluminada</span>
             <span className="dz-phase-text">{adv.phase.text}</span>
           </div>
         </div>
         <div className="glass dz-favs">
-          <span className="kicker" style={{ fontSize: 10, color: '#f3d98b' }}>Momento favorável para</span>
+          <span className="kicker" style={{ fontSize: 11.5, color: '#f3d98b' }}>Momento favorável para</span>
           <div className="dz-chips">
             {favs.length ? favs.map((f, i) => <span key={i} className="dz-chip" style={{ borderColor: f[1], color: f[1] }}>{f[0]}{adv.strong && f[0] !== 'Descansar' ? ' · forte' : ''}</span>) : <span className="dz-chip dz-chip-mute">Observar e preparar</span>}
           </div>
@@ -136,7 +136,7 @@ export default function Diario() {
         </div>
         {steps.length ? (
           <div className="glass dz-steps">
-            <span className="kicker" style={{ fontSize: 10, color: '#8fe3b0' }}>Do seu plano de ação</span>
+            <span className="kicker" style={{ fontSize: 11.5, color: '#8fe3b0' }}>Do seu plano de ação</span>
             {steps.map((s, i) => <span key={i} className={'dz-stepline' + (s.done ? ' dz-done' : '')}><b>{s.n}</b>{s.t}</span>)}
           </div>
         ) : null}
@@ -249,18 +249,18 @@ export default function Diario() {
               <button key={k} className="dz-chip" onClick={() => setEditor(Object.assign({}, e, { type: k }))} style={{ borderColor: tt.color, color: k === e.type ? '#1a1408' : tt.color, background: k === e.type ? tt.color : 'transparent' }}>{tt.label}</button>
             ))}
           </div>
-          <span className="kicker" style={{ fontSize: 10 }}>{fromIso(e.iso).getDate()} de {MO_FULL[fromIso(e.iso).getMonth()]}</span>
+          <span className="kicker" style={{ fontSize: 11.5 }}>{fromIso(e.iso).getDate()} de {MO_FULL[fromIso(e.iso).getMonth()]}</span>
           <input className="dz-input" value={e.title} placeholder={e.type === 'sonho' ? 'Um nome para o sonho' : e.type === 'decisao' ? 'O que você precisa decidir?' : 'Título'} onChange={(ev) => setEditor(Object.assign({}, e, { title: ev.target.value }))} />
           <textarea className="dz-area" value={e.text} rows={5} placeholder={e.type === 'sonho' ? 'Conte o sonho: lugares, pessoas, cores, sensações.' : e.type === 'gratidao' ? 'Pelo que você é grato hoje?' : e.type === 'intencao' ? 'Qual intenção você quer sustentar?' : e.type === 'decisao' ? 'Quais são as opções e o que pesa em cada uma?' : 'Escreva livremente.'} onChange={(ev) => setEditor(Object.assign({}, e, { text: ev.target.value }))} />
           {e.type === 'sonho' ? (
             <div className="dz-sub">
-              <span className="kicker" style={{ fontSize: 10 }}>Como você acordou?</span>
+              <span className="kicker" style={{ fontSize: 11.5 }}>Como você acordou?</span>
               <div className="dz-chips">{WAKE.map((w) => <button key={w} className="dz-chip" onClick={() => setEditor(Object.assign({}, e, { wake: e.wake === w ? '' : w }))} style={{ borderColor: t.color, background: e.wake === w ? t.color : 'transparent', color: e.wake === w ? '#1a1408' : '#f4f1ea' }}>{w}</button>)}</div>
             </div>
           ) : null}
           {e.type === 'decisao' ? (
             <div className="dz-sub">
-              <span className="kicker" style={{ fontSize: 10, color: '#c9a8ff' }}>Dias favoráveis para decidir</span>
+              <span className="kicker" style={{ fontSize: 11.5, color: '#c9a8ff' }}>Dias favoráveis para decidir</span>
               <div className="dz-chips">
                 {sugg.map((s, i) => {
                   const di = iso(s.date);

@@ -211,7 +211,7 @@ export default function Constelacao() {
           else { ctx.beginPath(); ctx.arc(p.x, p.y, it.kind === 'sonho' ? 4 : 3, 0, 6.283); ctx.fill(); }
         }
         if (z > 1.05 && it.kind !== 'estrela') {
-          ctx.globalAlpha = r * Math.min(1, (z - 1.05) * 3) * 0.85; ctx.fillStyle = '#f4f1ea'; ctx.font = '300 9px Manrope, sans-serif'; ctx.textAlign = 'center';
+          ctx.globalAlpha = r * Math.min(1, (z - 1.05) * 3) * 0.85; ctx.fillStyle = '#f4f1ea'; ctx.font = '300 10.5px Manrope, sans-serif'; ctx.textAlign = 'center';
           const lab = (it.title || '').length > 26 ? it.title.slice(0, 25) + '…' : it.title || '';
           ctx.fillText(lab, p.x, p.y + size * 2.2 + 10); ctx.textAlign = 'left'; ctx.globalAlpha = r;
         }
@@ -223,7 +223,7 @@ export default function Constelacao() {
       L.used.forEach((th) => {
         const c0 = toS(L.centers[th.k]); if (!(L.count[th.k] > 0)) return;
         ctx.globalAlpha = Math.min(1, Math.max(0, (t - 1.5) / 1.5)) * 0.75;
-        ctx.fillStyle = th.color; ctx.font = '400 10px Manrope, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillStyle = th.color; ctx.font = '400 11.5px Manrope, sans-serif'; ctx.textAlign = 'center';
         ctx.fillText(th.label.toUpperCase().split('').join(' '), c0.x, c0.y - (80 + 34 * Math.sqrt(L.count[th.k])) * z * 0.72);
         ctx.textAlign = 'left';
       });

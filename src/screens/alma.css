@@ -65,5 +65,5 @@
 @keyframes spin{to{rotate:360deg}}
 .sc-main .scroll{scrollbar-width:none}
 .sc-main .scroll::-webkit-scrollbar{display:none}
-.sc-main .kicker{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,241,234,.55)}
+.sc-main .kicker{font-size: 12.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,241,234,.55)}
 @media (prefers-reduced-motion:reduce){.sc-main *{animation-duration:.01ms!important;animation-iteration-count:1!important}}

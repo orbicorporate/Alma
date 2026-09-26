@@ -26,15 +26,6 @@
     <circle cx="700" cy="120" r="3" opacity=".55"/><circle cx="330" cy="120" r="2.5" opacity=".5"/><circle cx="930" cy="690" r="2.5" opacity=".5"/>
     <circle cx="90" cy="740" r="2.5" opacity=".45"/><circle cx="560" cy="930" r="3" opacity=".45"/>
   </g>
-  <!-- linhas da constelação (brilho + traço) -->
-  <g stroke="#e6ddff" stroke-linecap="round" fill="none">
-    <g stroke-width="10" opacity=".35" filter="url(#glowline)">
-      <path d="M512 250 L372 548 L292 770 M512 250 L652 548 L742 760"/>
-    </g>
-    <g stroke-width="3.5" opacity=".85">
-      <path d="M512 250 L372 548 L292 770 M512 250 L652 548 L742 760"/>
-    </g>
-  </g>
   <!-- estrelas -->
   <circle cx="372" cy="548" r="70" fill="url(#halo)"/><circle cx="372" cy="548" r="11" fill="#fff"/>
   <circle cx="652" cy="548" r="70" fill="url(#haloT)"/><circle cx="652" cy="548" r="11" fill="#fff"/>

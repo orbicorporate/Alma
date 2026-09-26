@@ -140,7 +140,7 @@ export default function NatalSphere({ sim, profile }) {
             <span className="sp-sub">{Math.floor(s.deg)}° · Casa {s.house} · {sim.HOUSE[s.house - 1]}</span>
           </span>
         </div>
-        <div className="kicker" style={{ fontSize: 10, marginTop: 4 }}>Como age em você</div>
+        <div className="kicker" style={{ fontSize: 11.5, marginTop: 4 }}>Como age em você</div>
         <p className="sp-text">{how}</p>
         {act.length ? (
           <div className="sp-today">
@@ -150,7 +150,7 @@ export default function NatalSphere({ sim, profile }) {
             ))}
           </div>
         ) : null}
-        <div className="kicker" style={{ fontSize: 10, marginTop: 6 }}>Dicas para cada área</div>
+        <div className="kicker" style={{ fontSize: 11.5, marginTop: 6 }}>Dicas para cada área</div>
         <div className="sp-tips">
           {AREAS.map((a, j) => (
             <div key={j} className="sp-tip">
