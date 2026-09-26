@@ -868,10 +868,7 @@ Component.prototype.render = function render() {
               {R.introA ? (
                 <>
                   <div style={css("position: absolute; top: 450px; left: 28px; right: 28px; display: flex; flex-direction: column; align-items: center; text-align: center")}>
-                    <div className="fade kicker" style={css("animation-delay: .2s")}>
-                      {R.ph?.kicker}
-                    </div>
-                    <div style={css("margin-top: 16px; display: flex; flex-direction: column; gap: 2px")}>
+                    <div style={css("display: flex; flex-direction: column; gap: 2px")}>
                       {(R.ph?.lines || []).map((L3_l, I3) => (
                         <React.Fragment key={I3}>
                           <p className="fade" style={css(`margin: 0; font-size: 25px; font-weight: 300; line-height: 1.28; letter-spacing: -.01em; ${(L3_l?.style) ?? ''}`)}>
@@ -906,10 +903,7 @@ Component.prototype.render = function render() {
               {R.introB ? (
                 <>
                   <div style={css("position: absolute; top: 450px; left: 28px; right: 28px; display: flex; flex-direction: column; align-items: center; text-align: center")}>
-                    <div className="fade kicker" style={css("animation-delay: .2s")}>
-                      {R.ph?.kicker}
-                    </div>
-                    <div style={css("margin-top: 16px; display: flex; flex-direction: column; gap: 2px")}>
+                    <div style={css("display: flex; flex-direction: column; gap: 2px")}>
                       {(R.ph?.lines || []).map((L4_l, I4) => (
                         <React.Fragment key={I4}>
                           <p className="fade" style={css(`margin: 0; font-size: 25px; font-weight: 300; line-height: 1.28; letter-spacing: -.01em; ${(L4_l?.style) ?? ''}`)}>
