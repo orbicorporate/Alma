@@ -65,4 +65,10 @@ export async function sendMagicLink(email) {
   const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
   return { error: error ? error.message : null };
 }
+export async function signInWithGoogle() {
+  if (!supabase) return { error: 'O login ainda não está configurado neste ambiente.' };
+  const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+  if (error && /not enabled|Unsupported provider/i.test(error.message)) return { error: 'O login com Google ainda está sendo ativado. Use o e-mail por enquanto.' };
+  return { error: error ? error.message : null };
+}
 export async function signOut() { if (supabase) await supabase.auth.signOut(); }
