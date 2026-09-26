@@ -120,7 +120,10 @@ class Component extends DCLogic {
     this.checkHandoff = this.checkHandoff.bind(this);
     this.checkHandoff();
     window.addEventListener('alma:show', this.checkHandoff);
-    this.offAuth = onAuth((auth) => this.setState({ auth }));
+    this.offAuth = onAuth((auth) => {
+      const entering = auth.loggedIn && this.state.screen === 'welcome';
+      this.setState(entering ? { auth, screen: 'breath', count: 0, inhale: true } : { auth });
+    });
     this.offData = onData((d) => this.setState({ entries: d.entries || [] }));
     this.k = setTimeout(() => this.setState({ inhale: true }), 80);
     this.b = setInterval(() => {
@@ -277,7 +280,7 @@ class Component extends DCLogic {
     const auroraB = `transform: translate(${(s.tx * 16).toFixed(1)}px, ${(s.ty * 16).toFixed(1)}px)`;
 
     const POS = {
-      intro: [195, 300, 140], breath: [195, 320, 220], ask: [195, 162, 124], releasing: [195, 320, 200], deepen: [195, 160, 110],
+      intro: [195, 300, 140], welcome: [195, 196, 120], breath: [195, 320, 220], ask: [195, 162, 124], releasing: [195, 320, 200], deepen: [195, 160, 110],
       council: [195, 380, 96], answers: [195, 58, 38], journal: [195, 58, 38], plan: [195, 58, 38]
     };
     const p = POS[s.screen];
@@ -540,7 +543,13 @@ class Component extends DCLogic {
         };
       })(),
       nextPhrase: () => this.setState({ pi: (this.state.pi + 1) % this.PH.length }),
-      startJourney: () => this.setState({ screen: 'breath', count: 0, inhale: true }),
+      startJourney: () => {
+        const a = this.state.auth;
+        let skipped = false;
+        try { skipped = localStorage.getItem('alma:skipLogin') === '1'; } catch (e) { /* sem armazenamento */ }
+        if (a.enabled && !a.loggedIn && !skipped) this.setState({ screen: 'welcome', loginMsg: '' });
+        else this.setState({ screen: 'breath', count: 0, inhale: true });
+      },
       rays, councilAgents, councilStatus, councilSub, statusColor, councilReady: s.lit >= N,
       cards, filters, noCards: cards.length === 0,
       voicesOpen: s.voicesOpen, voicesClosed: !s.voicesOpen, voiceCount: AG.length,
@@ -684,6 +693,44 @@ Object.assign(Component.prototype, {
     this.setState({ loginMsg: 'Enviando...' });
     const r = await sendMagicLink(email);
     this.setState({ loginMsg: r.error ? r.error : 'Pronto. Abra o link que enviamos para ' + email + ' neste aparelho.' });
+  },
+  renderWelcome() {
+    const skip = () => { try { localStorage.setItem('alma:skipLogin', '1'); } catch (e) { /* sem armazenamento */ } this.setState({ screen: 'breath', count: 0, inhale: true }); };
+    const G = (
+      <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.3 0-11.6-4.2-13.5-10l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>
+    );
+    const perks = [['#c9b8ff', 'Sua constelação de perguntas, estrelas e planos'], ['#a8d8ff', 'Seu diário, sonhos e post-its'], ['#f3d98b', 'Seu mapa natal e suas leituras']];
+    return (
+      <div className="screen">
+        <div style={css('position: absolute; inset: 0; box-sizing: border-box; padding: 290px 24px 28px; display: flex; flex-direction: column; gap: 14px')}>
+          <div style={css('display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center')}>
+            <span className="kicker">Bem-vindo à Alma</span>
+            <h1 style={css('margin: 0; font-size: 26px; line-height: 1.25; font-weight: 300')}>Guarde a sua jornada<br />em qualquer aparelho</h1>
+          </div>
+          <div style={css('display: flex; flex-direction: column; gap: 8px; margin: 4px 0 6px')}>
+            {perks.map((p, i) => (
+              <span key={i} className="fade" style={css(`display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 300; color: rgba(244,241,234,.82); animation-delay: ${0.3 + i * 0.15}s`)}>
+                <i style={css(`width: 8px; height: 8px; border-radius: 50%; background: ${p[0]}; box-shadow: 0 0 10px ${p[0]}; flex-shrink: 0`)} />{p[1]}
+              </span>
+            ))}
+          </div>
+          <button className="cta" onClick={async () => { const r = await signInWithGoogle(); if (r.error) this.setState({ loginMsg: r.error }); }} style={css('height: 54px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; font-weight: 500; color: #1f1f1f; background: #ffffff; box-shadow: 0 0 30px rgba(255,255,255,.15)')}>
+            {G}Continuar com Google
+          </button>
+          <div style={css('display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.4)')}>
+            <span style={css('flex-grow: 1; height: 1px; background: rgba(255,255,255,.12)')} />ou com e-mail<span style={css('flex-grow: 1; height: 1px; background: rgba(255,255,255,.12)')} />
+          </div>
+          <div style={css('display: flex; gap: 8px')}>
+            <input type="email" value={this.state.loginEmail} onChange={(e) => this.setState({ loginEmail: e.target.value, loginMsg: '' })} placeholder="seu@email.com" aria-label="Seu e-mail" style={css('flex-grow: 1; min-width: 0; height: 50px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #f4f1ea; font: inherit; font-size: 15px; outline: none')} />
+            <button className="cta" onClick={() => this.sendLink()} style={css('flex-shrink: 0; height: 50px; padding: 0 18px; border-radius: 999px; font-size: 14px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #c9b8ff, #efe8ff 50%, #b8d8ff)')}>Enviar link</button>
+          </div>
+          {this.state.loginMsg ? <span style={css('text-align: center; font-size: 12px; line-height: 1.5; color: #f3d98b')}>{this.state.loginMsg}</span> : <span style={css('text-align: center; font-size: 12px; line-height: 1.5; color: rgba(244,241,234,.5)')}>Sem senha: enviamos um link de acesso para o seu e-mail.</span>}
+          <div style={css('flex-grow: 1')} />
+          <button onClick={skip} style={css('height: 44px; align-self: center; padding: 0 18px; font-size: 14px; font-weight: 300; color: rgba(244,241,234,.7)')}>Continuar sem conta</button>
+          <span style={css('text-align: center; font-size: 11px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.42)')}>Sem conta, tudo fica salvo só neste aparelho. Você pode entrar depois na sua constelação.</span>
+        </div>
+      </div>
+    );
   },
   renderLogin() {
     const a = this.state.auth;
@@ -897,6 +944,7 @@ Component.prototype.render = function render() {
             </div>
           </>
         ) : null}
+        {this.state.screen === 'welcome' ? this.renderWelcome() : null}
         {R.isBreath ? (
           <>
             <div className="screen">
