@@ -2,7 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-export const supabase = url && key ? createClient(url, key) : null;
+// PKCE: o retorno do login vem como ?code= na URL, sem conflitar com a navegação por # do app.
+export const supabase = url && key ? createClient(url, key, { auth: { flowType: 'pkce', detectSessionInUrl: true, persistSession: true } }) : null;
 
 const LOCAL = 'alma:data';
 const readLocal = () => { try { return JSON.parse(localStorage.getItem(LOCAL) || '{}'); } catch (e) { return {}; } };
@@ -35,7 +36,11 @@ async function pullRemote() {
 }
 
 if (supabase) {
-  supabase.auth.getSession().then(({ data }) => { session = data.session; emit(); pullRemote(); });
+  supabase.auth.getSession().then(({ data }) => {
+    session = data.session; emit(); pullRemote();
+    // limpa o código de login da barra de endereço depois de entrar
+    if (/[?&]code=/.test(window.location.search)) window.history.replaceState(null, '', window.location.pathname + window.location.hash);
+  });
   supabase.auth.onAuthStateChange((event, s) => {
     const was = !!session; session = s; emit();
     if (s && !was) pullRemote();
