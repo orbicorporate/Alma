@@ -29,10 +29,10 @@
   <!-- linhas da constelação (brilho + traço) -->
   <g stroke="#e6ddff" stroke-linecap="round" fill="none">
     <g stroke-width="10" opacity=".35" filter="url(#glowline)">
-      <path d="M512 250 L372 548 L292 770 M512 250 L652 548 L742 760 M372 548 L652 548"/>
+      <path d="M512 250 L372 548 L292 770 M512 250 L652 548 L742 760"/>
     </g>
     <g stroke-width="3.5" opacity=".85">
-      <path d="M512 250 L372 548 L292 770 M512 250 L652 548 L742 760 M372 548 L652 548"/>
+      <path d="M512 250 L372 548 L292 770 M512 250 L652 548 L742 760"/>
     </g>
   </g>
   <!-- estrelas -->
