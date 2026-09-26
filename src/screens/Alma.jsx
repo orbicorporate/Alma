@@ -66,8 +66,8 @@ class Component extends DCLogic {
         reflection: 'Heráclito lembra que tudo flui, inclusive você. A cidade de hoje já não é a de antes, e a que você imagina também vai mudar. Escolha pensando na pessoa que você está se tornando.' }
     ];
     this.PH = [
-      { lines: ['Religiões e filosofias', 'não devem dividir,', 'e sim aconselhar.'], mid: 'Tudo importa.', gold: 'Flua com sabedoria e leve a luz.' },
       { lines: ['Muitos caminhos,', 'uma mesma montanha.'], mid: 'Cada tradição vê um lado dela.', gold: 'Suba com o coração aberto.' },
+      { lines: ['Religiões e filosofias', 'não devem dividir,', 'e sim aconselhar.'], mid: 'Tudo importa.', gold: 'Flua com sabedoria e leve a luz.' },
       { lines: ['Nenhuma voz', 'guarda a luz inteira.'], mid: 'Juntas, iluminam mais.', gold: 'Escute todas, escolha com amor.' },
       { lines: ['A verdade não cabe', 'em uma única história.'], mid: 'Ela cabe na escuta.', gold: 'Abra espaço para o outro.' },
       { lines: ['O que nos une', 'é mais antigo', 'do que o que nos separa.'], mid: 'A compaixão fala muitas línguas.', gold: 'Aprenda todas com o coração.' },
@@ -866,7 +866,7 @@ Component.prototype.render = function render() {
               </div>
               {R.introA ? (
                 <>
-                  <div style={css("position: absolute; top: 450px; left: 28px; right: 28px; display: flex; flex-direction: column; align-items: center; text-align: center")}>
+                  <div style={css("position: absolute; top: 492px; left: 28px; right: 28px; display: flex; flex-direction: column; align-items: center; text-align: center")}>
                     <div style={css("display: flex; flex-direction: column; gap: 2px")}>
                       {(R.ph?.lines || []).map((L3_l, I3) => (
                         <React.Fragment key={I3}>
@@ -901,7 +901,7 @@ Component.prototype.render = function render() {
               ) : null}
               {R.introB ? (
                 <>
-                  <div style={css("position: absolute; top: 450px; left: 28px; right: 28px; display: flex; flex-direction: column; align-items: center; text-align: center")}>
+                  <div style={css("position: absolute; top: 492px; left: 28px; right: 28px; display: flex; flex-direction: column; align-items: center; text-align: center")}>
                     <div style={css("display: flex; flex-direction: column; gap: 2px")}>
                       {(R.ph?.lines || []).map((L4_l, I4) => (
                         <React.Fragment key={I4}>
