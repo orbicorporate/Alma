@@ -1,8 +1,10 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Alma from './screens/Alma.jsx';
 import Simbolos from './screens/Simbolos.jsx';
+import Diario from './screens/Diario.jsx';
+import Constelacao from './screens/Constelacao.jsx';
 
-const routeOf = () => (window.location.hash.startsWith('#/simbolos') ? 'simbolos' : 'alma');
+const routeOf = () => { const h = window.location.hash; return h.startsWith('#/simbolos') ? 'simbolos' : h.startsWith('#/diario') ? 'diario' : h.startsWith('#/constelacao') ? 'constelacao' : 'alma'; };
 
 export default function App() {
   const [route, setRoute] = useState(routeOf());
@@ -40,6 +42,8 @@ export default function App() {
       <div ref={frame} className="app-frame" style={{ transform: `scale(${scale})` }}>
         <div style={{ display: route === 'alma' ? 'block' : 'none' }}><Alma /></div>
         <div style={{ display: route === 'simbolos' ? 'block' : 'none' }}><Simbolos /></div>
+        {route === 'diario' ? <div><Diario /></div> : null}
+        {route === 'constelacao' ? <div><Constelacao /></div> : null}
       </div>
     </div>
   );

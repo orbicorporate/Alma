@@ -3,6 +3,7 @@ import React from 'react';
 import { DCLogic, css } from '../dc/runtime.js';
 import { load, save, onData } from '../store.js';
 import { today, addDays, addMonths, WD_FULL } from '../dates.js';
+import NatalSphere from '../components/NatalSphere.jsx';
 
 class Component extends DCLogic {
   constructor(props) {
@@ -468,7 +469,7 @@ class Component extends DCLogic {
         frontPad: big ? 'padding: 18px 10px' : 'padding: 10px 6px',
         numSize: big ? '16px' : '11px', nameSize: big ? '16px' : '11px',
         sigilSize: big ? 'width: 120px; height: 120px' : 'width: 64px; height: 64px',
-        flipIt: () => { if (j === this.state.flipped) this.setState({ flipped: j + 1 }); }
+        flipIt: () => { if (j === this.state.flipped) { this.setState({ flipped: j + 1 }); if (j + 1 === cards.length) save({ readings: (load().readings || []).concat([{ at: Date.now(), q: this.state.tq || '', cards: cards.map((c) => c[0]), spread: cards.length }]) }); } }
       };
     });
     const low = (n) => n.replace(/^(O|A|Os) /, (m) => m.toLowerCase());
@@ -972,6 +973,7 @@ Component.prototype.render = function render() {
                     {`Sol em ${(R.horo?.sun) ?? ''} · Lua em ${(R.horo?.moon) ?? ''} · Ascendente em ${(R.horo?.asc) ?? ''}`}
                   </p>
                 </div>
+                <NatalSphere sim={this} profile={this.state.profile} />
                 <div className="scroll" style={css("display: flex; gap: 8px; overflow-x: auto; margin: 0 -20px; padding: 0 20px 2px")}>
                   {(R.periods || []).map((L9_p, I9) => (
                     <React.Fragment key={I9}>

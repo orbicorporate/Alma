@@ -567,7 +567,7 @@ class Component extends DCLogic {
         if (!st.savedNow || idx < 0 || !list[idx]) {
           const a = this.composeAlma();
           list.push({
-            date: dayMonth(today()), kind: st.kind, q: st.text, tags: st.ans.filter(Boolean), resolved: false, plan: null,
+            date: dayMonth(today()), at: Date.now(), kind: st.kind, q: st.text, tags: st.ans.filter(Boolean), resolved: false, plan: null,
             alma: a.p1 + ' ' + a.p2, step: a.step,
             stars: st.stars.map((i) => ({ name: this.AG[i].name, ref: this.AG[i].ref, color: this.AG[i].color, tr: this.AG[i].tr }))
           });
@@ -648,7 +648,7 @@ class Component extends DCLogic {
         const st = this.state;
         const a = this.composeAlma();
         const entry = {
-          date: dayMonth(today()), kind: st.kind, q: st.text, tags: st.ans.filter(Boolean), resolved: false, plan: null,
+          date: dayMonth(today()), at: Date.now(), kind: st.kind, q: st.text, tags: st.ans.filter(Boolean), resolved: false, plan: null,
           alma: a.p1 + ' ' + a.p2, step: a.step,
           stars: st.stars.map((i) => ({ name: this.AG[i].name, ref: this.AG[i].ref, color: this.AG[i].color, tr: this.AG[i].tr }))
         };
@@ -760,6 +760,13 @@ Component.prototype.render = function render() {
           {R.showJournal ? (
             <>
               <span style={css("display: flex; align-items: center; gap: 2px; pointer-events: auto")}>
+                <a href="#/diario" aria-label="Meu diário" style={css("width: 44px; height: 44px; display: flex; align-items: center; justify-content: center")}>
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#a8d8ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
+                    <path d="M3.5 10h17M8 3v4M16 3v4" />
+                    <circle cx="15.5" cy="15" r="2.2" fill="#f4efe0" stroke="none" />
+                  </svg>
+                </a>
                 <a href="Simbolos.dc.html" aria-label="Céu e Símbolos" style={css("width: 44px; height: 44px; display: flex; align-items: center; justify-content: center")}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9b8ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />
@@ -1422,6 +1429,13 @@ Component.prototype.render = function render() {
                     {"Cada pergunta vira uma estrela. Toque para revisitar."}
                   </p>
                 </div>
+                <a href="#/constelacao" className="cta" style={css('position: relative; overflow: hidden; height: 64px; border-radius: 22px; display: flex; align-items: center; gap: 14px; padding: 0 18px; text-decoration: none; color: #f4f1ea; background: radial-gradient(circle at 20% 50%, rgba(201,184,255,.35), rgba(20,16,44,.9) 60%); border: 1px solid rgba(201,184,255,.45); box-shadow: 0 0 30px rgba(201,184,255,.2)')}>
+                  <span style={css('width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #c9b8ff 45%, rgba(201,184,255,0) 72%); box-shadow: 0 0 20px #c9b8ff')} />
+                  <span style={css('display: flex; flex-direction: column; gap: 2px')}>
+                    <span style={css('font-size: 15px; font-weight: 400')}>Abrir o céu em tela inteira</span>
+                    <span style={css('font-size: 12px; font-weight: 300; color: rgba(244,241,234,.65)')}>Tudo o que você viveu na Alma, em luz</span>
+                  </span>
+                </a>
                 {this.renderLogin()}
                 {R.hasNext ? (
                   <>

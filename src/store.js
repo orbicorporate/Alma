@@ -21,15 +21,15 @@ export function onData(fn) { dataListeners.add(fn); return () => dataListeners.d
 
 async function pullRemote() {
   if (!supabase || !session) return;
-  const { data, error } = await supabase.from('alma_user_data').select('entries, profile').eq('user_id', session.user.id).maybeSingle();
+  const { data, error } = await supabase.from('alma_user_data').select('entries, profile, journal, postits, readings').eq('user_id', session.user.id).maybeSingle();
   if (error) { console.warn('Alma: erro ao carregar dados', error.message); return; }
   const local = readLocal();
   if (!data) {
     // Primeiro login: leva para a nuvem o que já estava no aparelho.
-    await supabase.from('alma_user_data').upsert({ user_id: session.user.id, entries: local.entries || [], profile: local.profile || null, updated_at: new Date().toISOString() });
+    await supabase.from('alma_user_data').upsert({ user_id: session.user.id, entries: local.entries || [], profile: local.profile || null, journal: local.journal || [], postits: local.postits || [], readings: local.readings || [], updated_at: new Date().toISOString() });
     return;
   }
-  const merged = { entries: data.entries || [], profile: data.profile || local.profile || null };
+  const merged = { entries: data.entries || [], profile: data.profile || local.profile || null, journal: data.journal || [], postits: data.postits || [], readings: data.readings || [] };
   writeLocal(merged);
   dataListeners.forEach((f) => f(merged));
 }

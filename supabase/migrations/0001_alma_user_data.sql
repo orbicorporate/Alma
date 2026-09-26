@@ -1,8 +1,12 @@
--- Dados de cada pessoa na Alma: constelação (perguntas, estrelas, planos) e perfil de nascimento.
+-- Dados de cada pessoa na Alma: constelação (perguntas, estrelas, planos), perfil de nascimento,
+-- diário, post-its e leituras de tarô.
 create table if not exists public.alma_user_data (
   user_id uuid primary key references auth.users (id) on delete cascade,
   entries jsonb not null default '[]'::jsonb,
   profile jsonb,
+  journal jsonb not null default '[]'::jsonb,
+  postits jsonb not null default '[]'::jsonb,
+  readings jsonb not null default '[]'::jsonb,
   updated_at timestamptz not null default now()
 );
 
