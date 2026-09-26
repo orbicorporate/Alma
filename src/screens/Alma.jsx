@@ -705,7 +705,6 @@ Object.assign(Component.prototype, {
         <div style={css('position: absolute; inset: 0; box-sizing: border-box; padding: 290px 24px 28px; display: flex; flex-direction: column; gap: 14px')}>
           <div style={css('display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center')}>
             <span className="kicker">Bem-vindo à Alma</span>
-            <h1 style={css('margin: 0; font-size: 26px; line-height: 1.25; font-weight: 300')}>Guarde a sua jornada<br />em qualquer aparelho</h1>
           </div>
           <div style={css('display: flex; flex-direction: column; gap: 8px; margin: 4px 0 6px')}>
             {perks.map((p, i) => (

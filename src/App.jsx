@@ -9,10 +9,17 @@ const routeOf = () => { const h = window.location.hash; return h.startsWith('#/s
 export default function App() {
   const [route, setRoute] = useState(routeOf());
   const [scale, setScale] = useState(1);
+  const [fh, setFh] = useState(844);
   const frame = useRef(null);
 
   useLayoutEffect(() => {
-    const fit = () => setScale(Math.min(window.innerWidth / 390, window.innerHeight / 844, 1.25));
+    const fit = () => {
+      const w = window.innerWidth, h = window.innerHeight;
+      const sw = w / 390, fh = h / sw;
+      // No celular, preenche a largura inteira e ajusta a altura da tela ao aparelho.
+      if (w < 700 && fh >= 760) { setScale(sw); setFh(fh); }
+      else { setScale(Math.min(w / 390, h / 844, 1.25)); setFh(844); }
+    };
     fit();
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);
@@ -39,7 +46,7 @@ export default function App() {
 
   return (
     <div className="app-bg" onClickCapture={onClickCapture}>
-      <div ref={frame} className="app-frame" style={{ transform: `scale(${scale})` }}>
+      <div ref={frame} className="app-frame" style={{ transform: `scale(${scale})`, height: fh, '--fh': fh + 'px' }}>
         <div style={{ display: route === 'alma' ? 'block' : 'none' }}><Alma /></div>
         <div style={{ display: route === 'simbolos' ? 'block' : 'none' }}><Simbolos /></div>
         {route === 'diario' ? <div><Diario /></div> : null}

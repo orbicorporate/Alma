@@ -7,3 +7,7 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 /* rolagem só na vertical nas telas longas */
 .sc-main .scroll, .sc-sym .scroll { overflow-x: hidden; }
 .sc-sym .screen, .sc-main .screen { overflow-x: hidden; }
+
+/* As telas ocupam a altura real do aparelho */
+.app-frame .sc-main > .alma, .app-frame .sc-sym > div:first-child, .app-frame .dz, .app-frame .cz { height: var(--fh, 844px) !important; }
+.app-frame > div { height: 100%; }
