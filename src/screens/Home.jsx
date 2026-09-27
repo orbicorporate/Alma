@@ -6,6 +6,7 @@ import { phraseOfDay } from '../phrases.js';
 import { dayTip, weekTip } from '../tips.js';
 import { Moon } from './Diario.jsx';
 import './home.css';
+import Starfield from '../components/Starfield.jsx';
 
 // Início: o lugar onde a pessoa se encontra todos os dias.
 const go = (hash, detail) => {
@@ -66,6 +67,7 @@ export default function Home() {
   return (
     <div className="hm">
       <div className="hm-aurora" />
+      <Starfield />
       <div className="hm-scroll">
         <header className="hm-head">
           <span className="hm-word">alma</span>

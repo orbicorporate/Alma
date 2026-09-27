@@ -29,7 +29,7 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .app-fill .sc-main > .alma, .app-fill .sc-sym > div:first-child, .app-fill .dz, .app-fill .cz { margin: 0 auto; overflow: visible !important; }
 .app-fill .sc-main, .app-fill .sc-sym { height: 100%; }
 .app-fill .dz-aurora { inset: 0 -220px; }
-.app-fill .cz-canvas { box-shadow: 0 0 0 400px #05040c; }
+
 
 /* Com a barra de navegação visível, o conteúdo rolável termina acima dela */
 .tabs-on .sc-main .scroll > div, .tabs-on .sc-sym .scroll > div { padding-bottom: 128px !important; }

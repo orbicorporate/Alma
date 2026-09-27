@@ -4,6 +4,7 @@ import { today, iso, fromIso, MO_FULL, WD_FULL } from '../dates.js';
 import { phaseOf, moonPath, dayAdvice, nextFavorable, PD_TEXT } from '../cosmos.js';
 import { readDream, recurring } from '../dreams.js';
 import './diario.css';
+import Starfield from '../components/Starfield.jsx';
 
 export const TYPES = {
   sonho: { label: 'Sonho', plural: 'Sonhos', color: '#c9a8ff' },
@@ -441,6 +442,7 @@ export default function Diario() {
   return (
     <div className="dz">
       <div className="dz-aurora" />
+      <Starfield />
       <div className="dz-top">
         <span className="dz-headtxt">
           <span className="dz-title">Meu diário</span>

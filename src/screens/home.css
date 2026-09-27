@@ -66,3 +66,7 @@
 .hm-why-k { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.55); font-weight: 400; }
 .hm .hm-why-cta { font-size: 13.5px; color: #f3d98b; min-height: 36px; }
 .hm-from { color: rgba(244,241,234,.55); -webkit-text-fill-color: rgba(244,241,234,.55); font-size: 13px; }
+.hm-ask-orb { position: relative; overflow: hidden; isolation: isolate; background: #6f5ae6; }
+.hm-ask-orb::before { content: ''; position: absolute; inset: -30%; border-radius: 50%; background: conic-gradient(from 0deg, #b9a6ff, #f5a8c8, #ffd3a8, #a8d8ff, #7a5cff, #c9a8ff, #b9a6ff); filter: blur(6px); animation: hmSpin 7s linear infinite; z-index: -1; }
+.hm-ask-orb::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.95), rgba(255,255,255,.3) 24%, transparent 50%); }
+@keyframes hmSpin { to { transform: rotate(360deg); } }

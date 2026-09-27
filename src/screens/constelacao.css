@@ -1,6 +1,6 @@
 .cz { position: relative; width: 390px; height: 844px; overflow: hidden; background: #05040c; color: #f4f1ea; font-family: 'Manrope', 'Noto Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 :where(.cz button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
-.cz-canvas { position: absolute; inset: 0; touch-action: none; cursor: grab; }
+.cz-canvas { position: absolute; top: 0; left: 0; touch-action: none; cursor: grab; }
 .cz-canvas:active { cursor: grabbing; }
 .cz-top { position: absolute; top: 36px; left: 12px; right: 12px; display: flex; align-items: center; gap: 6px; pointer-events: none; animation: czIn 1.2s 1.6s ease both; }
 .cz-top > * { pointer-events: auto; }
@@ -13,7 +13,7 @@
 .cz-chip i { width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
 .cz-time { position: absolute; left: 20px; right: 20px; bottom: 26px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13.5px; color: rgba(244,241,234,.8); animation: czIn 1.2s 2.6s ease both; }
 .cz-time input { width: 100%; accent-color: #c9b8ff; }
-.cz-time-hint { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.45); }
+.cz-time-hint { font-size: 11px; letter-spacing: .12em; white-space: nowrap; text-transform: uppercase; color: rgba(244,241,234,.45); }
 .cz-empty { position: absolute; left: 30px; right: 30px; top: 40%; text-align: center; display: flex; flex-direction: column; gap: 14px; animation: czIn 1s 2s ease both; }
 .cz-empty p { margin: 0; font-size: 17px; font-weight: 300; line-height: 1.5; }
 .cz .cz-btn { height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); font-size: 14px; background: rgba(255,255,255,.06); }
@@ -27,3 +27,12 @@
 .cz-card-title { font-size: 17px; font-weight: 300; line-height: 1.4; }
 .cz-card-text { margin: 0; font-size: 14.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.8); white-space: pre-line; }
 .cz-parent { font-size: 13.5px; color: #f3d98b; }
+
+.cz-veil-top { position: absolute; top: 0; left: -300px; right: -300px; height: 150px; pointer-events: none; background: linear-gradient(180deg, rgba(8,7,22,.85), rgba(8,7,22,0)); }
+.cz-range { -webkit-appearance: none; appearance: none; height: 26px; background: transparent; }
+.cz-range::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(90deg, #7a5cff, #f5a8c8 50%, #f3d98b) 0 0 / var(--p) 100% no-repeat, rgba(255,255,255,.14); }
+.cz-range::-moz-range-track { height: 4px; border-radius: 4px; background: rgba(255,255,255,.14); }
+.cz-range::-moz-range-progress { height: 4px; border-radius: 4px; background: linear-gradient(90deg, #7a5cff, #f5a8c8, #f3d98b); }
+.cz-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -9px; border-radius: 50%; border: 0; background: radial-gradient(circle at 35% 30%, #fff, #e4d6ff 45%, #b9a6ff); box-shadow: 0 0 16px rgba(201,184,255,.9), 0 0 36px rgba(245,168,200,.5); animation: czThumb 2.4s ease-in-out infinite; }
+.cz-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; border: 0; background: radial-gradient(circle at 35% 30%, #fff, #e4d6ff 45%, #b9a6ff); box-shadow: 0 0 16px rgba(201,184,255,.9); }
+@keyframes czThumb { 50% { box-shadow: 0 0 24px rgba(201,184,255,1), 0 0 50px rgba(245,168,200,.7); } }

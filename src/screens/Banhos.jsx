@@ -5,6 +5,7 @@ import { phaseOf } from '../cosmos.js';
 import { TAGS, MOONS, moonGroup, searchBaths } from '../baths.js';
 import { Moon } from './Diario.jsx';
 import './banhos.css';
+import Starfield from '../components/Starfield.jsx';
 
 const TAG = Object.fromEntries(TAGS.map((t) => [t.k, t]));
 const MOON = Object.fromEntries(MOONS.map((m) => [m.k, m]));
@@ -58,6 +59,7 @@ export default function Banhos() {
   return (
     <div className="bh">
       <div className="bh-aurora" />
+      <Starfield />
       <div className="bh-scroll">
         <header className="bh-head">
           <button className="bh-back" aria-label="Voltar" onClick={back}>‹</button>
