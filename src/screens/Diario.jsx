@@ -19,12 +19,47 @@ const WAKE = ['Em paz', 'Leve', 'Emocionado', 'Inquieto', 'Confuso'];
 const WDS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 const uid = () => Math.random().toString(36).slice(2, 10);
 
+// Lua fiel à fase: disco com mares lunares e crateras, borda mais escura (como a real),
+// terminador suave e o lado escuro levemente visível (luz da Terra).
+let moonSeq = 0;
 export function Moon({ f, size = 14 }) {
-  const r = size / 2 - 1;
+  const id = useMemo(() => 'mn' + (++moonSeq), []);
+  const r = size / 2 - 0.5;
+  const small = size < 24;
+  // mares e crateras em coordenadas relativas ao raio (lado visível da Lua)
+  const MARIA = [[-0.3, -0.34, 0.24, 0.18, -20], [0.1, -0.36, 0.16, 0.13, 10], [0.26, -0.1, 0.2, 0.15, 30], [0.6, -0.18, 0.11, 0.09, 0], [-0.52, 0.08, 0.2, 0.34, -10], [0.24, 0.26, 0.12, 0.1, 0], [-0.22, 0.34, 0.1, 0.08, 0]];
+  const CRAT = [[-0.08, 0.66, 0.08], [0.46, -0.52, 0.05], [-0.55, -0.5, 0.05], [0.58, 0.2, 0.04], [0.05, -0.7, 0.04]];
   return (
-    <svg width={size} height={size} viewBox={`${-size / 2} ${-size / 2} ${size} ${size}`} aria-hidden="true" style={{ flexShrink: 0 }}>
-      <circle r={r} fill="rgba(255,255,255,.07)" stroke="rgba(244,239,224,.35)" strokeWidth=".6" />
-      <path d={moonPath(f, r)} fill="#f4efe0" />
+    <svg width={size} height={size} viewBox={`${-size / 2} ${-size / 2} ${size} ${size}`} aria-hidden="true" style={{ flexShrink: 0, overflow: 'visible' }}>
+      <defs>
+        <radialGradient id={id + 'g'} cx="60%" cy="62%" r="70%">
+          <stop offset="0" stopColor="#fbf7ec" /><stop offset=".6" stopColor="#e9e3d2" /><stop offset="1" stopColor="#b9b2a0" />
+        </radialGradient>
+        <radialGradient id={id + 'd'} cx="45%" cy="40%" r="70%">
+          <stop offset="0" stopColor="#2a2745" /><stop offset="1" stopColor="#15132a" />
+        </radialGradient>
+        <filter id={id + 'b'} x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation={Math.max(0.3, r * 0.06)} /></filter>
+        <filter id={id + 's'} x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation={Math.max(0.4, r * 0.07)} /></filter>
+        <radialGradient id={id + 't'}><stop offset="0" stopColor="#fffdf5" stopOpacity=".9" /><stop offset="1" stopColor="#fffdf5" stopOpacity="0" /></radialGradient>
+        <mask id={id + 'm'}><path d={moonPath(f, r)} transform="scale(1.12)" fill="#fff" filter={`url(#${id}b)`} /></mask>
+        <clipPath id={id + 'c'}><circle r={r} /></clipPath>
+      </defs>
+      {/* no hemisfério sul (Brasil) a Lua aparece girada 180°: crescente iluminada à esquerda */}
+      <g transform="rotate(180)">
+      {/* lado escuro, com um leve brilho da Terra */}
+      <circle r={r} fill={`url(#${id}d)`} />
+      {!small ? <g clipPath={`url(#${id}c)`} opacity=".2" filter={`url(#${id}s)`}>{MARIA.map((m, i) => <ellipse key={i} cx={m[0] * r} cy={m[1] * r} rx={m[2] * r} ry={m[3] * r} transform={`rotate(${m[4]} ${m[0] * r} ${m[1] * r})`} fill="#0e0c1e" />)}</g> : null}
+      {/* parte iluminada */}
+      <g mask={`url(#${id}m)`} clipPath={`url(#${id}c)`}>
+        <circle r={r} fill={`url(#${id}g)`} />
+        <g filter={`url(#${id}s)`} opacity={small ? 0.28 : 0.34}>
+          {MARIA.map((m, i) => <ellipse key={i} cx={m[0] * r} cy={m[1] * r} rx={m[2] * r} ry={m[3] * r} transform={`rotate(${m[4]} ${m[0] * r} ${m[1] * r})`} fill="#8f8876" />)}
+        </g>
+        {!small ? <circle cx={-0.08 * r} cy={0.66 * r} r={0.16 * r} fill={`url(#${id}t)`} /> : null}
+        {!small ? CRAT.slice(1).map((c, i) => <circle key={i} cx={c[0] * r} cy={c[1] * r} r={c[2] * r} fill="#b8b09c" opacity=".35" filter={`url(#${id}s)`} />) : null}
+      </g>
+      </g>
+      <circle r={r} fill="none" stroke="rgba(244,239,224,.28)" strokeWidth={small ? 0.5 : 0.7} />
     </svg>
   );
 }
@@ -275,13 +310,11 @@ export default function Diario() {
     const askNow = qi >= 0 && !deepSkip;
     const deepList = readTab === 'psy' ? L.deepPsy : L.deepSpi;
     const acc = readTab === 'psy' ? '#c9a8ff' : '#f3d98b';
-    const ask = () => {
-      const d = r.deep || {};
-      const ctx = [d.emo && `a emoção era ${d.emo.toLowerCase()}`, d.who && `estava com: ${d.who.toLowerCase()}`, d.act && `eu ${d.act.toLowerCase()}`, d.life && d.life !== 'Não sei' && `lembra ${d.life.toLowerCase()}`].filter(Boolean).join('; ');
-      const q = `Sonhei: ${(r.title ? r.title + '. ' : '') + (r.text || '')}`.trim().slice(0, 360) + (ctx ? ` (${ctx}).` : '') + ' O que esse sonho pode estar me mostrando?';
-      try { localStorage.setItem('alma-handoff', JSON.stringify({ q, from: 'sonho', at: Date.now() })); } catch (e) { /* sem armazenamento */ }
-      setReading(null); window.location.hash = '#/';
+    const keepQ = () => {
+      setJournal(journal.concat([{ id: uid(), at: Date.now(), type: 'intencao', iso: iso(today()), title: L.question, text: `Do sonho “${r.title || 'sem título'}”` }]));
+      setReading(null); flash('Pergunta guardada nas suas intenções de hoje');
     };
+
     return (
       <>
         <button className="dz-scrim" aria-label="Fechar" onClick={() => setReading(null)} />
@@ -339,7 +372,7 @@ export default function Diario() {
           <p className="dz-foot">Leituras simbólicas, não diagnóstico nem previsão. O sentido final é seu: só você sabe o que cada imagem desperta.</p>
           <div className="dz-sheet-actions">
             <button className="dz-del" style={{ color: 'rgba(244,241,234,.8)' }} onClick={() => setReading(null)}>Fechar</button>
-            <button className="dz-save cta" onClick={ask} style={{ background: 'linear-gradient(120deg, #d9ccff, #b9a6ff)', padding: '0 24px' }}>Conversar com a Alma</button>
+            <button className="dz-save cta" onClick={keepQ} style={{ background: 'linear-gradient(120deg, #fff4d1, #f3d98b)', padding: '0 22px' }}>Guardar a pergunta</button>
           </div>
         </div>
       </>

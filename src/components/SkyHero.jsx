@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { skyAt, SIGNS } from '../sky.js';
 import { phaseOf, moonPath } from '../cosmos.js';
 import './skyhero.css';
+import { Moon } from '../screens/Diario.jsx';
 
 // Céu vivo do topo de Céu e Símbolos: roda do zodíaco girando, com o Sol, a Lua e os
 // planetas nas posições reais de hoje, nebulosa em movimento e estrelas cadentes.
@@ -67,9 +68,7 @@ export default function SkyHero({ onOpen }) {
             const q = pos(sky.moon, 96);
             return (
               <span className="skh-moon skh-up" style={{ left: q.left, top: q.top }}>
-                <svg width={moonR * 2 + 2} height={moonR * 2 + 2} viewBox={`${-moonR - 1} ${-moonR - 1} ${moonR * 2 + 2} ${moonR * 2 + 2}`} aria-hidden="true">
-                  <circle r={moonR} fill="rgba(255,255,255,.12)" /><path d={moonPath(ph.frac, moonR)} fill="#f7f1e0" />
-                </svg>
+                <Moon f={ph.frac} size={moonR * 2 + 2} />
               </span>
             );
           })()}
