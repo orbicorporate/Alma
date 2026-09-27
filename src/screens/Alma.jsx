@@ -258,10 +258,10 @@ class Component extends DCLogic {
     const MOODS = {
       calma: { c: ['#9fb8ff', '#c9a8ff', '#7fe0d6'], label: 'serenidade' },
       medo: { c: ['#6f8cff', '#8a6bff', '#46c6e0'], label: 'medo' },
-      alegria: { c: ['#ffd27a', '#ffb38a', '#fff1b8'], label: 'alegria' },
-      gratidao: { c: ['#8fe3b0', '#ffd98a', '#9fd6ff'], label: 'gratidão' },
+      alegria: { c: ['#e8b8ff', '#7a5cff', '#f3d98b'], label: 'alegria' },
+      gratidao: { c: ['#8fe3b0', '#7a5cff', '#9fd6ff'], label: 'gratidão' },
       tristeza: { c: ['#9a86ff', '#6d8bd6', '#c3b1ff'], label: 'melancolia' },
-      raiva: { c: ['#ff8f8f', '#ffb07a', '#d98ac0'], label: 'inquietação' },
+      raiva: { c: ['#ff9fb8', '#8a5cd6', '#d98ac0'], label: 'inquietação' },
       duvida: { c: ['#a8d8ff', '#b9a6ff', '#8fe3c8'], label: 'busca' }
     };
     const t = (s.text || '').toLowerCase();
@@ -768,7 +768,7 @@ Component.prototype.render = function render() {
   const R = this.renderVals();
   return (
     <div className="sc-main">
-      <div className={'alma' + (R.compactHeader ? ' reading' : '')} style={css(`width: 390px; height: 844px; position: relative; overflow: hidden; background: #0b0a16; ${(R.vars) ?? ''}`)} onMouseMove={R.onMove}>
+      <div className={'alma' + (R.compactHeader || R.isCouncil ? ' reading' : '')} style={css(`width: 390px; height: 844px; position: relative; overflow: hidden; background: #0b0a16; ${(R.vars) ?? ''}`)} onMouseMove={R.onMove}>
         <div className="aurora" style={css(`width: 420px; height: 420px; left: -160px; top: -120px; background: var(--m2); ${(R.auroraA) ?? ''}`)}></div>
         <div className="aurora" style={css(`width: 380px; height: 380px; right: -170px; bottom: -110px; background: var(--m1); animation-duration: 23s; ${(R.auroraB) ?? ''}`)}></div>
         <div className="aurora" style={css("width: 260px; height: 260px; left: 120px; top: 420px; background: var(--m3); opacity: .2; animation-duration: 29s")}></div>
