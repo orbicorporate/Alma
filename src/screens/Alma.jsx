@@ -768,10 +768,11 @@ Component.prototype.render = function render() {
   const R = this.renderVals();
   return (
     <div className="sc-main">
-      <div className="alma" style={css(`width: 390px; height: 844px; position: relative; overflow: hidden; background: #0b0a16; ${(R.vars) ?? ''}`)} onMouseMove={R.onMove}>
+      <div className={'alma' + (R.compactHeader ? ' reading' : '')} style={css(`width: 390px; height: 844px; position: relative; overflow: hidden; background: #0b0a16; ${(R.vars) ?? ''}`)} onMouseMove={R.onMove}>
         <div className="aurora" style={css(`width: 420px; height: 420px; left: -160px; top: -120px; background: var(--m2); ${(R.auroraA) ?? ''}`)}></div>
         <div className="aurora" style={css(`width: 380px; height: 380px; right: -170px; bottom: -110px; background: var(--m1); animation-duration: 23s; ${(R.auroraB) ?? ''}`)}></div>
         <div className="aurora" style={css("width: 260px; height: 260px; left: 120px; top: 420px; background: var(--m3); opacity: .2; animation-duration: 29s")}></div>
+        <div className="reading-bg" aria-hidden="true"></div>
         {(R.motes || []).map((L1_m, I1) => (
           <React.Fragment key={I1}>
             <div className="mote" style={css(L1_m?.style)}></div>
@@ -779,7 +780,7 @@ Component.prototype.render = function render() {
         ))}
         {R.compactHeader ? (
           <>
-            <div style={css("position: absolute; top: 0; left: 0; right: 0; height: 112px; z-index: 3; pointer-events: none; background: linear-gradient(180deg, #0b0a16 55%, rgba(11,10,22,0))")}></div>
+            <div style={css("position: absolute; top: 0; left: -600px; right: -600px; height: 112px; z-index: 3; pointer-events: none; background: linear-gradient(180deg, #1b1542 55%, rgba(27,21,66,0))")}></div>
           </>
         ) : null}
         <div className="orbwrap" style={css(R.orbStyle)}>
