@@ -1497,6 +1497,7 @@ Component.prototype.render = function render() {
                   </p>
                 </div>
                 {this.renderLogin()}
+                <a href="#/ajustes" style={css("align-self: flex-start; height: 36px; display: flex; align-items: center; gap: 8px; font-size: 14px; color: rgba(244,241,234,.75); text-decoration: none")}>⚙︎ Ajustes e conta ›</a>
                 {R.hasPlans ? (
                   <div style={css("display: flex; flex-direction: column; gap: 10px")}>
                     <span style={css("font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>Seus planos de ação</span>

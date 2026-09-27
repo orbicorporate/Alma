@@ -118,6 +118,7 @@ class Component extends DCLogic {
     this.onGo = (e) => {
       const k = e.detail;
       if (k === 'hub') this.setState({ screen: 'hub', hist: [] });
+      else if (k === 'profile') { const p = this.state.profile || {}; this.setState(this.state.profileSaved ? { screen: 'profile', hist: ['hub'], dName: p.name, dDate: p.date, dTime: p.time, dCity: p.city, perr: '' } : { screen: 'profile', hist: ['hub'], perr: '' }); }
       else if (k === 'tarot') this.setState({ screen: 'tSpread', hist: ['hub'] });
       else if (k === 'horo') this.setState(this.state.profileSaved ? { screen: 'horo', hist: ['hub'], period: 0 } : { screen: 'profile', hist: ['hub'], perr: '' });
     };

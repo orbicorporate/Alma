@@ -20,7 +20,7 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .sc-sym .screen, .sc-main .screen { overflow-x: hidden; }
 
 /* As telas ocupam a altura real do aparelho */
-.app-frame .sc-main > .alma, .app-frame .sc-sym > div:first-child, .app-frame .dz, .app-frame .cz, .app-frame .hm, .app-frame .bh { height: var(--fh, 844px) !important; }
+.app-frame .sc-main > .alma, .app-frame .sc-sym > div:first-child, .app-frame .dz, .app-frame .cz, .app-frame .hm, .app-frame .bh, .app-frame .aj { height: var(--fh, 844px) !important; }
 .app-frame > div { height: 100%; }
 
 /* Celular: a coluna do app fica centralizada e o fundo, as auroras e as partículas se estendem até as bordas */
@@ -65,3 +65,7 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 :is(.hm-card, .hm-tile, .bh-card, .dz-rec, .dz .glass, .sc-main .glass, .sc-sym .glass):nth-child(3n)::before { animation-delay: -5.3s; animation-duration: 10s; }
 @keyframes glowRun { to { --ga: 360deg; } }
 @media (prefers-reduced-motion: reduce) { :is(.hm-card, .hm-ask, .hm-tile, .bh-card, .dz-rec, .dz .glass, .sc-main .glass, .sc-sym .glass)::before { animation: none; opacity: 0; } }
+
+/* Preferência: animações mais calmas */
+.calm-motion .stf i, .calm-motion .stf-shoot, .calm-motion *::before { animation-duration: 40s !important; }
+.calm-motion .stf-shoot, .calm-motion .skh-shoot { display: none; }
