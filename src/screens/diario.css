@@ -180,3 +180,8 @@
 .dz-edhead { display: flex; align-items: center; gap: var(--s3); }
 .dz-edhead-t { display: flex; flex-direction: column; gap: 2px; font-size: 18px; font-weight: 300; }
 .dz-edhead-t small { font-size: 13px; color: rgba(244,241,234,.55); }
+
+.dz-plancard { border-radius: 20px; padding: var(--s3) var(--s4); display: flex; flex-direction: column; gap: var(--s2); border-color: rgba(143,227,176,.3); }
+.dz-plancard .dz-plan { padding: 0; background: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.dz-plan-from { font-size: 12.5px; color: rgba(244,241,234,.55); }
+.dz .dz-plan-link { align-self: flex-start; height: 32px; font-size: 13.5px; color: #8fe3b0; }

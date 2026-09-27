@@ -66,7 +66,7 @@ export function Moon({ f, size = 14 }) {
 
 function planStepsOn(entries, dayIso) {
   const out = [];
-  (entries || []).forEach((e, ei) => (e.plan || []).forEach((s, j) => { if (s.iso === dayIso) out.push({ q: e.q, t: s.t, n: j + 1, done: s.done, ei, j }); }));
+  (entries || []).forEach((e, ei) => (e.plan || []).forEach((s, j) => { if (s.iso === dayIso) out.push({ q: e.q, t: s.t, n: j + 1, total: e.plan.length, done: s.done, ei, j }); }));
   return out;
 }
 const ICON = { sonho: '☾', intencao: '✦', gratidao: '♡', decisao: '◇', nota: '✎' };
@@ -240,15 +240,19 @@ export default function Diario() {
         </div>
         {steps.length ? (
           <div className="dz-group">
-            <span className="dz-group-h" style={{ color: '#8fe3b0' }}><i style={{ background: '#8fe3b0' }} />Do seu plano de ação</span>
+            <span className="dz-group-h" style={{ color: '#8fe3b0' }}><i style={{ background: '#8fe3b0' }} />Passo de plano para este dia</span>
             {steps.map((st, i) => (
-              <button key={i} className={'glass dz-plan' + (st.done ? ' dz-plan-done' : '')} onClick={() => toggleStep(st)} aria-pressed={st.done ? 'true' : 'false'}>
-                <span className="dz-check">{st.done ? '✓' : ''}</span>
-                <span className="dz-plan-txt">
-                  <span className="dz-plan-t">{st.t}</span>
-                  <span className="dz-plan-q">Passo {st.n} · {st.done ? 'concluído' : 'toque para marcar como feito'}</span>
-                </span>
-              </button>
+              <div key={i} className={'glass dz-plancard' + (st.done ? ' dz-plan-done' : '')}>
+                <span className="dz-plan-from">Plano da pergunta “{st.q.length > 46 ? st.q.slice(0, 45) + '…' : st.q}”</span>
+                <button className="dz-plan" onClick={() => toggleStep(st)} aria-pressed={st.done ? 'true' : 'false'}>
+                  <span className="dz-check">{st.done ? '✓' : ''}</span>
+                  <span className="dz-plan-txt">
+                    <span className="dz-plan-t">{st.t}</span>
+                    <span className="dz-plan-q">Passo {st.n} de {st.total} · {st.done ? 'feito' : 'toque para marcar como feito'}</span>
+                  </span>
+                </button>
+                <button className="dz-plan-link" onClick={() => { window.dispatchEvent(new CustomEvent('alma:go', { detail: { screen: 'plan', planIdx: st.ei, planPrev: 'journal' } })); window.location.hash = '#/'; }}>Ver o plano completo ›</button>
+              </div>
             ))}
           </div>
         ) : null}

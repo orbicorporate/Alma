@@ -100,6 +100,7 @@ export default function Home() {
               <button className="hm-btn hm-btn-green" onClick={doneStep}>Concluí</button>
               <button className="hm-btn" onClick={() => go('#/', { screen: 'plan', planIdx: next.i, planPrev: 'journal' })}>Ver plano</button>
             </div>
+            <button className="hm-why" onClick={() => go('#/', { screen: 'journal', prev: 'ask' })}>Ver todos os seus planos ›</button>
           </section>
         ) : null}
 

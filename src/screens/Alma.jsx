@@ -446,6 +446,18 @@ class Component extends DCLogic {
       const len = Math.hypot(x2 - x1, y2 - y1), dg = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
       skyLines.push({ style: `left: ${x1}px; top: ${y1}px; width: ${len.toFixed(1)}px; transform: rotate(${dg.toFixed(1)}deg)` });
     }
+    const plans = ents.map((e, i) => ({ e, i })).filter(({ e }) => e.plan && e.plan.length).reverse().map(({ e, i }) => {
+      const pl = e.plan.map(stepInfo), done = pl.filter((x) => x.done).length, nx = pl.find((x) => !x.done);
+      const pct = Math.round(100 * done / pl.length), fin = done === pl.length;
+      const rel = nx ? (nx.due < 0 ? 'atrasado' : nx.due === 0 ? 'hoje' : nx.due === 1 ? 'amanhã' : `em ${nx.due} dias`) : '';
+      return {
+        q: e.q, prog: `${done} de ${pl.length} passos`,
+        ring: `background: conic-gradient(#8fe3b0 0% ${pct}%, rgba(255,255,255,.1) ${pct}% 100%)`,
+        next: fin ? (e.resolved ? 'Plano concluído e pergunta resolvida' : 'Todos os passos feitos. Já pode marcar como resolvida.') : `Próximo: ${nx.t} · ${rel}`,
+        nextStyle: fin ? 'color: #8fe3b0' : (nx.due <= 0 ? 'color: #f3d98b' : 'color: rgba(244,241,234,.65)'),
+        open: () => this.setState({ screen: 'plan', planIdx: i, planPrev: 'journal', sheet: -1 })
+      };
+    });
     let nextStep = null;
     ents.forEach((e, i) => {
       if (e.resolved || !e.plan) return;
@@ -589,6 +601,7 @@ class Component extends DCLogic {
         updEntry((e) => { e.plan = this.planFor(e.kind, e.q); return e; });
         this.setState({ screen: 'plan', planIdx: k, planPrev: 'journal', sheet: -1 });
       },
+      plans, hasPlans: plans.length > 0,
       hasNext: !!nextStep, next: nextStep || { t: '', n: '', total: '', q: '', kind: '', when: '', bell: '', bellFill: 'none', dot: '', open: () => {}, done: () => {} },
       makePlan: () => updEntry((e) => { e.plan = this.planFor(e.kind, e.q); return e; }),
       skyStars, skyLines, entryRows, jfilters, jhint, noEntries: entryRows.length === 0, sheet, sheetOpen: s.sheet >= 0, entryCount: ents.length,
@@ -1457,70 +1470,23 @@ Component.prototype.render = function render() {
                   </p>
                 </div>
                 {this.renderLogin()}
-                {R.hasNext ? (
-                  <>
-                    <div className="glass cardin" style={css("border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 14px; border-color: rgba(143,227,176,.4)")}>
-                      <div style={css("display: flex; flex-direction: column; gap: 4px")}>
-                        <span className="kicker" style={css("color: #8fe3b0")}>
-                          {"Seu próximo passo"}
+                {R.hasPlans ? (
+                  <div style={css("display: flex; flex-direction: column; gap: 10px")}>
+                    <span style={css("font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>Seus planos de ação</span>
+                    <p style={css("margin: 0; font-size: 13.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>Cada pergunta pode virar um plano com passos e datas. Os passos do dia também aparecem no seu Diário.</p>
+                    {(R.plans || []).map((pl, k) => (
+                      <button key={k} className="glass pill" onClick={pl.open} style={css("width: 100%; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; text-align: left; border-color: rgba(143,227,176,.28)")}>
+                        <span style={css(`width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; ${pl.ring}`)}>
+                          <span style={css("width: 36px; height: 36px; border-radius: 50%; background: #16132c; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #8fe3b0")}>{pl.prog.split(' ')[0]}/{pl.prog.split(' ')[2]}</span>
                         </span>
-                        <span style={css("font-size: 13.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                          {"A Alma acompanha seus planos de ação. Este é o passo mais próximo."}
+                        <span style={css("display: flex; flex-direction: column; gap: 4px; min-width: 0; flex-grow: 1")}>
+                          <span style={css("font-size: 15px; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap")}>{pl.q}</span>
+                          <span style={css(`font-size: 13px; line-height: 1.4; ${pl.nextStyle}`)}>{pl.next}</span>
                         </span>
-                      </div>
-                      <div style={css("border-radius: 18px; padding: 14px; background: rgba(255,255,255,.05); display: flex; flex-direction: column; gap: 10px")}>
-                        <div style={css("display: flex; align-items: center; gap: 10px")}>
-                          <span style={css("width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; background: #f3d98b; color: #1a1408")}>
-                            {R.next?.n}
-                          </span>
-                          <span className="kicker" style={css("font-size: 11.5px")}>
-                            {`Passo ${(R.next?.n) ?? ''} de ${(R.next?.total) ?? ''}`}
-                          </span>
-                        </div>
-                        <span style={css("font-size: 17px; font-weight: 300; line-height: 1.4")}>
-                          {R.next?.t}
-                        </span>
-                        <div style={css("display: flex; flex-wrap: wrap; gap: 8px")}>
-                          <span style={css("height: 30px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px; font-size: 13.5px; background: rgba(243,217,139,.12); color: #f3d98b")}>
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
-                              <path d="M3.5 10h17M8 3v4M16 3v4" />
-                            </svg>
-                            {R.next?.when}
-                          </span>
-                          <span style={css("height: 30px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px; font-size: 13.5px; background: rgba(255,255,255,.06); color: rgba(244,241,234,.75)")}>
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill={R.next?.bellFill} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" />
-                              <path d="M10 20.5a2 2 0 0 0 4 0" fill="none" />
-                            </svg>
-                            {R.next?.bell}
-                          </span>
-                        </div>
-                      </div>
-                      <div style={css("display: flex; align-items: flex-start; gap: 10px")}>
-                        <span style={css(`width: 8px; height: 8px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; ${(R.next?.dot) ?? ''}`)}></span>
-                        <span style={css("display: flex; flex-direction: column; gap: 2px; min-width: 0")}>
-                          <span style={css("font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: rgba(244,241,234,.5)")}>
-                            {`Do plano da sua pergunta · ${(R.next?.kind) ?? ''}`}
-                          </span>
-                          <span style={css("font-size: 14px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.8)")}>
-                            {`“${(R.next?.q) ?? ''}”`}
-                          </span>
-                        </span>
-                      </div>
-                      <div style={css("display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px")}>
-                        <button className="cta" onClick={R.next?.done} style={css("height: 46px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0c1f15" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M5 12.5l4.5 4.5L19 7.5" />
-                          </svg>
-                          {"Concluí"}
-                        </button>
-                        <button className="pill" onClick={R.next?.open} style={css("height: 46px; border-radius: 999px; font-size: 14px; border: 1px solid rgba(255,255,255,.18)")}>
-                          {"Ver plano completo"}
-                        </button>
-                      </div>
-                    </div>
-                  </>
+                        <span aria-hidden="true" style={css("font-size: 22px; font-weight: 200; color: rgba(244,241,234,.5)")}>›</span>
+                      </button>
+                    ))}
+                  </div>
                 ) : null}
                 <a href="#/constelacao" aria-label="Abrir sua constelação em tela inteira" style={css("position: relative; display: block; height: 260px; margin: 0 -20px; overflow: hidden; text-decoration: none; color: inherit; -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 55%, transparent 100%)")}>
                   <MiniCosmos w={390} h={260} />
