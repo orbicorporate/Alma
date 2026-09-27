@@ -3,6 +3,7 @@ import React from 'react';
 import { DCLogic, css } from '../dc/runtime.js';
 import { today, addDays, iso, dayMonth, stepInfo } from '../dates.js';
 import { PH, nextPhraseIndex } from '../phrases.js';
+import MiniCosmos from '../components/MiniCosmos.jsx';
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
 
 class Component extends DCLogic {
@@ -783,7 +784,7 @@ Component.prototype.render = function render() {
         ))}
         {R.compactHeader ? (
           <>
-            <div style={css("position: absolute; top: 0; left: -600px; right: -600px; height: 112px; z-index: 3; pointer-events: none; background: linear-gradient(180deg, #1b1542 55%, rgba(27,21,66,0))")}></div>
+            <div style={css("position: absolute; top: calc(-1 * var(--sat, 0px)); left: -600px; right: -600px; height: calc(112px + var(--sat, 0px)); z-index: 3; pointer-events: none; background: linear-gradient(180deg, #1b1542 55%, rgba(27,21,66,0))")}></div>
           </>
         ) : null}
         <div className="orbwrap" style={css(R.orbStyle)}>
@@ -1536,7 +1537,8 @@ Component.prototype.render = function render() {
                     </React.Fragment>
                   ))}
                 </div>
-                <div className="glass" style={css("position: relative; height: 240px; border-radius: 26px; overflow: hidden; background: radial-gradient(circle at 50% 110%, rgba(243,217,139,.08), rgba(255,255,255,.03) 60%)")}>
+                <div className="glass" style={css("position: relative; height: 240px; border-radius: 26px; overflow: hidden; background: radial-gradient(circle at 50% 110%, rgba(243,217,139,.1), rgba(12,10,32,.9) 70%)")}>
+                  <MiniCosmos />
                   {(R.skyLines || []).map((L20_l, I20) => (
                     <React.Fragment key={I20}>
                       <div style={css(`position: absolute; height: 1px; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(243,217,139,.15), rgba(243,217,139,.55), rgba(243,217,139,.15)); ${(L20_l?.style) ?? ''}`)}></div>
@@ -1545,7 +1547,7 @@ Component.prototype.render = function render() {
                   {(R.skyStars || []).map((L21_s, I21) => (
                     <React.Fragment key={I21}>
                       <button onClick={L21_s?.open} aria-label={L21_s?.aria} style={css(`position: absolute; width: 64px; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; ${(L21_s?.style) ?? ''}`)}>
-                        <span className="twinkle" style={css(`width: 10px; height: 10px; border-radius: 50%; ${(L21_s?.dot) ?? ''}`)}></span>
+                        <span className="twinkle" style={css(`width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 14px 4px rgba(201,184,255,.55), 0 0 30px rgba(168,216,255,.4); ${(L21_s?.dot) ?? ''}`)}></span>
                         <span style={css("font-size: 11.5px; letter-spacing: .08em; color: rgba(244,241,234,.7)")}>
                           {L21_s?.label}
                         </span>

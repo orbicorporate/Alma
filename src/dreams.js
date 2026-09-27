@@ -6,6 +6,38 @@ export const norm = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[̀
 
 // re: raízes das palavras (texto sem acentos, minúsculo)
 export const SYMBOLS = [
+  { k: 'joia', name: 'Pedras preciosas', re: /\b(pedra preciosa|pedras preciosas|joia|joias|diamante|cristal|cristais|esmeralda|rubi|safira|ametista|brilhante)/,
+    psy: 'Joias e pedras preciosas costumam representar o que você tem de mais valioso por dentro: talentos, afetos, partes suas que ainda não foram lapidadas. Para Jung, o cristal pode simbolizar o Self, o centro inteiro da personalidade.',
+    spi: 'Em muitas tradições, pedras preciosas são luz que se tornou matéria. Sonhar com elas fala de dons, de proteção e de um tesouro espiritual que está sendo revelado.',
+    q: 'Que valor seu está pedindo para ser reconhecido e lapidado?' },
+  { k: 'lua', name: 'Lua', re: /\b(lua|luar)\b/,
+    psy: 'A Lua fala do feminino, dos ciclos e do inconsciente. Jung a associava à anima e à vida emocional que muda de fase.',
+    spi: 'A Lua ensina que tudo tem fases. Sonhar com ela pede que você respeite o seu ciclo atual.',
+    q: 'Em que fase da sua vida você está agora?' },
+  { k: 'estrela', name: 'Estrelas e céu', re: /\b(estrela|estrelas|ceu estrelado|universo|galaxia|constelac)/,
+    psy: 'Estrelas representam ideais, desejos elevados e aquilo que orienta você à distância.',
+    spi: 'O céu estrelado lembra que você faz parte de algo imenso. Um convite à fé e à esperança.',
+    q: 'Qual ideal tem guiado você ultimamente?' },
+  { k: 'flor', name: 'Flores e jardim', re: /\b(flor|flores|jardim|rosa\b|rosas|petala)/,
+    psy: 'Flores e jardins falam de desabrochar, beleza e afeto. Um jardim cuidado pode mostrar uma fase fértil da vida emocional.',
+    spi: 'A flor é símbolo de florescimento da alma. Algo em você está pronto para se abrir.',
+    q: 'O que em você está pronto para florescer?' },
+  { k: 'passaro', name: 'Pássaros', re: /\b(passaro|passarinho|ave\b|aves|pomba|aguia|coruja|borboleta)/,
+    psy: 'Aves e borboletas falam de pensamentos, liberdade e transformação. A borboleta, em especial, é imagem de metamorfose.',
+    spi: 'Aves são mensageiras entre céu e terra. Um sinal de notícias, leveza e transformação da alma.',
+    q: 'Que mensagem ou mudança está tentando chegar até você?' },
+  { k: 'ouro', name: 'Ouro', re: /\b(ouro|dourad)/,
+    psy: 'Para Jung, o ouro é o resultado da alquimia interior: o que resta de precioso quando atravessamos as provas.',
+    spi: 'O ouro simboliza o divino e a pureza. Você está sendo lembrado do seu valor essencial.',
+    q: 'Que parte de você resistiu às provas e hoje brilha?' },
+  { k: 'bicho', name: 'Animais selvagens', re: /\b(leao|tigre|lobo|urso|onca|jacare|tubarao)/,
+    psy: 'Animais selvagens representam instintos poderosos: raiva, desejo, força. Como você se relaciona com eles no sonho mostra como lida com essa energia.',
+    spi: 'Muitas tradições veem animais de poder como guias. A força que assusta também pode proteger.',
+    q: 'Que força instintiva em você pede respeito e direção?' },
+  { k: 'luzcasa', name: 'Igreja ou templo', re: /\b(igreja|templo|altar|capela|terreiro|mesquita|sinagoga)/,
+    psy: 'Espaços sagrados em sonho falam de valores, culpa, proteção ou busca de sentido.',
+    spi: 'Um templo em sonho é o seu espaço sagrado interior chamando por visita.',
+    q: 'Onde você encontra o sagrado no seu dia a dia?' },
   { k: 'agua', name: 'Água', re: /\b(agua|mar\b|oceano|rio\b|rios\b|onda|piscina|lago|cachoeira|praia|inunda|enchente)/,
     psy: 'A água é a imagem clássica do inconsciente e das emoções. Água calma costuma falar de sentimentos acolhidos; água revolta ou funda, de algo que transborda e ainda não tem nome.',
     spi: 'Nas tradições, a água purifica e renova. Sonhar com ela pode ser um convite a lavar mágoas e deixar a vida fluir de novo.',
@@ -197,8 +229,41 @@ const WAKE_SPI = {
   'Confuso': 'A confusão pede tempo. Anote o que lembrar e deixe o sentido se revelar nos próximos dias.'
 };
 
+// Perguntas para aprofundar a leitura: cada resposta acrescenta um trecho nos dois olhares.
+export const DEEP = [
+  { k: 'emo', q: 'Qual era a emoção principal no sonho?', opts: [
+    ['Paz', 'A paz no sonho indica um desejo atendido ou um conflito que encontrou solução.', 'A paz é sinal de alinhamento: sua alma está em sintonia com o momento.'],
+    ['Alegria', 'A alegria mostra um desejo realizado, algo que você quer viver mais na vida desperta.', 'A alegria em sonho é bênção. Celebre o que ela aponta.'],
+    ['Medo', 'O medo costuma ser a porta de algo que a consciência ainda evita. Não é aviso de perigo real, é convite a olhar.', 'O medo pede proteção e coragem. Uma oração ou respiração antes de dormir ajuda.'],
+    ['Saudade', 'A saudade fala de algo que ficou para trás e ainda está sendo elaborado.', 'A saudade é o amor que continua. Honre o que foi vivido.'],
+    ['Angústia', 'A angústia sinaliza um conflito entre o que você deseja e o que se permite.', 'A angústia pede cuidado com a energia: silêncio, natureza e descanso.'],
+    ['Curiosidade', 'A curiosidade mostra a psique buscando algo novo, ainda sem nome.', 'A curiosidade é a alma chamando para descobrir um novo caminho.']
+  ] },
+  { k: 'who', q: 'Quem estava com você?', opts: [
+    ['Só eu', 'Estar sozinho no sonho pode apontar para autonomia, ou para uma solidão que pede companhia.', 'Um sonho a sós é conversa íntima com a própria alma.'],
+    ['Família', 'Figuras da família costumam representar padrões antigos e partes suas que vieram de casa.', 'A família no sonho pode trazer cura para os laços e para as raízes.'],
+    ['Um amor', 'Uma pessoa amada no sonho muitas vezes representa qualidades que você admira e quer integrar.', 'O amor no sonho lembra onde está o seu coração.'],
+    ['Desconhecidos', 'Desconhecidos, para Jung, são aspectos seus ainda não reconhecidos: a sombra ou potenciais escondidos.', 'Estranhos podem ser mensageiros. Observe o que eles diziam ou faziam.'],
+    ['Alguém que partiu', 'Sonhar com quem já partiu faz parte do luto: o inconsciente continua a conversa.', 'Muitas tradições entendem como visita de afeto. Receba com gratidão.']
+  ] },
+  { k: 'act', q: 'O que você fazia no sonho?', opts: [
+    ['Procurava', 'Procurar mostra uma busca real na vida desperta, algo que falta ou que você deseja encontrar.', 'Quem procura é conduzido. O caminho aparece passo a passo.'],
+    ['Fugia', 'Fugir aponta para algo que você evita encarar. O que persegue quase sempre é parte de você.', 'Fugir pede coragem para parar e olhar com compaixão.'],
+    ['Encontrava', 'Encontrar algo fala de descoberta: um recurso interno que está vindo à tona.', 'Encontrar é sinal de graça: algo chega até você no tempo certo.'],
+    ['Observava', 'Observar de fora pode indicar distância das próprias emoções, ou uma fase de reflexão.', 'Observar é sabedoria: o sonho pede presença antes de agir.'],
+    ['Criava ou cuidava', 'Criar e cuidar mostram potência e desejo de gerar algo seu.', 'Quem cuida em sonho está plantando algo bom na vida.']
+  ] },
+  { k: 'life', q: 'Isso lembra algo que você vive agora?', opts: [
+    ['Trabalho', 'Ligado ao trabalho, o sonho pode estar elaborando pressões, desejos de reconhecimento ou mudança de rota.', 'No trabalho, a mensagem é de propósito: faça o que tem sentido para você.'],
+    ['Relação', 'Ligado a uma relação, o sonho mostra o que você sente e talvez ainda não disse.', 'Numa relação, o sonho pede verdade e cuidado mútuo.'],
+    ['Família', 'Ligado à família, ele pode estar reorganizando papéis e memórias antigas.', 'Na família, o convite é de perdão e de laços mais leves.'],
+    ['Uma decisão', 'Ligado a uma decisão, o sonho oferece imagens do que cada caminho desperta em você.', 'Numa decisão, confie na sensação que o sonho deixou.'],
+    ['Não sei', 'Tudo bem não saber. Muitas vezes o sentido aparece dias depois, em um detalhe.', 'Deixe o sonho descansar. O sentido se revela no tempo certo.']
+  ] }
+];
+
 export function readDream(dream) {
-  const txt = norm(`${dream.title || ''} ${dream.text || ''}`);
+  const txt = norm(`${dream.title || ''} ${dream.text || ''} ${(dream.deep && dream.deep.extra) || ''}`);
   // na ordem em que aparecem no relato
   const found = SYMBOLS.map((s) => ({ s, i: txt.search(s.re) })).filter((x) => x.i >= 0).sort((a, b) => a.i - b.i).map((x) => x.s);
   const tone = (EMO.find((e) => e.re.test(txt)) || {}).tone || null;
@@ -217,7 +282,11 @@ export function readDream(dream) {
   const spiClose = found.length
     ? 'Guarde a imagem que mais ficou e leve-a como intenção para o dia.'
     : 'Leve a sensação principal do sonho como intenção para o dia e observe os sinais que aparecerem.';
+  const deep = dream.deep || {};
+  const deepPsy = [], deepSpi = [];
+  DEEP.forEach((d) => { const o = d.opts.find((x) => x[0] === deep[d.k]); if (o) { deepPsy.push({ k: d.k, label: o[0], t: o[1] }); deepSpi.push({ k: d.k, label: o[0], t: o[2] }); } });
   return {
+    deepPsy, deepSpi, deepDone: DEEP.every((d) => deep[d.k]),
     symbols: top,
     more: found.length - top.length,
     psy: { intro: psyIntro, close: psyClose },

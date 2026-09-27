@@ -634,7 +634,7 @@ Component.prototype.render = function render() {
             <span className="mote" style={css(L1_m?.style)}></span>
           </React.Fragment>
         ))}
-        <div style={css("position: absolute; top: 0; left: 0; right: 0; height: 104px; z-index: 3; pointer-events: none; background: linear-gradient(180deg, #0a0918 55%, rgba(10,9,24,0))")}></div>
+        <div style={css("position: absolute; top: calc(-1 * var(--sat, 0px)); left: -600px; right: -600px; height: calc(104px + var(--sat, 0px)); z-index: 3; pointer-events: none; background: linear-gradient(180deg, #0a0918 55%, rgba(10,9,24,0))")}></div>
         <div style={css("position: absolute; top: 36px; left: 12px; right: 12px; height: 44px; z-index: 5; display: flex; align-items: center; gap: 4px")}>
           {R.isHub ? (
             <span style={css("padding-left: 10px; font-size: 16px; font-weight: 300; letter-spacing: .38em; color: rgba(244,241,234,.85)")}>{"alma"}</span>

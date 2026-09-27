@@ -38,4 +38,9 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .tabs-on .dz-toast { bottom: 108px !important; }
 .tabs-on .cz-time { bottom: 104px !important; }
 .tabs-on .cz-card { bottom: 176px !important; max-height: 320px !important; }
-.app-frame .route { position: relative; }
+.app-frame .route { position: relative; box-sizing: border-box; padding-top: var(--sat, 0px); }
+
+/* Fundos das telas continuam por trás da área do relógio (iPhone) */
+.app-fill .hm-aurora, .app-fill .bh-aurora, .app-fill .stf { top: calc(-1 * var(--sat, 0px)); }
+.app-fill .dz-aurora { top: calc(-1 * var(--sat, 0px)); }
+.app-fill .sc-sym > div:first-child, .app-fill .sc-main > .alma { box-shadow: 0 calc(-1 * var(--sat, 0px)) 0 0 var(--topc, #0a0918); }

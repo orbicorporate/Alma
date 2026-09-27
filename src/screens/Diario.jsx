@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { load, save, onData } from '../store.js';
 import { today, iso, fromIso, MO_FULL, WD_FULL } from '../dates.js';
 import { phaseOf, moonPath, dayAdvice, nextFavorable, PD_TEXT } from '../cosmos.js';
-import { readDream, recurring } from '../dreams.js';
+import { readDream, recurring, DEEP } from '../dreams.js';
 import './diario.css';
 import Starfield from '../components/Starfield.jsx';
 
@@ -47,6 +47,8 @@ export default function Diario() {
   const [editor, setEditor] = useState(null);
   const [reading, setReading] = useState(null);
   const [readTab, setReadTab] = useState('psy');
+  const [deepSkip, setDeepSkip] = useState(false);
+  const [extra, setExtra] = useState('');
   const [noteFilter, setNoteFilter] = useState('all');
   useEffect(() => {
     window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'diario', hide: !!editor || !!reading } }));
@@ -79,7 +81,7 @@ export default function Diario() {
     if (e.id) setJournal(journal.map((j) => (j.id === e.id ? e : j)));
     else setJournal(journal.concat([saved]));
     setEditor(null);
-    if (saved.type === 'sonho') { setReadTab('psy'); setReading(saved); return; }
+    if (saved.type === 'sonho') { setReadTab('psy'); setDeepSkip(false); setReading(saved); return; }
     flash(e.id ? 'Registro atualizado' : `${TYPES[e.type].label} ${TYPES[e.type].f ? 'guardada' : 'guardado'} no seu céu`);
   };
   const delEditor = () => { setJournal(journal.filter((j) => j.id !== editor.id)); setEditor(null); flash('Registro apagado'); };
@@ -151,7 +153,7 @@ export default function Diario() {
           {r.text && r.title ? <span className="dz-rec-x">{r.text}</span> : null}
         </button>
         {r.type === 'sonho' ? (
-          <button className="dz-read" onClick={() => { setReadTab('psy'); setReading(r); }}>
+          <button className="dz-read" onClick={() => { setReadTab('psy'); setDeepSkip(false); setReading(r); }}>
             <span className="dz-read-ic">✦</span> Ver o que o sonho diz
           </button>
         ) : null}
@@ -267,9 +269,16 @@ export default function Diario() {
   const renderReading = () => {
     const r = journal.find((j) => j.id === reading.id) || reading;
     const L = readDream(r), P = readTab === 'psy' ? L.psy : L.spi;
+    const deep = r.deep || {};
+    const setDeep = (patch) => setJournal(journal.map((j) => (j.id === r.id ? Object.assign({}, j, { deep: Object.assign({}, j.deep || {}, patch) }) : j)));
+    const qi = DEEP.findIndex((d) => !deep[d.k]);
+    const askNow = qi >= 0 && !deepSkip;
+    const deepList = readTab === 'psy' ? L.deepPsy : L.deepSpi;
     const acc = readTab === 'psy' ? '#c9a8ff' : '#f3d98b';
     const ask = () => {
-      const q = `Sonhei: ${(r.title ? r.title + '. ' : '') + (r.text || '')}`.trim().slice(0, 400) + ' O que esse sonho pode estar me mostrando?';
+      const d = r.deep || {};
+      const ctx = [d.emo && `a emoção era ${d.emo.toLowerCase()}`, d.who && `estava com: ${d.who.toLowerCase()}`, d.act && `eu ${d.act.toLowerCase()}`, d.life && d.life !== 'Não sei' && `lembra ${d.life.toLowerCase()}`].filter(Boolean).join('; ');
+      const q = `Sonhei: ${(r.title ? r.title + '. ' : '') + (r.text || '')}`.trim().slice(0, 360) + (ctx ? ` (${ctx}).` : '') + ' O que esse sonho pode estar me mostrando?';
       try { localStorage.setItem('alma-handoff', JSON.stringify({ q, from: 'sonho', at: Date.now() })); } catch (e) { /* sem armazenamento */ }
       setReading(null); window.location.hash = '#/';
     };
@@ -283,6 +292,25 @@ export default function Diario() {
           {L.symbols.length ? (
             <div className="dz-chips">{L.symbols.map((x) => <span key={x.k} className="dz-chip dz-chip-sm" style={{ borderColor: '#c9a8ff88', color: '#e4d6ff' }}>{x.name}</span>)}{L.more > 0 ? <span className="dz-chip dz-chip-sm dz-chip-mute">+{L.more}</span> : null}</div>
           ) : null}
+          {askNow ? (
+            <div className="dz-deep" key={qi}>
+              <div className="dz-deep-top">
+                <span className="kicker" style={{ fontSize: 11.5, color: '#f3d98b' }}>Aprofundar a leitura · {qi + 1} de {DEEP.length}</span>
+                <button className="dz-deep-skip" onClick={() => setDeepSkip(true)}>Pular</button>
+              </div>
+              <span className="dz-deep-q">{DEEP[qi].q}</span>
+              <div className="dz-chips">
+                {DEEP[qi].opts.map((o) => <button key={o[0]} className="dz-chip dz-deep-opt" onClick={() => setDeep({ [DEEP[qi].k]: o[0] })}>{o[0]}</button>)}
+              </div>
+              <div className="dz-deep-bar"><i style={{ width: `${(qi / DEEP.length) * 100}%` }} /></div>
+            </div>
+          ) : null}
+          {!askNow && !deep.extra ? (
+            <div className="dz-extra">
+              <input className="dz-input" value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="Um detalhe a mais? Uma cor, um objeto, um lugar" aria-label="Detalhe do sonho" />
+              <button className="dz-extra-ok" disabled={!extra.trim()} onClick={() => { setDeep({ extra: extra.trim() }); setExtra(''); }}>Reler</button>
+            </div>
+          ) : null}
           <div className="dz-seg" role="tablist">
             <button role="tab" aria-selected={readTab === 'psy'} className={'dz-seg-b' + (readTab === 'psy' ? ' on' : '')} onClick={() => setReadTab('psy')}>Psicanálise</button>
             <button role="tab" aria-selected={readTab === 'spi'} className={'dz-seg-b' + (readTab === 'spi' ? ' on' : '')} onClick={() => setReadTab('spi')}>Espiritual</button>
@@ -293,6 +321,13 @@ export default function Diario() {
               <div key={x.k} className="dz-sym">
                 <span className="dz-sym-n">{x.name}</span>
                 <p>{readTab === 'psy' ? x.psy : x.spi}</p>
+              </div>
+            ))}
+            {deepList.length ? <span className="dz-group-h" style={{ marginTop: 4 }}>O que você contou</span> : null}
+            {deepList.map((x) => (
+              <div key={x.k} className="dz-sym dz-sym-you">
+                <span className="dz-sym-n">{x.label}</span>
+                <p>{x.t}</p>
               </div>
             ))}
             <p className="dz-read-p">{P.close}</p>

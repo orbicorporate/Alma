@@ -15,6 +15,7 @@ export default function App() {
   const [fh, setFh] = useState(844);
   const [fw, setFw] = useState(390);
   const [fill, setFill] = useState(false);
+  const [sat, setSat] = useState(0);
   const frame = useRef(null);
   // Cada área avisa se a barra deve sumir (rituais, painéis abertos) e em que tela está.
   const [chrome, setChrome] = useState({});
@@ -47,9 +48,15 @@ export default function App() {
       if (w < 700) {
         // No celular: o conteúdo cabe inteiro e o fundo do app preenche a tela toda, em qualquer proporção.
         const sc = Math.min(w / 390, h / 844);
+        // área do relógio e da câmera do iPhone: o conteúdo começa abaixo dela
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:fixed;top:0;left:0;height:0;padding-top:env(safe-area-inset-top);visibility:hidden';
+        document.body.appendChild(probe);
+        const top = probe.offsetHeight; probe.remove();
+        setSat(Math.round(top / sc));
         setScale(sc); setFw(w / sc); setFh(h / sc); setFill(true);
       } else {
-        setScale(Math.min(w / 390, h / 844, 1.25)); setFw(390); setFh(844); setFill(false);
+        setScale(Math.min(w / 390, h / 844, 1.25)); setFw(390); setFh(844); setFill(false); setSat(0);
       }
     };
     fit();
@@ -85,7 +92,7 @@ export default function App() {
 
   return (
     <div className="app-bg" onClickCapture={onClickCapture}>
-      <div ref={frame} className={'app-frame' + (fill ? ' app-fill' : '') + (visible ? ' tabs-on' : '')} style={{ transform: `scale(${scale})`, width: fw, height: fh, '--fh': fh + 'px' }}>
+      <div ref={frame} className={'app-frame' + (fill ? ' app-fill' : '') + (visible ? ' tabs-on' : '')} style={{ transform: `scale(${scale})`, width: fw, height: fh, '--fh': (fh - sat) + 'px', '--sat': sat + 'px' }}>
         <div className="route" style={{ display: route === 'alma' ? 'block' : 'none', background: '#0b0a16' }}><Alma /></div>
         <div className="route" style={{ display: route === 'simbolos' ? 'block' : 'none', background: '#0a0918' }}><Simbolos /></div>
         {route === 'diario' ? <div className="route" style={{ background: '#0b0a16' }}><Diario /></div> : null}

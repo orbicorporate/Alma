@@ -141,3 +141,18 @@
 .dz-sym p { margin: 0; font-size: 14.5px; font-weight: 300; line-height: 1.55; }
 .dz-question { padding: var(--s4); border-radius: 18px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.3); display: flex; flex-direction: column; gap: var(--s2); }
 .dz-question p { margin: 0; font-size: 17px; font-weight: 300; line-height: 1.45; }
+
+.dz-deep { padding: var(--s4); border-radius: 20px; display: flex; flex-direction: column; gap: var(--s3); background: linear-gradient(140deg, rgba(243,217,139,.12), rgba(201,168,255,.08)); border: 1px solid rgba(243,217,139,.35); animation: dzIn .5s ease both; }
+.dz-deep-top { display: flex; align-items: center; justify-content: space-between; }
+.dz .dz-deep-skip { height: 32px; padding: 0 8px; font-size: 13.5px; color: rgba(244,241,234,.6); }
+.dz-deep-q { font-size: 18px; font-weight: 300; line-height: 1.35; }
+.dz .dz-deep-opt { border-color: rgba(243,217,139,.45); color: #f4f1ea; background: rgba(255,255,255,.04); }
+.dz .dz-deep-opt:active { background: #f3d98b; color: #1a1408; }
+.dz-deep-bar { height: 3px; border-radius: 3px; background: rgba(255,255,255,.1); overflow: hidden; }
+.dz-deep-bar i { display: block; height: 100%; background: linear-gradient(90deg, #f3d98b, #c9a8ff); transition: width .5s ease; }
+.dz-extra { display: flex; gap: var(--s2); }
+.dz-extra .dz-input { height: 44px; font-size: 14.5px; }
+.dz .dz-extra-ok { flex-shrink: 0; height: 44px; padding: 0 16px; border-radius: 999px; font-size: 14px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #e4d6ff, #c9a8ff); }
+.dz .dz-extra-ok:disabled { opacity: .4; }
+.dz-sym-you { border-left-color: #f3d98b; background: rgba(243,217,139,.07); }
+.dz-sym-you .dz-sym-n { color: #f3d98b; }

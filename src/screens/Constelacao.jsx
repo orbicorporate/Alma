@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 import { load, onData } from '../store.js';
 import { MO } from '../dates.js';
 import './constelacao.css';
+import { makeGalaxy, drawGalaxy, makeComet, drawComet } from '../components/cosmosFx.js';
 
 // A constelação reflete tudo o que a pessoa coloca na Alma: perguntas, respostas estreladas,
 // planos, diário, sonhos, post-its e leituras de tarô. Itens se agrupam por tema em nebulosas.
@@ -132,6 +133,12 @@ export default function Constelacao() {
     const dust = [];
     for (let i = 0; i < 260; i++) { const u = Math.random(), v = (Math.random() + Math.random() + Math.random() - 1.5) * 0.28; dust.push({ u, v, r: Math.random() * 0.9 + 0.2, p: Math.random() * 6 }); }
     const shoots = [];
+    const gals = [
+      { g: makeGalaxy({ size: 70, tilt: 0.42, rot: -0.5, n: 380, speed: 0.06 }), x: W * 0.18, y: H * 0.3, d: 0.12 },
+      { g: makeGalaxy({ arms: 3, size: 110, tilt: 0.5, rot: 0.6, n: 560, speed: -0.04, hue: ['#f5a8c8', '#ffd3a8', '#c9b8ff', '#ffffff'] }), x: W * 0.84, y: H * 0.7, d: 0.2 },
+      { g: makeGalaxy({ size: 36, tilt: 0.3, rot: 1.2, n: 160, speed: 0.1, hue: ['#a8d8ff', '#ffffff'] }), x: W * 0.7, y: H * 0.16, d: 0.06 }
+    ];
+    const comets = []; let nextComet = 3.5;
     const ripples = st.current.ripples || (st.current.ripples = []);
     let raf, lastShoot = 0;
     const hex = (a) => Math.round(Math.max(0, Math.min(1, a)) * 255).toString(16).padStart(2, '0');
@@ -171,6 +178,14 @@ export default function Constelacao() {
         if (s.r > 1.2 && tw > 0.85) { ctx.globalAlpha *= 0.5; ctx.fillRect(px - 3, py - 0.3, 6, 0.6); ctx.fillRect(px - 0.3, py - 3, 0.6, 6); }
       });
       ctx.globalAlpha = 1;
+      // galáxias distantes girando (quase paradas quando você arrasta: estão muito longe)
+      gals.forEach((q) => {
+        const gx = q.x - (cx * z) * 0.05 * q.d, gy = q.y - (cy * z) * 0.05 * q.d;
+        drawGalaxy(ctx, q.g, gx, gy, t, Math.min(1, t / 2.5) * 0.7, 1 + 0.03 * Math.sin(t * 0.3));
+      });
+      // cometas atravessando o céu
+      if (t > nextComet) { comets.push(makeComet(W, H, t)); nextComet = t + 9 + Math.random() * 8; }
+      for (let i = comets.length - 1; i >= 0; i--) if (!drawComet(ctx, comets[i], t)) comets.splice(i, 1);
       // estrelas cadentes
       if (t - lastShoot > 4 + Math.random() * 5 && t > 3) { lastShoot = t; shoots.push({ x: Math.random() * W * 0.8 + W * 0.2, y: Math.random() * H * 0.4, t0: t, a: 2.5 + Math.random() * 0.4 }); }
       for (let i = shoots.length - 1; i >= 0; i--) {
@@ -319,7 +334,9 @@ export default function Constelacao() {
       L.used.forEach((th) => {
         const c0 = toS(L.centers[th.k]); if (!(L.count[th.k] > 0)) return;
         const ly = c0.y - (90 + 36 * Math.sqrt(L.count[th.k])) * z * 0.7;
-        ctx.globalAlpha = Math.min(1, Math.max(0, (t - 1.5) / 1.5)) * 0.8 * Math.min(1, Math.max(0, (ly - 150) / 60));
+        const topFade = Math.min(1, Math.max(0, (ly - 170) / 60)), inFade = Math.min(1, Math.max(0, (t - 1.5) / 1.5));
+        if (topFade * inFade < 0.02 || ly > H - 180) return;
+        ctx.globalAlpha = inFade * 0.8 * topFade;
         ctx.fillStyle = th.color; ctx.font = '400 11.5px Manrope, sans-serif'; ctx.textAlign = 'center';
         ctx.shadowColor = th.color; ctx.shadowBlur = 12;
         ctx.fillText(th.label.toUpperCase().split('').join(' '), c0.x, ly);

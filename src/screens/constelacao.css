@@ -1,6 +1,6 @@
 .cz { position: relative; width: 390px; height: 844px; overflow: hidden; background: #05040c; color: #f4f1ea; font-family: 'Manrope', 'Noto Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 :where(.cz button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
-.cz-canvas { position: absolute; top: 0; left: 0; touch-action: none; cursor: grab; }
+.cz-canvas { position: absolute; top: calc(-1 * var(--sat, 0px)); left: 0; touch-action: none; cursor: grab; }
 .cz-canvas:active { cursor: grabbing; }
 .cz-top { position: absolute; top: 36px; left: 12px; right: 12px; display: flex; align-items: center; gap: 6px; pointer-events: none; animation: czIn 1.2s 1.6s ease both; }
 .cz-top > * { pointer-events: auto; }
@@ -28,7 +28,7 @@
 .cz-card-text { margin: 0; font-size: 14.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.8); white-space: pre-line; }
 .cz-parent { font-size: 13.5px; color: #f3d98b; }
 
-.cz-veil-top { position: absolute; top: 0; left: -300px; right: -300px; height: 150px; pointer-events: none; background: linear-gradient(180deg, rgba(8,7,22,.85), rgba(8,7,22,0)); }
+.cz-veil-top { position: absolute; top: calc(-1 * var(--sat, 0px)); left: -300px; right: -300px; height: 150px; pointer-events: none; background: linear-gradient(180deg, rgba(8,7,22,.85), rgba(8,7,22,0)); }
 .cz-range { -webkit-appearance: none; appearance: none; height: 26px; background: transparent; }
 .cz-range::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(90deg, #7a5cff, #f5a8c8 50%, #f3d98b) 0 0 / var(--p) 100% no-repeat, rgba(255,255,255,.14); }
 .cz-range::-moz-range-track { height: 4px; border-radius: 4px; background: rgba(255,255,255,.14); }
