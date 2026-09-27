@@ -10,15 +10,20 @@ export default function App() {
   const [route, setRoute] = useState(routeOf());
   const [scale, setScale] = useState(1);
   const [fh, setFh] = useState(844);
+  const [fw, setFw] = useState(390);
+  const [fill, setFill] = useState(false);
   const frame = useRef(null);
 
   useLayoutEffect(() => {
     const fit = () => {
       const w = window.innerWidth, h = window.innerHeight;
-      const sw = w / 390, fh = h / sw;
-      // No celular, preenche a largura inteira e ajusta a altura da tela ao aparelho.
-      if (w < 700 && fh >= 760) { setScale(sw); setFh(fh); }
-      else { setScale(Math.min(w / 390, h / 844, 1.25)); setFh(844); }
+      if (w < 700) {
+        // No celular: o conteúdo cabe inteiro e o fundo do app preenche a tela toda, em qualquer proporção.
+        const sc = Math.min(w / 390, h / 844);
+        setScale(sc); setFw(w / sc); setFh(h / sc); setFill(true);
+      } else {
+        setScale(Math.min(w / 390, h / 844, 1.25)); setFw(390); setFh(844); setFill(false);
+      }
     };
     fit();
     window.addEventListener('resize', fit);
@@ -35,6 +40,13 @@ export default function App() {
     return () => window.removeEventListener('hashchange', on);
   }, []);
 
+  // Garante que nenhum container role na horizontal (foco em campos pode empurrar a tela).
+  useEffect(() => {
+    const fix = (e) => { const t = e.target; if (t && t.scrollLeft) t.scrollLeft = 0; };
+    document.addEventListener('scroll', fix, true);
+    return () => document.removeEventListener('scroll', fix, true);
+  }, []);
+
   // Links entre as duas áreas (herdados do protótipo) viram navegação interna.
   const onClickCapture = (e) => {
     const a = e.target.closest && e.target.closest('a[href]');
@@ -46,11 +58,11 @@ export default function App() {
 
   return (
     <div className="app-bg" onClickCapture={onClickCapture}>
-      <div ref={frame} className="app-frame" style={{ transform: `scale(${scale})`, height: fh, '--fh': fh + 'px' }}>
-        <div style={{ display: route === 'alma' ? 'block' : 'none' }}><Alma /></div>
-        <div style={{ display: route === 'simbolos' ? 'block' : 'none' }}><Simbolos /></div>
-        {route === 'diario' ? <div><Diario /></div> : null}
-        {route === 'constelacao' ? <div><Constelacao /></div> : null}
+      <div ref={frame} className={'app-frame' + (fill ? ' app-fill' : '')} style={{ transform: `scale(${scale})`, width: fw, height: fh, '--fh': fh + 'px' }}>
+        <div className="route" style={{ display: route === 'alma' ? 'block' : 'none', background: '#0b0a16' }}><Alma /></div>
+        <div className="route" style={{ display: route === 'simbolos' ? 'block' : 'none', background: '#0a0918' }}><Simbolos /></div>
+        {route === 'diario' ? <div className="route" style={{ background: '#0b0a16' }}><Diario /></div> : null}
+        {route === 'constelacao' ? <div className="route" style={{ background: '#05040c' }}><Constelacao /></div> : null}
       </div>
     </div>
   );

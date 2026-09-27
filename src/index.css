@@ -11,3 +11,11 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 /* As telas ocupam a altura real do aparelho */
 .app-frame .sc-main > .alma, .app-frame .sc-sym > div:first-child, .app-frame .dz, .app-frame .cz { height: var(--fh, 844px) !important; }
 .app-frame > div { height: 100%; }
+
+/* Celular: a coluna do app fica centralizada e o fundo, as auroras e as partículas se estendem até as bordas */
+.app-fill { overflow: hidden; overflow: clip; }
+.app-fill .route { width: 100%; height: 100%; overflow: hidden; overflow: clip; }
+.app-fill .sc-main > .alma, .app-fill .sc-sym > div:first-child, .app-fill .dz, .app-fill .cz { margin: 0 auto; overflow: visible !important; }
+.app-fill .sc-main, .app-fill .sc-sym { height: 100%; }
+.app-fill .dz-aurora { inset: 0 -220px; }
+.app-fill .cz-canvas { box-shadow: 0 0 0 400px #05040c; }
