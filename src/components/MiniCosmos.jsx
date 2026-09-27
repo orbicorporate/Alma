@@ -11,7 +11,7 @@ export default function MiniCosmos({ w = 350, h = 240 }) {
     const stars = Array.from({ length: 90 }, () => ({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1 + 0.2, p: Math.random() * 6 }));
     const gal = makeGalaxy({ size: 64, tilt: 0.42, rot: -0.35, n: 340, speed: 0.08 });
     const gal2 = makeGalaxy({ size: 26, tilt: 0.35, rot: 0.9, n: 120, speed: -0.12, hue: ['#a8d8ff', '#ffffff'] });
-    const comets = []; let next = 1.2, raf;
+    const comets = []; let next = 2.5, raf;
     const t0 = performance.now();
     const draw = (now) => {
       const t = (now - t0) / 1000;
@@ -22,9 +22,9 @@ export default function MiniCosmos({ w = 350, h = 240 }) {
       ctx.fillStyle = neb; ctx.fillRect(0, 0, w, h);
       stars.forEach((s) => { ctx.globalAlpha = 0.25 + 0.6 * (0.5 + 0.5 * Math.sin(t * 1.4 + s.p)); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill(); });
       ctx.globalAlpha = 1;
-      drawGalaxy(ctx, gal, w * 0.74, h * 0.38, t, Math.min(1, t / 1.5));
-      drawGalaxy(ctx, gal2, w * 0.14, h * 0.2, t, Math.min(1, t / 2) * 0.8);
-      if (t > next) { comets.push(makeComet(w, h, t)); next = t + 6 + Math.random() * 5; }
+      drawGalaxy(ctx, gal, w * 0.74, h * 0.38, t, Math.min(1, t / 2) * 0.8, 0.85);
+      drawGalaxy(ctx, gal2, w * 0.14, h * 0.2, t, Math.min(1, t / 2) * 0.6, 0.8);
+      if (t > next) { comets.push(makeComet(w, h, t)); next = t + 10 + Math.random() * 8; }
       for (let i = comets.length - 1; i >= 0; i--) if (!drawComet(ctx, comets[i], t)) comets.splice(i, 1);
       raf = requestAnimationFrame(draw);
     };

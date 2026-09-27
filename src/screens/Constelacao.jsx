@@ -138,7 +138,7 @@ export default function Constelacao() {
       { g: makeGalaxy({ arms: 3, size: 110, tilt: 0.5, rot: 0.6, n: 560, speed: -0.04, hue: ['#f5a8c8', '#ffd3a8', '#c9b8ff', '#ffffff'] }), x: W * 0.84, y: H * 0.7, d: 0.2 },
       { g: makeGalaxy({ size: 36, tilt: 0.3, rot: 1.2, n: 160, speed: 0.1, hue: ['#a8d8ff', '#ffffff'] }), x: W * 0.7, y: H * 0.16, d: 0.06 }
     ];
-    const comets = []; let nextComet = 3.5;
+    const comets = []; let nextComet = 5;
     const ripples = st.current.ripples || (st.current.ripples = []);
     let raf, lastShoot = 0;
     const hex = (a) => Math.round(Math.max(0, Math.min(1, a)) * 255).toString(16).padStart(2, '0');
@@ -181,10 +181,10 @@ export default function Constelacao() {
       // galáxias distantes girando (quase paradas quando você arrasta: estão muito longe)
       gals.forEach((q) => {
         const gx = q.x - (cx * z) * 0.05 * q.d, gy = q.y - (cy * z) * 0.05 * q.d;
-        drawGalaxy(ctx, q.g, gx, gy, t, Math.min(1, t / 2.5) * 0.7, 1 + 0.03 * Math.sin(t * 0.3));
+        drawGalaxy(ctx, q.g, gx, gy, t, Math.min(1, t / 3) * 0.75, 0.85 + 0.02 * Math.sin(t * 0.3));
       });
       // cometas atravessando o céu
-      if (t > nextComet) { comets.push(makeComet(W, H, t)); nextComet = t + 9 + Math.random() * 8; }
+      if (t > nextComet) { comets.push(makeComet(W, H, t)); nextComet = t + 14 + Math.random() * 10; }
       for (let i = comets.length - 1; i >= 0; i--) if (!drawComet(ctx, comets[i], t)) comets.splice(i, 1);
       // estrelas cadentes
       if (t - lastShoot > 4 + Math.random() * 5 && t > 3) { lastShoot = t; shoots.push({ x: Math.random() * W * 0.8 + W * 0.2, y: Math.random() * H * 0.4, t0: t, a: 2.5 + Math.random() * 0.4 }); }
