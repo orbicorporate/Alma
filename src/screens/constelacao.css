@@ -1,5 +1,5 @@
 .cz { position: relative; width: 390px; height: 844px; overflow: hidden; background: #05040c; color: #f4f1ea; font-family: 'Manrope', 'Noto Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-.cz button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:where(.cz button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 .cz-canvas { position: absolute; inset: 0; touch-action: none; cursor: grab; }
 .cz-canvas:active { cursor: grabbing; }
 .cz-top { position: absolute; top: 36px; left: 12px; right: 12px; display: flex; align-items: center; gap: 6px; pointer-events: none; animation: czIn 1.2s 1.6s ease both; }
@@ -7,7 +7,7 @@
 .cz-ic { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 200; }
 .cz-title { font-size: 20px; font-weight: 300; text-shadow: 0 0 20px rgba(201,184,255,.6); }
 .cz-sub { font-size: 12.5px; letter-spacing: .06em; color: rgba(244,241,234,.6); }
-.cz-themes { position: absolute; top: 92px; left: 0; right: 0; display: flex; gap: 6px; overflow-x: auto; padding: 0 16px; scrollbar-width: none; animation: czIn 1.2s 2.2s ease both; }
+.cz-themes { position: absolute; top: 96px; left: 0; right: 0; display: flex; gap: 6px; overflow-x: auto; padding: 0 16px; scrollbar-width: none; animation: czIn 1.2s 2.2s ease both; }
 .cz-themes::-webkit-scrollbar { display: none; }
 .cz .cz-chip { flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 999px; border-width: 1px; border-style: solid; font-size: 14px; white-space: nowrap; display: flex; align-items: center; gap: 6px; background: rgba(10,8,24,.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .cz-chip i { width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
@@ -17,7 +17,7 @@
 .cz-empty { position: absolute; left: 30px; right: 30px; top: 40%; text-align: center; display: flex; flex-direction: column; gap: 14px; animation: czIn 1s 2s ease both; }
 .cz-empty p { margin: 0; font-size: 17px; font-weight: 300; line-height: 1.5; }
 .cz .cz-btn { height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); font-size: 14px; background: rgba(255,255,255,.06); }
-.cz-card { position: absolute; left: 16px; right: 16px; bottom: 96px; max-height: 360px; overflow-y: auto; padding: 16px 18px; border-radius: 24px; display: flex; flex-direction: column; gap: 6px; background: rgba(18,15,38,.78); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12); animation: czUp .5s cubic-bezier(.2,.8,.2,1) both; }
+.cz-card { position: absolute; left: 16px; right: 16px; bottom: 96px; max-height: 360px; overflow-y: auto; padding: 18px var(--s5); border-radius: 24px; display: flex; flex-direction: column; gap: var(--s2); background: rgba(18,15,38,.78); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12); animation: czUp .5s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes czUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
 @keyframes czIn { from { opacity: 0; } to { opacity: 1; } }
 .cz-card-head { display: flex; align-items: center; justify-content: space-between; }

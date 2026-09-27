@@ -1,6 +1,6 @@
 /* generated from Simbolos.dc.html */
 .sc-sym{margin:0;background:#0a0918;font-family:'Manrope','Noto Sans',system-ui,sans-serif;color:#f4f1ea;-webkit-font-smoothing:antialiased}
-.sc-sym button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:where(.sc-sym button) {font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 .sc-sym input,.sc-sym select{font:inherit;color:inherit}
 .sc-sym a{color:inherit;text-decoration:none}
 .sc-sym .sym{font-family:'Noto Sans Symbols','Noto Sans',sans-serif}

@@ -5,11 +5,11 @@ import { phaseOf, moonPath, dayAdvice, nextFavorable, PD_TEXT } from '../cosmos.
 import './diario.css';
 
 export const TYPES = {
-  nota: { label: 'Anotação', color: '#a8d8ff' },
+  nota: { label: 'Anotação', color: '#a8d8ff', f: true },
   sonho: { label: 'Sonho', color: '#c9a8ff' },
-  gratidao: { label: 'Gratidão', color: '#8fe3b0' },
-  intencao: { label: 'Intenção', color: '#f3d98b' },
-  decisao: { label: 'Decisão', color: '#ffb38a' }
+  gratidao: { label: 'Gratidão', color: '#8fe3b0', f: true },
+  intencao: { label: 'Intenção', color: '#f3d98b', f: true },
+  decisao: { label: 'Decisão', color: '#ffb38a', f: true }
 };
 const POST_COLORS = ['#f3d98b', '#f5a8c8', '#a8d8ff', '#8fe3b0', '#c9a8ff'];
 const WAKE = ['Em paz', 'Leve', 'Emocionado', 'Inquieto', 'Confuso'];
@@ -61,7 +61,7 @@ export default function Diario() {
     if (e.id) setJournal(journal.map((j) => (j.id === e.id ? e : j)));
     else setJournal(journal.concat([Object.assign({}, e, { id: uid(), at: Date.now() })]));
     setEditor(null);
-    flash(e.id ? 'Registro atualizado' : `${TYPES[e.type].label} guardada no seu céu`);
+    flash(e.id ? 'Registro atualizado' : `${TYPES[e.type].label} ${TYPES[e.type].f ? 'guardada' : 'guardado'} no seu céu`);
   };
   const delEditor = () => { setJournal(journal.filter((j) => j.id !== editor.id)); setEditor(null); flash('Registro apagado'); };
 

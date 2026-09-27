@@ -377,7 +377,7 @@ class Component extends DCLogic {
       const open = s.numOpen === k;
       return {
         n, label: DEF[k][0], what: DEF[k][1], how: DEF[k][2], calc: N[k].calc,
-        title: cyc ? C[0].split('.')[0] : nm(n)[0], short: cyc ? '' : nm(n)[1],
+        title: cyc ? C[0].split('.')[0] : nm(n)[0], short: cyc ? '' : nm(n)[1].replace(new RegExp('^' + nm(n)[0].split(' ')[0] + ',\\s*', 'i'), (m) => '').replace(/^./, (c) => c.toUpperCase()),
         ess: !cyc ? X[0] : k === 'py' ? C[0] : `${C[0].split('.')[0]}. Esta vibração colore ${k === 'pm' ? `o seu mês de ${CMN}, dentro do tema do ano` : 'o seu dia de hoje: um bom foco para as próximas horas'}.`, luz: X[1], sombra: X[2], convite: X[3], fazer: C[1], evitar: C[2],
         isPerson: !cyc, isCycle: cyc, isPY: k === 'py',
         dots: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => ({ n: d, style: d === this.red(n) ? 'background: #f3d98b; color: #1a1408; font-weight: 500; box-shadow: 0 0 12px rgba(243,217,139,.6)' : d < this.red(n) ? 'background: rgba(243,217,139,.18); color: rgba(244,241,234,.7)' : 'background: rgba(255,255,255,.05); color: rgba(244,241,234,.45)' })),
@@ -662,7 +662,7 @@ Component.prototype.render = function render() {
                 <button className="glass pill" onClick={R.goProfile} style={css("width: 100%; border-radius: 24px; padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 14px")}>
                   <span style={css("width: 100%; display: flex; align-items: center; justify-content: space-between")}>
                     <span className="kicker">
-                      {this.state.profileSaved ? 'Seu perfil da alma' : 'Perfil de exemplo · crie o seu'}
+                      {this.state.profileSaved ? 'Seu perfil da alma' : 'Perfil de exemplo'}
                     </span>
                     <span style={css("font-size: 13.5px; color: #f3d98b")}>
                       {this.state.profileSaved ? 'Editar' : 'Criar'}

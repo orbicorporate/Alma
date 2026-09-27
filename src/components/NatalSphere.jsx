@@ -76,8 +76,8 @@ export default function NatalSphere({ sim, profile }) {
   const sorted = points.slice().sort((a, b) => a.lon - b.lon);
   const shown = {};
   let prev = -99;
-  sorted.forEach((p) => { const v = Math.max(p.lon, prev + 22); shown[p.k] = v; prev = v; });
-  const over = prev - (sorted[0].lon + 360 - 22);
+  sorted.forEach((p) => { const v = Math.max(p.lon, prev + 30); shown[p.k] = v; prev = v; });
+  const over = prev - (sorted[0].lon + 360 - 30);
   if (over > 0) sorted.forEach((p, i) => { shown[p.k] -= over * (i / Math.max(1, sorted.length - 1)); });
   const laneOf = {};
   sorted.forEach((p, i) => { laneOf[p.k] = Math.abs(shown[p.k] - p.lon) > 8 ? (i % 2) : 0; });

@@ -278,7 +278,7 @@ export default function Constelacao() {
         <button className="cz-ic" aria-label="Voltar" onClick={() => { window.location.hash = '#/'; }}>‹</button>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span className="cz-title">Sua constelação</span>
-          <span className="cz-sub">{counts.pergunta} {counts.pergunta === 1 ? 'pergunta' : 'perguntas'} · {counts.estrela} {counts.estrela === 1 ? 'estrela' : 'estrelas'} · {counts.diario} {counts.diario === 1 ? 'registro' : 'registros'} · pince para aproximar</span>
+          <span className="cz-sub">{counts.pergunta} {counts.pergunta === 1 ? 'pergunta' : 'perguntas'} · {counts.estrela} {counts.estrela === 1 ? 'estrela' : 'estrelas'} · {counts.diario} {counts.diario === 1 ? 'registro' : 'registros'}</span>
         </div>
       </div>
       <div className="cz-themes">
@@ -297,7 +297,7 @@ export default function Constelacao() {
         <div className="cz-time">
           <span>{cut >= 1000 ? 'Hoje' : fmt(cutAt)}</span>
           <input type="range" min="0" max="1000" value={cut} onChange={(e) => setCut(+e.target.value)} aria-label="Linha do tempo da constelação" />
-          <span className="cz-time-hint">Arraste para rebobinar o seu céu</span>
+          <span className="cz-time-hint">Arraste para rebobinar · pince para aproximar</span>
         </div>
       ) : null}
       {sel ? (

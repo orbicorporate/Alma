@@ -1,3 +1,14 @@
+/*
+  Regra de espaçamento da Alma (base 4px)
+  --s1 4   : entre ícone e texto dentro de uma linha
+  --s2 8   : entre rótulo (kicker) e título; entre tags
+  --s3 12  : entre título e texto de apoio; entre cartões de uma lista
+  --s4 16  : espaço interno dos cartões (lateral e vertical)
+  --s5 20  : margem lateral das telas
+  --s6 24  : entre seções de uma tela
+  Texto: rótulo 11.5px maiúsculo, corpo 15 a 17px com entrelinha 1.5, apoio 13.5px com entrelinha 1.5.
+*/
+:root { --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; }
 html, body, #root { margin: 0; height: 100%; background: #0b0a16; }
 body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .app-bg { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 30%, #17142e, #07060f 70%); }

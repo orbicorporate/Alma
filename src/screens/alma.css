@@ -4,7 +4,7 @@
 @property --m2{syntax:'<color>';inherits:true;initial-value:#c9a8ff}
 @property --m3{syntax:'<color>';inherits:true;initial-value:#7fe0d6}
 .sc-main .alma{transition:--m1 1.8s ease,--m2 1.8s ease,--m3 1.8s ease}
-.sc-main button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:where(.sc-main button) {font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 .sc-main textarea{font:inherit;color:inherit;background:transparent;border:0;outline:none;resize:none;width:100%}
 .sc-main textarea::placeholder{color:rgba(244,241,234,.42)}
 .sc-main .aurora{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;animation:drift 18s ease-in-out infinite alternate;transition:transform 1.6s ease}
