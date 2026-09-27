@@ -3,6 +3,7 @@ import { load, save, onData } from '../store.js';
 import { today, iso, fromIso, MO_FULL, WD_FULL } from '../dates.js';
 import { phaseOf, moonPath, dayAdvice, nextFavorable, PD_TEXT } from '../cosmos.js';
 import { readDream, recurring, DEEP } from '../dreams.js';
+import { planNameOf } from '../questions.js';
 import './diario.css';
 import Starfield from '../components/Starfield.jsx';
 
@@ -66,7 +67,7 @@ export function Moon({ f, size = 14 }) {
 
 function planStepsOn(entries, dayIso) {
   const out = [];
-  (entries || []).forEach((e, ei) => (e.plan || []).forEach((s, j) => { if (s.iso === dayIso) out.push({ q: e.q, t: s.t, n: j + 1, total: e.plan.length, done: s.done, ei, j }); }));
+  (entries || []).forEach((e, ei) => (e.plan || []).forEach((s, j) => { if (s.iso === dayIso) out.push({ q: e.q, name: planNameOf(e), t: s.t, n: j + 1, total: e.plan.length, done: s.done, ei, j }); }));
   return out;
 }
 const ICON = { sonho: '☾', intencao: '✦', gratidao: '♡', decisao: '◇', nota: '✎' };
@@ -243,7 +244,7 @@ export default function Diario() {
             <span className="dz-group-h" style={{ color: '#8fe3b0' }}><i style={{ background: '#8fe3b0' }} />Passo de plano para este dia</span>
             {steps.map((st, i) => (
               <div key={i} className={'glass dz-plancard' + (st.done ? ' dz-plan-done' : '')}>
-                <span className="dz-plan-from">Plano da pergunta “{st.q.length > 46 ? st.q.slice(0, 45) + '…' : st.q}”</span>
+                <span className="dz-plan-from">Plano: {st.name}</span>
                 <button className="dz-plan" onClick={() => toggleStep(st)} aria-pressed={st.done ? 'true' : 'false'}>
                   <span className="dz-check">{st.done ? '✓' : ''}</span>
                   <span className="dz-plan-txt">

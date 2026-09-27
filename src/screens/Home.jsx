@@ -4,6 +4,7 @@ import { today, iso, WD_FULL, MO_FULL, stepInfo } from '../dates.js';
 import { phaseOf, dayAdvice, PD_TEXT } from '../cosmos.js';
 import { phraseOfDay } from '../phrases.js';
 import { dayTip, weekTip } from '../tips.js';
+import { planNameOf } from '../questions.js';
 import { Moon } from './Diario.jsx';
 import './home.css';
 import Starfield from '../components/Starfield.jsx';
@@ -40,7 +41,7 @@ export default function Home() {
       e.plan.forEach((p0, j) => {
         const p = stepInfo(p0);
         if (p.done) return;
-        if (!best || p.due < best.due) best = { i, j, t: p.t, date: p.date, due: p.due, n: j + 1, total: e.plan.length, q: e.q };
+        if (!best || p.due < best.due) best = { i, j, t: p.t, date: p.date, due: p.due, n: j + 1, total: e.plan.length, q: planNameOf(e) };
       });
     });
     return best;
@@ -95,7 +96,7 @@ export default function Home() {
               <span className="hm-num">{next.n}</span>
               <span className="hm-step-t">{next.t}</span>
             </div>
-            <p className="hm-sub">Do plano da pergunta “{next.q}”</p>
+            <p className="hm-sub">Plano: {next.q}</p>
             <div className="hm-row">
               <button className="hm-btn hm-btn-green" onClick={doneStep}>Concluí</button>
               <button className="hm-btn" onClick={() => go('#/', { screen: 'plan', planIdx: next.i, planPrev: 'journal' })}>Ver plano</button>

@@ -36,3 +36,7 @@
 .cz-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -9px; border-radius: 50%; border: 0; background: radial-gradient(circle at 35% 30%, #fff, #e4d6ff 45%, #b9a6ff); box-shadow: 0 0 16px rgba(201,184,255,.9), 0 0 36px rgba(245,168,200,.5); animation: czThumb 2.4s ease-in-out infinite; }
 .cz-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; border: 0; background: radial-gradient(circle at 35% 30%, #fff, #e4d6ff 45%, #b9a6ff); box-shadow: 0 0 16px rgba(201,184,255,.9); }
 @keyframes czThumb { 50% { box-shadow: 0 0 24px rgba(201,184,255,1), 0 0 50px rgba(245,168,200,.7); } }
+
+.cz .cz-del { align-self: flex-start; height: 36px; font-size: 13.5px; color: rgba(255,163,163,.85); }
+.cz-del-box { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 16px; background: rgba(255,163,163,.08); border: 1px solid rgba(255,163,163,.3); font-size: 14px; line-height: 1.5; }
+.cz .cz-btn-del { color: #ffa3a3; border-color: rgba(255,163,163,.45); }

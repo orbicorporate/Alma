@@ -156,3 +156,12 @@ const PLAN = {
 export function contextOf(text) { return detect(text); }
 export function stepFor(text) { const d = detect(text); return (d && STEP[d.topic.k]) || 'Faça um teste pequeno antes da decisão grande e depois faça esta pergunta de novo.'; }
 export function planSteps(text) { const d = detect(text); return (d && PLAN[d.topic.k]) || PLAN._; }
+
+// Nome do plano: o que a pessoa escolheu ou, por padrão, a própria pergunta resumida.
+export function planNameOf(e) {
+  if (e.planName) return e.planName;
+  const q = (e.q || '').replace(/^(estou pensando em|penso em|devo|será que devo|quero)\s+/i, '').replace(/\?$/, '');
+  const t = q.charAt(0).toUpperCase() + q.slice(1);
+  return t.length > 48 ? t.slice(0, 47).trim() + '…' : t;
+}
+

@@ -1,10 +1,10 @@
 // Gerado a partir de Main.dc.html (protótipo Alma) e mantido à mão a partir daqui.
 import React from 'react';
 import { DCLogic, css } from '../dc/runtime.js';
-import { today, addDays, iso, dayMonth, stepInfo } from '../dates.js';
+import { today, addDays, iso, fromIso, dayMonth, stepInfo } from '../dates.js';
 import { PH, nextPhraseIndex } from '../phrases.js';
 import MiniCosmos from '../components/MiniCosmos.jsx';
-import { contextQS, contextOf, stepFor, planSteps } from '../questions.js';
+import { contextQS, contextOf, stepFor, planSteps, planNameOf } from '../questions.js';
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
 
 class Component extends DCLogic {
@@ -105,7 +105,7 @@ class Component extends DCLogic {
       screen: 'intro', pi: nextPhraseIndex(), pk: 0, planIdx: -1, savedIdx: -1, prev: 'ask', inhale: false, count: 0, medit: false,
       text: '',
       kind: 'Dúvida', step: 0, voicesOpen: false, ans: [null, null, null], other: false, otherText: '', jfilter: 'all', confirmDel: false, lit: 0, focus: -1, open: -1, stars: [], filter: 'all',
-      savedNow: false, toast: '', sheet: -1, tx: 0, ty: 0,
+      savedNow: false, toast: '', sheet: -1, tx: 0, ty: 0, planEdit: null, nameEdit: null,
       entries: load().entries || [],
       auth: getAuth(), loginEmail: '', loginMsg: ''
     };
@@ -209,7 +209,25 @@ class Component extends DCLogic {
     const cur = plan.findIndex((x) => !x.done);
     const setStep = (j, patch) => this.updAt(idx, (en) => { en.plan = en.plan.map((x, k) => k === j ? Object.assign({}, x, patch) : x); return en; });
     const pct = Math.round(100 * doneN / total);
+    const defName = planNameOf(e);
+    const ed = s.planEdit;
     return {
+      confirmPlanDel: !!s.confirmPlanDel,
+      askDelPlan: () => this.setState({ confirmPlanDel: true }),
+      cancelDelPlan: () => this.setState({ confirmPlanDel: false }),
+      delPlan: () => { this.updAt(idx, (en) => { delete en.plan; delete en.planName; return en; }); this.setState({ confirmPlanDel: false, planEdit: null, screen: s.planPrev || 'journal' }); this.flash('Plano excluído. A pergunta continua no seu céu.'); },
+      name: defName, nameEditing: s.nameEdit != null, nameDraft: s.nameEdit || '',
+      editName: () => this.setState({ nameEdit: defName, planEdit: null }),
+      onName: (ev) => this.setState({ nameEdit: ev.target.value }),
+      saveName: () => { const v = (this.state.nameEdit || '').trim(); this.updAt(idx, (en) => { en.planName = v || undefined; return en; }); this.setState({ nameEdit: null }); this.flash('Nome do plano salvo'); },
+      cancelName: () => this.setState({ nameEdit: null }),
+      addStep: () => {
+        const last = e.plan[e.plan.length - 1];
+        const d = last ? fromIso(last.iso) : today(); d.setDate(d.getDate() + 7);
+        const nIso = iso(d < today() ? addDays(today(), 1) : d);
+        this.updAt(idx, (en) => { en.plan = en.plan.concat([{ t: 'Novo passo', iso: nIso, done: false, remind: true }]); return en; });
+        this.setState({ planEdit: { j: e.plan.length, t: '', iso: nIso }, nameEdit: null });
+      },
       q: `“${e.q}”`, doneN, total, allDone: doneN === total,
       headline: doneN === total ? 'Plano concluído' : doneN === 0 ? 'Vamos começar pelo passo 1' : `Você está no passo ${cur + 1}`,
       sub: doneN === total ? 'Todos os passos feitos. Que caminho bonito.' : `Próximo: ${plan[cur].date.replace('Hoje · ', 'hoje, ')}`,
@@ -222,9 +240,18 @@ class Component extends DCLogic {
       },
       steps: plan.map((x, j) => {
         const isCurrent = j === cur, done = x.done;
+        const editing = ed && ed.j === j;
         return {
+          editing, notEditing: !editing, draftT: editing ? ed.t : '', draftIso: editing ? ed.iso : '',
+          edit: () => this.setState({ planEdit: { j, t: x.t, iso: x.iso || iso(today()) }, nameEdit: null }),
+          onT: (ev) => this.setState({ planEdit: Object.assign({}, this.state.planEdit, { t: ev.target.value }) }),
+          onIso: (ev) => this.setState({ planEdit: Object.assign({}, this.state.planEdit, { iso: ev.target.value }) }),
+          save: () => { const d = this.state.planEdit; const t = (d.t || '').trim(); if (!t) { this.flash('Escreva o passo'); return; } setStep(j, { t, iso: d.iso || x.iso, remind: true }); this.setState({ planEdit: null }); this.flash('Passo atualizado'); },
+          cancel: () => this.setState({ planEdit: null }),
+          remove: () => { this.updAt(idx, (en) => { en.plan = en.plan.filter((_, k) => k !== j); return en; }); this.setState({ planEdit: null }); this.flash('Passo removido'); },
+          canRemove: total > 1,
           n: j + 1, t: x.t, date: x.date, kicker: `Passo ${j + 1} de ${total}`,
-          done, todo: !done, isCurrent, isFuture: !done && !isCurrent,
+          done, todo: !done, isCurrent: isCurrent && !editing, isFuture: !done && !isCurrent && !editing,
           badgeOn: done || isCurrent, badge: done ? 'Concluído' : 'Agora',
           badgeStyle: done ? 'background: rgba(143,227,176,.16); color: #8fe3b0' : 'background: rgba(243,217,139,.18); color: #f3d98b',
           cardStyle: isCurrent ? 'border-color: rgba(243,217,139,.55); box-shadow: 0 0 40px rgba(243,217,139,.12), inset 0 1px 0 rgba(255,255,255,.14)' : done ? 'opacity: .7' : 'opacity: .85',
@@ -451,7 +478,7 @@ class Component extends DCLogic {
       const pct = Math.round(100 * done / pl.length), fin = done === pl.length;
       const rel = nx ? (nx.due < 0 ? 'atrasado' : nx.due === 0 ? 'hoje' : nx.due === 1 ? 'amanhã' : `em ${nx.due} dias`) : '';
       return {
-        q: e.q, prog: `${done} de ${pl.length} passos`,
+        q: planNameOf(e), prog: `${done} de ${pl.length} passos`,
         ring: `background: conic-gradient(#8fe3b0 0% ${pct}%, rgba(255,255,255,.1) ${pct}% 100%)`,
         next: fin ? (e.resolved ? 'Plano concluído e pergunta resolvida' : 'Todos os passos feitos. Já pode marcar como resolvida.') : `Próximo: ${nx.t} · ${rel}`,
         nextStyle: fin ? 'color: #8fe3b0' : (nx.due <= 0 ? 'color: #f3d98b' : 'color: rgba(244,241,234,.65)'),
@@ -1559,11 +1586,22 @@ Component.prototype.render = function render() {
                   <div className="kicker" style={css("color: #8fe3b0")}>
                     {"Plano de ação"}
                   </div>
-                  <h1 style={css("margin: 8px 0 0; font-size: 28px; line-height: 1.2; font-weight: 300")}>
-                    {"Um passo de cada vez"}
-                  </h1>
-                  <p style={css("margin: 8px 0 0; font-size: 14px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.65)")}>
-                    {R.pl?.q}
+                  {R.pl?.nameEditing ? (
+                    <div style={css("margin-top: 10px; display: flex; flex-direction: column; gap: 8px")}>
+                      <input className="pl-input" autoFocus value={R.pl.nameDraft} onChange={R.pl.onName} placeholder="Dê um nome ao seu plano" aria-label="Nome do plano" />
+                      <div style={css("display: flex; gap: 8px")}>
+                        <button className="pl-btn pl-btn-main" onClick={R.pl.saveName}>Salvar nome</button>
+                        <button className="pl-btn" onClick={R.pl.cancelName}>Cancelar</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button onClick={R.pl?.editName} aria-label="Editar nome do plano" style={css("margin-top: 8px; display: flex; align-items: flex-start; gap: 10px; text-align: left")}>
+                      <span style={css("font-size: 27px; line-height: 1.2; font-weight: 300")}>{R.pl?.name}</span>
+                      <span className="pl-pencil" aria-hidden="true">✎</span>
+                    </button>
+                  )}
+                  <p style={css("margin: 8px 0 0; font-size: 13.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
+                    {`Da pergunta ${R.pl?.q ?? ''}`}
                   </p>
                 </div>
                 <div className="glass" style={css("border-radius: 24px; padding: 18px 20px; display: flex; align-items: center; gap: 18px")}>
@@ -1643,6 +1681,23 @@ Component.prototype.render = function render() {
                           </>
                         ) : null}
                       </div>
+                      {L23_st?.editing ? (
+                        <div style={css("display: flex; flex-direction: column; gap: 10px")}>
+                          <label className="pl-field"><span>O que fazer</span>
+                            <textarea className="pl-input" rows={2} autoFocus value={L23_st.draftT} onChange={L23_st.onT} placeholder="Descreva o passo" />
+                          </label>
+                          <label className="pl-field"><span>Data do lembrete</span>
+                            <input className="pl-input" type="date" value={L23_st.draftIso} onChange={L23_st.onIso} />
+                          </label>
+                          <div style={css("display: flex; gap: 8px; flex-wrap: wrap")}>
+                            <button className="pl-btn pl-btn-main" onClick={L23_st.save}>Salvar passo</button>
+                            <button className="pl-btn" onClick={L23_st.cancel}>Cancelar</button>
+                            {L23_st.canRemove ? <button className="pl-btn pl-btn-del" onClick={L23_st.remove}>Remover</button> : null}
+                          </div>
+                        </div>
+                      ) : null}
+                      {L23_st?.notEditing ? (
+                      <>
                       <p style={css(`margin: 0; font-size: 18px; font-weight: 300; line-height: 1.4; ${(L23_st?.textStyle) ?? ''}`)}>
                         {L23_st?.t}
                       </p>
@@ -1661,7 +1716,10 @@ Component.prototype.render = function render() {
                           </svg>
                           {L23_st?.bellLabel}
                         </button>
+                        <button className="pl-edit" onClick={L23_st?.edit}>✎ Editar</button>
                       </div>
+                      </>
+                      ) : null}
                       {L23_st?.isCurrent ? (
                         <>
                           <button className="cta" onClick={L23_st?.complete} style={css("height: 50px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
@@ -1689,6 +1747,18 @@ Component.prototype.render = function render() {
                     </div>
                   </React.Fragment>
                 ))}
+                <button className="pl-add" onClick={R.pl?.addStep}>+ Adicionar um passo</button>
+                {R.pl?.confirmPlanDel ? (
+                  <div className="glass" style={css("border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px; border-color: rgba(255,163,163,.4)")}>
+                    <span style={css("font-size: 14.5px; font-weight: 300; line-height: 1.5")}>Excluir este plano e todos os passos? A pergunta continua no seu céu.</span>
+                    <div style={css("display: flex; gap: 8px")}>
+                      <button className="pl-btn pl-btn-del" onClick={R.pl.delPlan}>Excluir plano</button>
+                      <button className="pl-btn" onClick={R.pl.cancelDelPlan}>Cancelar</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={R.pl?.askDelPlan} style={css("align-self: center; height: 40px; padding: 0 16px; font-size: 14px; color: rgba(255,163,163,.85)")}>Excluir este plano</button>
+                )}
                 {R.pl?.allDone ? (
                   <>
                     <div className="glass cardin" style={css("border-radius: 26px; padding: 22px 20px; position: relative; overflow: hidden; border-color: rgba(243,217,139,.4); text-align: center")}>

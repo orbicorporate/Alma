@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { load, onData } from '../store.js';
+import { load, save, onData } from '../store.js';
 import { MO } from '../dates.js';
 import './constelacao.css';
 import { makeGalaxy, drawGalaxy, makeComet, drawComet } from '../components/cosmosFx.js';
@@ -91,6 +91,8 @@ export default function Constelacao() {
   const items = useMemo(() => buildItems(data), [data]);
   const L = useMemo(() => layout(items), [items]);
   const [sel, setSel] = useState(null);
+  const [confirm, setConfirm] = useState(false);
+  useEffect(() => setConfirm(false), [sel]);
   const [cut, setCut] = useState(1000);
   const cv = useRef(null);
   const st = useRef({ cam: { x: 0, y: 0, z: 0.4 }, target: null, light: { x: 195, y: 360 }, pointers: new Map(), moved: 0, t0: performance.now() });
@@ -383,6 +385,19 @@ export default function Constelacao() {
   const onWheel = (e) => { const S = st.current; S.target = null; S.cam.z = Math.max(0.25, Math.min(3, S.cam.z * (e.deltaY > 0 ? 0.9 : 1.1))); };
   const focusTheme = (k) => { const c = L.centers[k]; st.current.target = { x: c.x, y: c.y, z: 1.2 }; setSel(null); };
 
+  // Excluir do céu: remove da fonte certa (pergunta, estrela, plano, diário, post-it ou tarô)
+  const removeSel = () => {
+    const d = load(); const it = sel;
+    const qi = (id) => +id.match(/^q(\d+)/)[1];
+    if (it.kind === 'pergunta') d.entries = (d.entries || []).filter((_, i) => i !== qi(it.id));
+    else if (it.kind === 'estrela') { const [, a, b] = it.id.match(/^q(\d+)s(\d+)$/); d.entries = d.entries.map((e, i) => (i === +a ? Object.assign({}, e, { stars: (e.stars || []).filter((_, k) => k !== +b) }) : e)); }
+    else if (it.kind === 'plano') d.entries = d.entries.map((e, i) => { if (i !== qi(it.id)) return e; const n = Object.assign({}, e); delete n.plan; delete n.planName; return n; });
+    else if (it.kind === 'postit') d.postits = (d.postits || []).filter((p) => 'p' + p.id !== it.id);
+    else if (it.kind === 'taro') d.readings = (d.readings || []).filter((_, i) => 't' + i !== it.id);
+    else d.journal = (d.journal || []).filter((j) => 'j' + j.id !== it.id && 'j' + j.linkOf !== it.id);
+    save({ entries: d.entries, journal: d.journal, postits: d.postits, readings: d.readings });
+    setData(Object.assign({}, d)); setSel(null); setConfirm(false);
+  };
   const parentOf = sel && sel.parent ? items.find((i) => i.id === sel.parent) : null;
   const counts = { pergunta: 0, diario: 0, estrela: 0 };
   items.forEach((i) => { if (i.kind === 'pergunta') counts.pergunta++; else if (i.kind === 'estrela') counts.estrela++; else if (!['plano', 'taro'].includes(i.kind)) counts.diario++; });
@@ -427,6 +442,15 @@ export default function Constelacao() {
           <span className="cz-card-title">{sel.title}</span>
           {sel.text ? <p className="cz-card-text">{sel.text}</p> : null}
           {parentOf ? <span className="cz-parent">Da pergunta: “{parentOf.title}”</span> : null}
+          {confirm ? (
+            <div className="cz-del-box">
+              <span>{sel.kind === 'pergunta' ? 'Excluir esta pergunta, as respostas estreladas e o plano?' : sel.kind === 'plano' ? 'Excluir este plano? A pergunta continua no céu.' : 'Excluir este item do seu céu?'} Não dá para desfazer.</span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="cz-btn cz-btn-del" onClick={removeSel}>Excluir</button>
+                <button className="cz-btn" onClick={() => setConfirm(false)}>Cancelar</button>
+              </div>
+            </div>
+          ) : <button className="cz-del" onClick={() => setConfirm(true)}>Excluir do céu</button>}
           {sel.kind === 'pergunta' && sel.stars.length ? <span className="cz-parent">{sel.stars.length} {sel.stars.length === 1 ? 'resposta estrelada' : 'respostas estreladas'} orbitando esta estrela</span> : null}
         </div>
       ) : null}
