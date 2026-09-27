@@ -54,6 +54,7 @@ let pending = {};
 export function save(patch) {
   const next = Object.assign(readLocal(), patch);
   writeLocal(next);
+  try { window.dispatchEvent(new CustomEvent('alma:saved', { detail: patch })); } catch (e) { /* ambiente sem janela */ }
   if (!supabase || !session) return;
   Object.assign(pending, patch);
   clearTimeout(timer);

@@ -38,10 +38,14 @@ export default function Diario() {
   const [postits, setPostits] = useState(data0.postits || []);
   const [entries, setEntries] = useState(data0.entries || []);
   const [profile, setProfile] = useState(data0.profile || null);
-  const [view, setView] = useState('mes');
+  const [view, setView] = useState('dia');
   const [sel, setSel] = useState(iso(today()));
   const [month, setMonth] = useState(() => { const t = today(); return { y: t.getFullYear(), m: t.getMonth() }; });
   const [editor, setEditor] = useState(null);
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'diario', hide: !!editor } }));
+  }, [editor]);
+  useEffect(() => () => window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'diario', hide: false } })), []);
   const [toast, setToast] = useState('');
   const first = useRef(true);
 
@@ -119,10 +123,17 @@ export default function Diario() {
     const favs = [adv.agir && ['Agir', '#8fe3b0'], adv.decidir && ['Decidir', '#c9a8ff'], adv.descansar && ['Descansar', '#a8d8ff']].filter(Boolean);
     return (
       <div className="dz-day-panel">
+        {compact ? null : (
+          <div className="dz-daynav">
+            <button className="dz-ic" aria-label="Dia anterior" onClick={() => { const d = fromIso(sel); d.setDate(d.getDate() - 1); setSel(iso(d)); setMonth({ y: d.getFullYear(), m: d.getMonth() }); }}>‹</button>
+            <span className="dz-daynav-t">{sel === iso(today()) ? 'Hoje' : `${WD_FULL[selDate.getDay()]}`}<small>{selDate.getDate()} de {MO_FULL[selDate.getMonth()]}</small></span>
+            <button className="dz-ic" aria-label="Próximo dia" onClick={() => { const d = fromIso(sel); d.setDate(d.getDate() + 1); setSel(iso(d)); setMonth({ y: d.getFullYear(), m: d.getMonth() }); }}>›</button>
+          </div>
+        )}
         <div className="glass dz-moon-card">
           <div className="dz-moon-big"><Moon f={adv.phase.frac} size={64} /><div className="dz-moon-glow" /></div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-            <span className="kicker" style={{ fontSize: 11.5 }}>{WD_FULL[selDate.getDay()]}, {selDate.getDate()} de {MO_FULL[selDate.getMonth()]}</span>
+            <span className="kicker" style={{ fontSize: 11.5 }}>{compact ? `${WD_FULL[selDate.getDay()]}, ${selDate.getDate()} de ${MO_FULL[selDate.getMonth()]}` : 'Lua do dia'}</span>
             <span className="dz-phase">{adv.phase.name} · {adv.phase.lit}% iluminada</span>
             <span className="dz-phase-text">{adv.phase.text}</span>
           </div>
@@ -285,13 +296,15 @@ export default function Diario() {
     if (need.length) setJournal(journal.concat(need.map((j) => ({ id: uid(), linkOf: j.id, type: 'decisao', iso: j.decideBy, title: `Dia de decidir: ${j.title || 'sua decisão'}`, text: '', at: Date.now() }))));
   }, [journal]);
 
-  const TABS = [['mes', 'Mês'], ['dia', 'Dia'], ['ano', 'Ano'], ['quadro', 'Post-its']];
+  const TABS = [['dia', 'Dia'], ['mes', 'Mês'], ['ano', 'Ano'], ['quadro', 'Post-its']];
   return (
     <div className="dz">
       <div className="dz-aurora" />
       <div className="dz-top">
-        <button className="dz-ic" aria-label="Voltar para a Alma" onClick={() => { window.location.hash = '#/'; }}>‹</button>
-        <span className="dz-title">Meu diário</span>
+        <span className="dz-headtxt">
+          <span className="dz-title">Meu diário</span>
+          <span className="dz-purpose">Registre seu dia e veja a Lua e os melhores momentos para agir.</span>
+        </span>
         <button className="dz-ic dz-todaybtn" onClick={() => { const t = today(); setSel(iso(t)); setMonth({ y: t.getFullYear(), m: t.getMonth() }); }}>Hoje</button>
       </div>
       <div className="dz-tabs">

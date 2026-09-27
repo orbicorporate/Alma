@@ -112,9 +112,23 @@ class Component extends DCLogic {
       spread: 3, tq: '', prog: 0, holding: false, tick: 0, deck: [], cut: -1, picked: [], flipped: 0
     };
   }
-  componentDidMount() { this.offData = onData((d) => { if (d.profile) this.setState({ profile: d.profile, profileSaved: true }); }); }
-  componentDidUpdate(pp, ps) { if (this.state.profileSaved && ps.profile !== this.state.profile) save({ profile: this.state.profile }); }
-  componentWillUnmount() { this.offData && this.offData(); clearInterval(this.hi); clearTimeout(this.tc); clearTimeout(this.tcut); }
+  componentDidMount() {
+    this.offData = onData((d) => { if (d.profile) this.setState({ profile: d.profile, profileSaved: true }); });
+    this.onGo = (e) => {
+      const k = e.detail;
+      if (k === 'hub') this.setState({ screen: 'hub', hist: [] });
+      else if (k === 'tarot') this.setState({ screen: 'tSpread', hist: ['hub'] });
+      else if (k === 'horo') this.setState(this.state.profileSaved ? { screen: 'horo', hist: ['hub'], period: 0 } : { screen: 'profile', hist: ['hub'], perr: '' });
+    };
+    window.addEventListener('sym:go', this.onGo);
+    this.emitChrome();
+  }
+  emitChrome() {
+    const hide = ['calc', 'tQuestion', 'tShuffle', 'tCut', 'tFan'].includes(this.state.screen);
+    window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'sym', screen: this.state.screen, hide } }));
+  }
+  componentDidUpdate(pp, ps) { if (this.state.profileSaved && ps.profile !== this.state.profile) save({ profile: this.state.profile }); if (ps.screen !== this.state.screen) this.emitChrome(); }
+  componentWillUnmount() { window.removeEventListener('sym:go', this.onGo); this.offData && this.offData(); clearInterval(this.hi); clearTimeout(this.tc); clearTimeout(this.tcut); }
 
   /* ---------- astronomy ---------- */
   norm(x) { return ((x % 360) + 360) % 360; }
@@ -552,11 +566,11 @@ class Component extends DCLogic {
         this.setState({ screen: prev, hist: h, holding: false });
       },
       goProfile: () => this.setState(this.state.profileSaved ? { screen: 'profile', hist: ['hub'], dName: p.name, dDate: p.date, dTime: p.time, dCity: p.city, perr: '' } : { screen: 'profile', hist: ['hub'], perr: '' }),
-      goMap: () => this.setState({ screen: 'map', hist: ['hub'] }),
-      goHoro: () => this.setState({ screen: 'horo', hist: ['hub'] }),
+      goMap: () => this.setState(this.state.profileSaved ? { screen: 'map', hist: ['hub'] } : { screen: 'profile', hist: ['hub'], perr: '' }),
+      goHoro: () => this.setState(this.state.profileSaved ? { screen: 'horo', hist: ['hub'] } : { screen: 'profile', hist: ['hub'], perr: '' }),
       mapToHoro: () => this.setState({ screen: 'horo', hist: ['hub', 'map'], period: 0 }),
       mapToNum: () => this.setState({ screen: 'num', hist: ['hub', 'map'] }),
-      goNum: () => this.setState({ screen: 'num', hist: ['hub'] }),
+      goNum: () => this.setState(this.state.profileSaved ? { screen: 'num', hist: ['hub'] } : { screen: 'profile', hist: ['hub'], perr: '' }),
       goTarot: () => this.setState({ screen: 'tSpread', hist: ['hub'] }),
       toggleTech: () => this.setState({ showTech: !this.state.showTech }),
       pick1: () => this.setState({ spread: 1, screen: 'tQuestion', hist: ['hub', 'tSpread'], tq: '' }),
@@ -622,14 +636,7 @@ Component.prototype.render = function render() {
         <div style={css("position: absolute; top: 0; left: 0; right: 0; height: 104px; z-index: 3; pointer-events: none; background: linear-gradient(180deg, #0a0918 55%, rgba(10,9,24,0))")}></div>
         <div style={css("position: absolute; top: 36px; left: 12px; right: 12px; height: 44px; z-index: 5; display: flex; align-items: center; gap: 4px")}>
           {R.isHub ? (
-            <>
-              <a href="Main.dc.html" aria-label="Voltar para a Alma" style={css("height: 44px; padding: 0 10px 0 4px; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 300; letter-spacing: .3em; color: rgba(244,241,234,.85)")}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M15 5l-7 7 7 7" />
-                </svg>
-                {"alma"}
-              </a>
-            </>
+            <span style={css("padding-left: 10px; font-size: 16px; font-weight: 300; letter-spacing: .38em; color: rgba(244,241,234,.85)")}>{"alma"}</span>
           ) : null}
           {R.notHub ? (
             <>
@@ -659,6 +666,15 @@ Component.prototype.render = function render() {
                     {"Astrologia, numerologia e tarô como espelhos para se conhecer. Leituras são convites à reflexão, não sentenças sobre o futuro."}
                   </p>
                 </div>
+                {!this.state.profileSaved ? (
+                <button className="glass pill" onClick={R.goProfile} style={css("width: 100%; border-radius: 24px; padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 10px; border-color: rgba(243,217,139,.45)")}>
+                  <span style={css("font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>Comece por aqui</span>
+                  <span style={css("font-size: 18px; font-weight: 300; line-height: 1.35")}>Crie seu perfil de nascimento</span>
+                  <span style={css("font-size: 13.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.7)")}>Com data, hora e cidade, a Alma calcula seu mapa, seu horóscopo e seus números. Leva menos de um minuto.</span>
+                  <span style={css("align-self: flex-start; margin-top: 4px; height: 40px; padding: 0 18px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 14px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #ffc79a)")}>Criar meu perfil</span>
+                </button>
+              ) : null}
+              {this.state.profileSaved ? (
                 <button className="glass pill" onClick={R.goProfile} style={css("width: 100%; border-radius: 24px; padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 14px")}>
                   <span style={css("width: 100%; display: flex; align-items: center; justify-content: space-between")}>
                     <span className="kicker">
@@ -694,6 +710,7 @@ Component.prototype.render = function render() {
                     ))}
                   </span>
                 </button>
+              ) : null}
                 <div style={css("display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px")}>
                   <button className="glass pill" onClick={R.goTarot} style={css("grid-column: span 2; border-radius: 24px; padding: 20px; text-align: left; display: flex; align-items: center; gap: 16px; border-color: rgba(243,217,139,.4)")}>
                     <span style={css("position: relative; width: 58px; height: 80px; flex-shrink: 0")}>
@@ -738,14 +755,14 @@ Component.prototype.render = function render() {
                   </button>
                   <button className="glass pill" onClick={R.goNum} style={css("grid-column: span 2; border-radius: 24px; padding: 18px; text-align: left; display: flex; align-items: center; gap: 16px")}>
                     <span style={css("width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 200; color: #f3d98b; border: 1px solid rgba(243,217,139,.5); box-shadow: 0 0 24px rgba(243,217,139,.2)")}>
-                      {R.num?.path?.n}
+                      {this.state.profileSaved ? R.num?.path?.n : '#'}
                     </span>
                     <span style={css("display: flex; flex-direction: column; gap: 4px")}>
                       <span style={css("font-size: 16px; font-weight: 400")}>
                         {"Numerologia completa"}
                       </span>
                       <span style={css("font-size: 13.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
-                        {`Caminho de vida ${(R.num?.path?.n) ?? ''}, expressão, alma, ciclos e seu ano pessoal`}
+                        {this.state.profileSaved ? `Caminho de vida ${(R.num?.path?.n) ?? ''}, expressão, alma, ciclos e seu ano pessoal` : 'Caminho de vida, expressão, alma, ciclos e seu ano pessoal'}
                       </span>
                     </span>
                   </button>

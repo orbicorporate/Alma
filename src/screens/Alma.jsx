@@ -2,6 +2,7 @@
 import React from 'react';
 import { DCLogic, css } from '../dc/runtime.js';
 import { today, addDays, iso, dayMonth, stepInfo } from '../dates.js';
+import { PH } from '../phrases.js';
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
 
 class Component extends DCLogic {
@@ -65,16 +66,7 @@ class Component extends DCLogic {
         tr: 'Não é possível entrar duas vezes no mesmo rio.',
         reflection: 'Heráclito lembra que tudo flui, inclusive você. A cidade de hoje já não é a de antes, e a que você imagina também vai mudar. Escolha pensando na pessoa que você está se tornando.' }
     ];
-    this.PH = [
-      { lines: ['Muitos caminhos,', 'uma mesma montanha.'], mid: 'Cada tradição vê um lado dela.', gold: 'Suba com o coração aberto.' },
-      { lines: ['Religiões e filosofias', 'não devem dividir,', 'e sim aconselhar.'], mid: 'Tudo importa.', gold: 'Flua com sabedoria e leve a luz.' },
-      { lines: ['Nenhuma voz', 'guarda a luz inteira.'], mid: 'Juntas, iluminam mais.', gold: 'Escute todas, escolha com amor.' },
-      { lines: ['A verdade não cabe', 'em uma única história.'], mid: 'Ela cabe na escuta.', gold: 'Abra espaço para o outro.' },
-      { lines: ['O que nos une', 'é mais antigo', 'do que o que nos separa.'], mid: 'A compaixão fala muitas línguas.', gold: 'Aprenda todas com o coração.' },
-      { lines: ['Rios diferentes,', 'o mesmo mar.'], mid: 'Toda sabedoria deságua no amor.', gold: 'Deixe a sua fluir.' },
-      { lines: ['Aprender com a fé', 'do outro não é trair', 'a sua.'], mid: 'É fazer ela crescer.', gold: 'Cresça sem muros.' },
-      { lines: ['A luz não pertence', 'a uma só janela.'], mid: 'Ela entra por todas.', gold: 'Abra as suas.' }
-    ];
+    this.PH = PH;
     this.QS = {
       'Pensamento': [
         { q: 'Esse pensamento é mais…', tags: ['Uma ideia', 'Uma lembrança', 'Uma pergunta sobre a vida', 'Um incômodo'] },
@@ -122,9 +114,15 @@ class Component extends DCLogic {
     window.addEventListener('alma:show', this.checkHandoff);
     this.offAuth = onAuth((auth) => {
       const entering = auth.loggedIn && this.state.screen === 'welcome';
-      this.setState(entering ? { auth, screen: 'breath', count: 0, inhale: true } : { auth });
+      this.setState(entering ? { auth, screen: 'ask' } : { auth });
+      if (entering) window.location.hash = '#/inicio';
     });
     this.offData = onData((d) => this.setState({ entries: d.entries || [] }));
+    this.onGo = (e) => this.setState(Object.assign({ sheet: -1 }, e.detail || {}));
+    this.onSaved = (e) => { const p = e.detail || {}; if (p.entries && p.entries !== this.state.entries) this.setState({ entries: p.entries }); };
+    window.addEventListener('alma:go', this.onGo);
+    window.addEventListener('alma:saved', this.onSaved);
+    this.emitChrome();
     this.k = setTimeout(() => this.setState({ inhale: true }), 80);
     this.b = setInterval(() => {
       const s = this.state;
@@ -133,7 +131,7 @@ class Component extends DCLogic {
     }, 4000);
   }
   componentWillUnmount() {
-    window.removeEventListener('alma:show', this.checkHandoff); this.offAuth && this.offAuth(); this.offData && this.offData();
+    window.removeEventListener('alma:show', this.checkHandoff); window.removeEventListener('alma:go', this.onGo); window.removeEventListener('alma:saved', this.onSaved); this.offAuth && this.offAuth(); this.offData && this.offData();
     clearTimeout(this.k); clearInterval(this.b); clearTimeout(this.t1); clearInterval(this.ci); clearTimeout(this.ts); clearTimeout(this.tq);
   }
   flash(msg) {
@@ -548,7 +546,7 @@ class Component extends DCLogic {
         let skipped = false;
         try { skipped = localStorage.getItem('alma:skipLogin') === '1'; } catch (e) { /* sem armazenamento */ }
         if (a.enabled && !a.loggedIn && !skipped) this.setState({ screen: 'welcome', loginMsg: '' });
-        else this.setState({ screen: 'breath', count: 0, inhale: true });
+        else { this.setState({ screen: 'ask' }); window.location.hash = '#/inicio'; }
       },
       rays, councilAgents, councilStatus, councilSub, statusColor, councilReady: s.lit >= N,
       cards, filters, noCards: cards.length === 0,
@@ -628,7 +626,7 @@ class Component extends DCLogic {
       isBreath: scr === 'breath', isAsk: scr === 'ask', isRelease: scr === 'releasing', isDeepen: scr === 'deepen',
       isCouncil: scr === 'council', isAnswers: scr === 'answers', isJournal: scr === 'journal',
       compactHeader: scr === 'answers' || scr === 'journal' || scr === 'plan',
-      showBack: scr === 'journal' || scr === 'plan', showWord: scr !== 'journal' && scr !== 'plan', showJournal: scr === 'ask' || scr === 'answers',
+      showBack: scr === 'plan', showWord: scr !== 'plan', showJournal: scr === 'ask' || scr === 'answers',
       breathWord: s.inhale ? 'Inspire' : 'Solte',
       breathWordStyle: s.inhale ? 'letter-spacing: .14em; color: #f4f1ea' : 'letter-spacing: .02em; color: rgba(244,241,234,.8)',
       breathSub: s.medit ? 'Com o que depende de você, inspire. Com o que não depende, solte. Fique o tempo que precisar.' : 'Três respirações antes de perguntar. A Alma escuta melhor no silêncio.',
@@ -675,6 +673,12 @@ class Component extends DCLogic {
 Object.assign(Component.prototype, {
   componentDidUpdate(pp, ps) {
     if (ps.entries !== this.state.entries) save({ entries: this.state.entries });
+    if (ps.screen !== this.state.screen || ps.sheet !== this.state.sheet) this.emitChrome();
+  },
+  // Avisa o app em que tela a Alma está, para mostrar ou esconder a barra de navegação.
+  emitChrome() {
+    const ritual = ['intro', 'welcome', 'breath', 'releasing', 'deepen', 'council'].includes(this.state.screen);
+    window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'alma', screen: this.state.screen, hide: ritual || this.state.sheet >= 0 } }));
   },
   checkHandoff() {
     try {
@@ -695,7 +699,7 @@ Object.assign(Component.prototype, {
     this.setState({ loginMsg: r.error ? r.error : 'Pronto. Abra o link que enviamos para ' + email + ' neste aparelho.' });
   },
   renderWelcome() {
-    const skip = () => { try { localStorage.setItem('alma:skipLogin', '1'); } catch (e) { /* sem armazenamento */ } this.setState({ screen: 'breath', count: 0, inhale: true }); };
+    const skip = () => { try { localStorage.setItem('alma:skipLogin', '1'); } catch (e) { /* sem armazenamento */ } this.setState({ screen: 'ask' }); window.location.hash = '#/inicio'; };
     const G = (
       <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.3 0-11.6-4.2-13.5-10l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>
     );
@@ -809,36 +813,7 @@ Component.prototype.render = function render() {
               </span>
             </>
           ) : null}
-          {R.showJournal ? (
-            <>
-              <span style={css("display: flex; align-items: center; gap: 2px; pointer-events: auto")}>
-                <a href="#/diario" aria-label="Meu diário" style={css("width: 44px; height: 44px; display: flex; align-items: center; justify-content: center")}>
-                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#a8d8ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
-                    <path d="M3.5 10h17M8 3v4M16 3v4" />
-                    <circle cx="15.5" cy="15" r="2.2" fill="#f4efe0" stroke="none" />
-                  </svg>
-                </a>
-                <a href="Simbolos.dc.html" aria-label="Céu e Símbolos" style={css("width: 44px; height: 44px; display: flex; align-items: center; justify-content: center")}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9b8ff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />
-                    <path d="M17 3.5l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z" fill="#f3d98b" stroke="#f3d98b" />
-                  </svg>
-                </a>
-                <button onClick={R.openJournal} aria-label="Minha constelação" style={css("pointer-events: auto; height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 8px; border-radius: 999px; font-size: 14px; color: rgba(244,241,234,.85)")}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f3d98b" strokeWidth="1.3" strokeLinecap="round" aria-hidden="true">
-                    <path d="M5 17L11 7L19 12" opacity=".55" />
-                    <circle cx="5" cy="17" r="1.8" fill="#f3d98b" />
-                    <circle cx="11" cy="7" r="1.8" fill="#f3d98b" />
-                    <circle cx="19" cy="12" r="1.8" fill="#f3d98b" />
-                  </svg>
-                  <span>
-                    {R.entryCount}
-                  </span>
-                </button>
-              </span>
-            </>
-          ) : null}
+
         </div>
         {R.isIntro ? (
           <>

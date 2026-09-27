@@ -20,7 +20,7 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .sc-sym .screen, .sc-main .screen { overflow-x: hidden; }
 
 /* As telas ocupam a altura real do aparelho */
-.app-frame .sc-main > .alma, .app-frame .sc-sym > div:first-child, .app-frame .dz, .app-frame .cz { height: var(--fh, 844px) !important; }
+.app-frame .sc-main > .alma, .app-frame .sc-sym > div:first-child, .app-frame .dz, .app-frame .cz, .app-frame .hm { height: var(--fh, 844px) !important; }
 .app-frame > div { height: 100%; }
 
 /* Celular: a coluna do app fica centralizada e o fundo, as auroras e as partículas se estendem até as bordas */
@@ -30,3 +30,12 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .app-fill .sc-main, .app-fill .sc-sym { height: 100%; }
 .app-fill .dz-aurora { inset: 0 -220px; }
 .app-fill .cz-canvas { box-shadow: 0 0 0 400px #05040c; }
+
+/* Com a barra de navegação visível, o conteúdo rolável termina acima dela */
+.tabs-on .sc-main .scroll > div, .tabs-on .sc-sym .scroll > div { padding-bottom: 128px !important; }
+.tabs-on .dz-body { padding-bottom: 128px !important; }
+.tabs-on .sc-main .toast { bottom: 112px !important; }
+.tabs-on .dz-toast { bottom: 108px !important; }
+.tabs-on .cz-time { bottom: 104px !important; }
+.tabs-on .cz-card { bottom: 176px !important; max-height: 320px !important; }
+.app-frame .route { position: relative; }
