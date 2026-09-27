@@ -1,4 +1,4 @@
-.skh { position: relative; margin: 0 -20px; height: 408px; cursor: pointer; }
+.skh { position: relative; margin: 0 -14px; height: 408px; cursor: pointer; }
 .skh-neb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; mix-blend-mode: screen; }
 .skh-neb-a { width: 300px; height: 260px; left: -20px; top: 10px; background: conic-gradient(from 0deg, #7a5cff, #f5a8c8, #a8d8ff, #7a5cff); opacity: .42; animation: skhNeb 14s ease-in-out infinite alternate, skhHue 18s linear infinite; }
 .skh-neb-b { width: 240px; height: 220px; right: -30px; top: 110px; background: radial-gradient(circle, #ffb38a, #b9a6ff 60%, transparent); opacity: .3; animation: skhNeb 17s ease-in-out infinite alternate-reverse, skhHue 24s linear infinite reverse; }
@@ -20,16 +20,16 @@
 .skh-dotmark { position: absolute; width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; border-radius: 50%; background: rgba(255,255,255,.5); }
 .skh-pl { position: absolute; width: 0; height: 0; }
 .skh-pl i { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--c) 60%); box-shadow: 0 0 12px var(--c); animation: skhTw 3s ease-in-out infinite; }
-.skh-pl b { position: absolute; left: 9px; top: -20px; font-weight: 400; font-size: 13.5px; color: var(--c); font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; }
+.skh-pl b { position: absolute; left: 9px; top: -20px; font-weight: 400; font-size: 14.5px; color: var(--c); font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; }
 @keyframes skhTw { 50% { box-shadow: 0 0 20px var(--c); } }
 .skh-sun { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fffbe8, #f3d98b 45%, #ffb38a); box-shadow: 0 0 22px #f3d98b, 0 0 50px rgba(255,179,138,.6); }
 .skh-sun::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; border: 1px dashed rgba(243,217,139,.55); animation: skhSpin 12s linear infinite; }
 .skh-moon { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; filter: drop-shadow(0 0 10px rgba(247,241,224,.7)); }
 .skh-core { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) translateZ(40px); display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; pointer-events: none; }
-.skh-k { font-size: 12.5px; letter-spacing: .24em; text-transform: uppercase; color: rgba(244,241,234,.6); }
+.skh-k { font-size: 13.5px; letter-spacing: .24em; text-transform: uppercase; color: rgba(244,241,234,.6); }
 .skh-t { font-size: 27px; line-height: 1.1; font-weight: 200; background: linear-gradient(90deg, #fff, #e4d6ff, #fff4d1, #fff); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 6s linear infinite; }
 .skh-now { position: absolute; left: 20px; right: 20px; bottom: 16px; display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
-.skh-now span { height: 34px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); animation: skhIn 1s .8s ease both; }
+.skh-now span { height: 34px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; font-size: 16px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); animation: skhIn 1s .8s ease both; }
 .skh-now i { width: 7px; height: 7px; border-radius: 50%; }
 .skh-shoot { position: absolute; top: 40px; left: 60%; width: 110px; height: 1.5px; border-radius: 2px; background: linear-gradient(90deg, rgba(255,255,255,.95), transparent); transform: rotate(-24deg); opacity: 0; pointer-events: none; animation: skhShoot 9s ease-in 2s infinite; }
 .skh-shoot-2 { top: 150px; left: 15%; animation-delay: 6.5s; animation-duration: 13s; }

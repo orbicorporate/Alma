@@ -68,3 +68,10 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 /* Preferência: animações mais calmas */
 .calm-motion .stf i, .calm-motion .stf-shoot, .calm-motion *::before { animation-duration: 40s !important; }
 .calm-motion .stf-shoot, .calm-motion .skh-shoot { display: none; }
+
+/* Caixas mais largas: telas flexíveis usam a largura toda do aparelho (até 440) e margens menores */
+.app-fill .hm, .app-fill .dz, .app-fill .bh, .app-fill .aj { width: min(100%, 440px) !important; }
+.app-fill .hm-scroll, .app-fill .bh-scroll, .app-fill .aj-scroll { padding-left: 14px !important; padding-right: 14px !important; }
+.app-fill .dz-body { padding-left: 14px !important; padding-right: 14px !important; }
+.app-fill .dz-top { left: 14px !important; }
+.app-fill .dz-tabs { left: 14px !important; right: 14px !important; }
