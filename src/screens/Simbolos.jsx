@@ -4,6 +4,7 @@ import { DCLogic, css } from '../dc/runtime.js';
 import { load, save, onData } from '../store.js';
 import { today, addDays, addMonths, WD_FULL } from '../dates.js';
 import NatalSphere from '../components/NatalSphere.jsx';
+import SkyHero from '../components/SkyHero.jsx';
 
 class Component extends DCLogic {
   constructor(props) {
@@ -654,18 +655,11 @@ Component.prototype.render = function render() {
         {R.isHub ? (
           <>
             <div className="screen scroll">
-              <div style={css("box-sizing: border-box; padding: 100px 20px 40px; display: flex; flex-direction: column; gap: 16px")}>
-                <div>
-                  <div className="kicker">
-                    {"Tradições simbólicas"}
-                  </div>
-                  <h1 style={css("margin: 8px 0 0; font-size: 32px; line-height: 1.15; font-weight: 200")}>
-                    {"Céu e Símbolos"}
-                  </h1>
-                  <p style={css("margin: 10px 0 0; font-size: 14px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
-                    {"Astrologia, numerologia e tarô como espelhos para se conhecer. Leituras são convites à reflexão, não sentenças sobre o futuro."}
-                  </p>
-                </div>
+              <div style={css("box-sizing: border-box; padding: 64px 20px 40px; display: flex; flex-direction: column; gap: 16px")}>
+                <SkyHero onOpen={R.goHoro} />
+                <p style={css("margin: -4px 0 4px; text-align: center; font-size: 14px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
+                  {"Astrologia, numerologia e tarô como espelhos para se conhecer. Convites à reflexão, não sentenças sobre o futuro."}
+                </p>
                 {!this.state.profileSaved ? (
                 <button className="glass pill" onClick={R.goProfile} style={css("width: 100%; border-radius: 24px; padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 10px; border-color: rgba(243,217,139,.45)")}>
                   <span style={css("font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>Comece por aqui</span>
@@ -712,8 +706,8 @@ Component.prototype.render = function render() {
                 </button>
               ) : null}
                 <div style={css("display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px")}>
-                  <button className="glass pill" onClick={R.goTarot} style={css("grid-column: span 2; border-radius: 24px; padding: 20px; text-align: left; display: flex; align-items: center; gap: 16px; border-color: rgba(243,217,139,.4)")}>
-                    <span style={css("position: relative; width: 58px; height: 80px; flex-shrink: 0")}>
+                  <button className="glass pill sky-tile" onClick={R.goTarot} style={css("grid-column: span 2; border-radius: 24px; padding: 20px; text-align: left; display: flex; align-items: center; gap: 16px; border-color: rgba(243,217,139,.4)")}>
+                    <span className="sky-float" style={css("position: relative; width: 58px; height: 80px; flex-shrink: 0")}>
                       <span className="cardback" style={css("position: absolute; left: 0; top: 4px; width: 46px; height: 72px; border-radius: 8px; transform: rotate(-10deg)")}></span>
                       <span className="cardback" style={css("position: absolute; left: 12px; top: 0; width: 46px; height: 72px; border-radius: 8px; transform: rotate(8deg)")}></span>
                     </span>
@@ -729,8 +723,8 @@ Component.prototype.render = function render() {
                       </span>
                     </span>
                   </button>
-                  <button className="glass pill" onClick={R.goHoro} style={css("border-radius: 24px; padding: 18px 16px; text-align: left; display: flex; flex-direction: column; gap: 10px; min-height: 150px")}>
-                    <span className="sym" style={css("font-size: 26px; line-height: 1; color: #b9a6ff")}>
+                  <button className="glass pill sky-tile" onClick={R.goHoro} style={css("border-radius: 24px; padding: 18px 16px; text-align: left; display: flex; flex-direction: column; gap: 10px; min-height: 150px")}>
+                    <span className="sym sky-spin" style={css("display: inline-block; width: 26px; font-size: 26px; line-height: 1; color: #b9a6ff; text-shadow: 0 0 14px #b9a6ff")}>
                       {"☉︎"}
                     </span>
                     <span style={css("font-size: 16px; font-weight: 400")}>
@@ -740,8 +734,8 @@ Component.prototype.render = function render() {
                       {"Do dia a um ano, pelo seu mapa completo"}
                     </span>
                   </button>
-                  <button className="glass pill" onClick={R.goMap} style={css("border-radius: 24px; padding: 18px 16px; text-align: left; display: flex; flex-direction: column; gap: 10px; min-height: 150px")}>
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a8d8ff" strokeWidth="1.3" aria-hidden="true">
+                  <button className="glass pill sky-tile" onClick={R.goMap} style={css("border-radius: 24px; padding: 18px 16px; text-align: left; display: flex; flex-direction: column; gap: 10px; min-height: 150px")}>
+                    <svg className="sky-spin" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a8d8ff" strokeWidth="1.3" aria-hidden="true" style={{ filter: "drop-shadow(0 0 6px #a8d8ff)" }}>
                       <circle cx="12" cy="12" r="10" />
                       <circle cx="12" cy="12" r="5" />
                       <path d="M2 12h20M12 2v20M4.9 4.9l14.2 14.2M19.1 4.9L4.9 19.1" opacity=".5" />
@@ -753,8 +747,8 @@ Component.prototype.render = function render() {
                       {"Planetas, signos e casas do seu nascimento"}
                     </span>
                   </button>
-                  <button className="glass pill" onClick={R.goNum} style={css("grid-column: span 2; border-radius: 24px; padding: 18px; text-align: left; display: flex; align-items: center; gap: 16px")}>
-                    <span style={css("width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 200; color: #f3d98b; border: 1px solid rgba(243,217,139,.5); box-shadow: 0 0 24px rgba(243,217,139,.2)")}>
+                  <button className="glass pill sky-tile" onClick={R.goNum} style={css("grid-column: span 2; border-radius: 24px; padding: 18px; text-align: left; display: flex; align-items: center; gap: 16px")}>
+                    <span className="sky-pulse" style={css("width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 200; color: #f3d98b; border: 1px solid rgba(243,217,139,.5); box-shadow: 0 0 24px rgba(243,217,139,.2)")}>
                       {this.state.profileSaved ? R.num?.path?.n : '#'}
                     </span>
                     <span style={css("display: flex; flex-direction: column; gap: 4px")}>
@@ -766,8 +760,8 @@ Component.prototype.render = function render() {
                       </span>
                     </span>
                   </button>
-                  <button className="glass pill" onClick={() => { window.location.hash = '#/banhos'; }} style={css("grid-column: span 2; border-radius: 24px; padding: 18px; text-align: left; display: flex; align-items: center; gap: 16px; border-color: rgba(143,227,176,.35)")}>
-                    <span style={css("width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #8fe3b0 40%, rgba(143,227,176,0) 75%); box-shadow: 0 0 24px rgba(143,227,176,.35)")}></span>
+                  <button className="glass pill sky-tile" onClick={() => { window.location.hash = '#/banhos'; }} style={css("grid-column: span 2; border-radius: 24px; padding: 18px; text-align: left; display: flex; align-items: center; gap: 16px; border-color: rgba(143,227,176,.35)")}>
+                    <span className="sky-bubble" style={css("width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #8fe3b0 40%, rgba(143,227,176,0) 75%); box-shadow: 0 0 24px rgba(143,227,176,.35)")}></span>
                     <span style={css("display: flex; flex-direction: column; gap: 4px")}>
                       <span style={css("font-size: 16px; font-weight: 400")}>Banhos da Lua</span>
                       <span style={css("font-size: 13.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>Limpeza, amor, prosperidade, calma. Banhos de ervas que combinam com a Lua de hoje</span>

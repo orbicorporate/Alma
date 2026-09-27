@@ -65,3 +65,4 @@
 .hm-why-i { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.78); }
 .hm-why-k { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.55); font-weight: 400; }
 .hm .hm-why-cta { font-size: 13.5px; color: #f3d98b; min-height: 36px; }
+.hm-from { color: rgba(244,241,234,.55); -webkit-text-fill-color: rgba(244,241,234,.55); font-size: 13px; }

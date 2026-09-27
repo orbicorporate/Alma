@@ -28,7 +28,7 @@ export default function Home() {
   const hour = new Date().getHours();
   const hello = hour < 5 ? 'Boa noite' : hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
   const name = (data.profile && data.profile.name ? data.profile.name.split(' ')[0] : '') || (auth.email ? auth.email.split('@')[0] : '');
-  const ph = phraseOfDay(t);
+  const ph = phraseOfDay(new Date());
   const adv = dayAdvice(t, data.profile);
   const entries = data.entries || [];
 
@@ -141,9 +141,9 @@ export default function Home() {
         </section>
 
         <section className="hm-card hm-phrase">
-          <div className="hm-k">Frase do dia</div>
-          <p className="hm-quote">{ph.lines.join(' ')}</p>
-          <p className="hm-gold">{ph.gold}</p>
+          <div className="hm-k">Sabedoria desta hora</div>
+          <p className="hm-quote">“{ph.lines.join(' ')}”</p>
+          <p className="hm-gold">{ph.by} <span className="hm-from">· {ph.from}</span></p>
         </section>
 
         <div className="hm-k hm-sec">Atalhos</div>

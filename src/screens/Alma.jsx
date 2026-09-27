@@ -2,7 +2,7 @@
 import React from 'react';
 import { DCLogic, css } from '../dc/runtime.js';
 import { today, addDays, iso, dayMonth, stepInfo } from '../dates.js';
-import { PH } from '../phrases.js';
+import { PH, nextPhraseIndex } from '../phrases.js';
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
 
 class Component extends DCLogic {
@@ -100,7 +100,7 @@ class Component extends DCLogic {
       ]
     };
     this.state = {
-      screen: 'intro', pi: 0, planIdx: -1, savedIdx: -1, prev: 'ask', inhale: false, count: 0, medit: false,
+      screen: 'intro', pi: nextPhraseIndex(), pk: 0, planIdx: -1, savedIdx: -1, prev: 'ask', inhale: false, count: 0, medit: false,
       text: '',
       kind: 'Dúvida', step: 0, voicesOpen: false, ans: [null, null, null], other: false, otherText: '', jfilter: 'all', confirmDel: false, lit: 0, focus: -1, open: -1, stars: [], filter: 'all',
       savedNow: false, toast: '', sheet: -1, tx: 0, ty: 0,
@@ -527,20 +527,19 @@ class Component extends DCLogic {
     return {
       vars, auroraA, auroraB, orbStyle, motes, thoughts, chips, dots, relWords,
       bars, dtags, dq: cq.q, qAnim: `animation: ${s.step % 2 ? 'qIn1' : 'qIn2'} .9s cubic-bezier(.2,.7,.2,1) both`, textShort,
-      introIcons, isIntro: s.screen === 'intro', introA: s.pi % 2 === 0, introB: s.pi % 2 === 1,
+      introIcons, isIntro: s.screen === 'intro', introA: s.pk % 2 === 0, introB: s.pk % 2 === 1,
       ph: (() => {
         const f = this.PH[s.pi % this.PH.length];
         const n = f.lines.length, mid = 0.6 + n * 0.9 + 0.3;
         return {
-          kicker: s.pi === 0 ? 'Manifesto Alma' : 'Frase de hoje',
           lines: f.lines.map((t, i) => ({ t, style: `animation-delay: ${(0.6 + i * 0.9).toFixed(1)}s` })),
-          mid: f.mid, gold: f.gold,
+          by: f.by, from: f.from, fs: f.lines.join(' ').length > 52 || f.lines.some((l) => l.length > 27) ? 'font-size: 21px' : 'font-size: 25px',
           midStyle: `animation-delay: ${mid.toFixed(1)}s`,
           goldStyle: `animation-delay: ${(mid + 1.1).toFixed(1)}s`,
           btnStyle: `animation-delay: ${(mid + 2.2).toFixed(1)}s`
         };
       })(),
-      nextPhrase: () => this.setState({ pi: (this.state.pi + 1) % this.PH.length }),
+      nextPhrase: () => this.setState({ pi: nextPhraseIndex(), pk: this.state.pk + 1 }),
       startJourney: () => {
         const a = this.state.auth;
         let skipped = false;
@@ -846,20 +845,22 @@ Component.prototype.render = function render() {
                     <div style={css("display: flex; flex-direction: column; gap: 2px")}>
                       {(R.ph?.lines || []).map((L3_l, I3) => (
                         <React.Fragment key={I3}>
-                          <p className="fade" style={css(`margin: 0; font-size: 25px; font-weight: 300; line-height: 1.28; letter-spacing: -.01em; ${(L3_l?.style) ?? ''}`)}>
+                          <p className="fade" style={css(`margin: 0; ${R.ph?.fs}; font-weight: 300; line-height: 1.28; letter-spacing: -.01em; text-wrap: balance; ${(L3_l?.style) ?? ''}`)}>
                             {L3_l?.t}
                           </p>
                         </React.Fragment>
                       ))}
                     </div>
-                    <p className="fade" style={css(`margin: 20px 0 0; font-size: 16px; font-weight: 200; letter-spacing: .05em; color: rgba(244,241,234,.78); ${(R.ph?.midStyle) ?? ''}`)}>
-                      {R.ph?.mid}
-                    </p>
-                    <div className="fade" style={css(`margin-top: 6px; ${(R.ph?.goldStyle) ?? ''}`)}>
-                      <span className="goldtext" style={css("font-size: 19px; font-weight: 400; letter-spacing: .01em")}>
-                        {R.ph?.gold}
+                    <div className="fade" style={css(`margin-top: 26px; display: flex; align-items: center; gap: 12px; ${(R.ph?.midStyle) ?? ''}`)}>
+                      <span style={css("width: 28px; height: 1px; background: linear-gradient(90deg, transparent, #f3d98b)")}></span>
+                      <span className="goldtext" style={css("font-size: 19px; font-weight: 400; letter-spacing: .02em")}>
+                        {R.ph?.by}
                       </span>
+                      <span style={css("width: 28px; height: 1px; background: linear-gradient(90deg, #f3d98b, transparent)")}></span>
                     </div>
+                    <p className="fade" style={css(`margin: 8px 0 0; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: rgba(244,241,234,.6); ${(R.ph?.goldStyle) ?? ''}`)}>
+                      {R.ph?.from}
+                    </p>
                   </div>
                   <div className="fade" style={css(`position: absolute; top: 706px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; ${(R.ph?.btnStyle) ?? ''}`)}>
                     <button className="glass cta" onClick={R.startJourney} style={css("height: 56px; padding: 0 48px; border-radius: 999px; font-size: 16px; letter-spacing: .06em")}>
@@ -881,20 +882,22 @@ Component.prototype.render = function render() {
                     <div style={css("display: flex; flex-direction: column; gap: 2px")}>
                       {(R.ph?.lines || []).map((L4_l, I4) => (
                         <React.Fragment key={I4}>
-                          <p className="fade" style={css(`margin: 0; font-size: 25px; font-weight: 300; line-height: 1.28; letter-spacing: -.01em; ${(L4_l?.style) ?? ''}`)}>
+                          <p className="fade" style={css(`margin: 0; ${R.ph?.fs}; font-weight: 300; line-height: 1.28; letter-spacing: -.01em; text-wrap: balance; ${(L4_l?.style) ?? ''}`)}>
                             {L4_l?.t}
                           </p>
                         </React.Fragment>
                       ))}
                     </div>
-                    <p className="fade" style={css(`margin: 20px 0 0; font-size: 16px; font-weight: 200; letter-spacing: .05em; color: rgba(244,241,234,.78); ${(R.ph?.midStyle) ?? ''}`)}>
-                      {R.ph?.mid}
-                    </p>
-                    <div className="fade" style={css(`margin-top: 6px; ${(R.ph?.goldStyle) ?? ''}`)}>
-                      <span className="goldtext" style={css("font-size: 19px; font-weight: 400; letter-spacing: .01em")}>
-                        {R.ph?.gold}
+                    <div className="fade" style={css(`margin-top: 26px; display: flex; align-items: center; gap: 12px; ${(R.ph?.midStyle) ?? ''}`)}>
+                      <span style={css("width: 28px; height: 1px; background: linear-gradient(90deg, transparent, #f3d98b)")}></span>
+                      <span className="goldtext" style={css("font-size: 19px; font-weight: 400; letter-spacing: .02em")}>
+                        {R.ph?.by}
                       </span>
+                      <span style={css("width: 28px; height: 1px; background: linear-gradient(90deg, #f3d98b, transparent)")}></span>
                     </div>
+                    <p className="fade" style={css(`margin: 8px 0 0; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: rgba(244,241,234,.6); ${(R.ph?.goldStyle) ?? ''}`)}>
+                      {R.ph?.from}
+                    </p>
                   </div>
                   <div className="fade" style={css(`position: absolute; top: 706px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; ${(R.ph?.btnStyle) ?? ''}`)}>
                     <button className="glass cta" onClick={R.startJourney} style={css("height: 56px; padding: 0 48px; border-radius: 999px; font-size: 16px; letter-spacing: .06em")}>
