@@ -4,6 +4,7 @@ import { DCLogic, css } from '../dc/runtime.js';
 import { today, addDays, iso, fromIso, dayMonth, stepInfo } from '../dates.js';
 import { PH, nextPhraseIndex } from '../phrases.js';
 import MiniCosmos from '../components/MiniCosmos.jsx';
+import { voiceFor } from '../voices.js';
 import { contextQS, contextOf, stepFor, planSteps, planNameOf, moodOf } from '../questions.js';
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
 
@@ -170,7 +171,7 @@ class Component extends DCLogic {
       const about = cx ? ` sobre ${cx.obj}` : '';
       return {
         p1: `Você trouxe uma escolha${about}, não um problema. O que te move é ${move}; o que te pede atenção é ${hold}.`,
-        p2: 'Quase todas as vozes concordam que o que te chama merece ser ouvido. Mas pedem pés no chão: Sêneca lembra que levamos a nós mesmos aonde vamos, e Confúcio pede que você separe o que sabe do que ainda é imaginação. ' +
+        p2: 'Quase todas as vozes concordam que o que te chama merece ser ouvido. Mas pedem pés no chão: Epicteto pede que você separe o que depende de você do que não depende, e Confúcio, o que você sabe do que ainda é imaginação. ' +
           (feel ? `Ao se imaginar nesse caminho, você se sente ${feel}. Um sentimento assim costuma ser bússola, não capricho.` : 'Você ainda não sabe como se sentiria, e tudo bem: é exatamente isso que um teste pequeno responde.'),
         step: stepFor(s.text) + ' Depois faça esta pergunta de novo.'
       };
@@ -284,6 +285,16 @@ class Component extends DCLogic {
         };
       })
     };
+  }
+  // Voz de uma tradição no contexto da pergunta atual (sentimento + assunto).
+  voice(i) {
+    const a = this.AG[i], s = this.state;
+    const cx = contextOf(s.text);
+    const v = voiceFor(a.name, s.kind, cx ? cx.obj : null);
+    if (!v) return a;
+    const SC = { 'Hebraico': ['hebrew', 'rtl'], 'Árabe': ['arabic', 'rtl'], 'Persa': ['arabic', 'rtl'], 'Sânscrito': ['deva', 'ltr'], 'Chinês clássico': ['han', 'ltr'], 'Gurmukhi': ['gurmukhi', 'ltr'] };
+    const sc = SC[v.lang] || ['latin', 'ltr'];
+    return Object.assign({}, a, v, { script: sc[0], dir: sc[1] });
   }
   KP(k) {
     return { 'Pensamento': 'um pensamento', 'Dúvida': 'uma dúvida', 'Aflição': 'uma aflição', 'Medo': 'um medo', 'Alegria': 'uma alegria', 'Sugestão': 'um pedido de sugestão' }[k] || 'algo seu';
@@ -437,7 +448,7 @@ class Component extends DCLogic {
     if (s.filter === 'stars') idx = idx.filter((i) => s.stars.includes(i));
     else if (typeof s.filter === 'number') idx = [s.filter];
     const cards = idx.map((i, pos) => {
-      const a = AG[i];
+      const a = this.voice(i);
       const open = s.open === i;
       const on = s.stars.includes(i);
       const base = Math.min(pos, 5) * 180;
@@ -631,7 +642,7 @@ class Component extends DCLogic {
           list.push({
             date: dayMonth(today()), at: Date.now(), kind: st.kind, q: st.text, tags: st.ans.filter(Boolean), resolved: false, plan: null,
             alma: a.p1 + ' ' + a.p2, step: a.step,
-            stars: st.stars.map((i) => ({ name: this.AG[i].name, ref: this.AG[i].ref, color: this.AG[i].color, tr: this.AG[i].tr }))
+            stars: st.stars.map((i) => { const v = this.voice(i); return { name: v.name, ref: v.ref, color: v.color, tr: v.tr }; })
           });
           idx = list.length - 1;
         }
@@ -716,7 +727,7 @@ class Component extends DCLogic {
         const entry = {
           date: dayMonth(today()), at: Date.now(), kind: st.kind, q: st.text, tags: st.ans.filter(Boolean), resolved: false, plan: null,
           alma: a.p1 + ' ' + a.p2, step: a.step,
-          stars: st.stars.map((i) => ({ name: this.AG[i].name, ref: this.AG[i].ref, color: this.AG[i].color, tr: this.AG[i].tr }))
+          stars: st.stars.map((i) => { const v = this.voice(i); return { name: v.name, ref: v.ref, color: v.color, tr: v.tr }; })
         };
         this.setState({ entries: st.entries.concat([entry]), savedNow: true, savedIdx: st.entries.length });
         this.flash('Uma nova estrela na sua constelação');
