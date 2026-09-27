@@ -38,7 +38,7 @@ export default function App() {
     else if (k === 'minha') { go({ screen: 'journal', prev: 'ask' }); window.location.hash = '#/'; }
     else if (k === 'perguntar') {
       const inFlow = ['answers', 'deepen', 'council', 'releasing', 'breath'].includes(almaScreen);
-      if (route === 'alma' || !inFlow) go({ screen: 'ask', open: -1, lit: 0, stars: [], filter: 'all', savedNow: false, ans: [null, null, null], step: 0, text: '', fromWhere: '', voicesOpen: false });
+      if (route === 'alma' || !inFlow) go({ screen: 'ask', open: -1, lit: 0, stars: [], filter: 'all', savedNow: false, ans: [null, null, null], step: 0, text: '', fromWhere: '', voicesOpen: false, kindPicked: false, kind: 'Dúvida' });
       window.location.hash = '#/';
     }
   };

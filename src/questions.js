@@ -111,6 +111,10 @@ const em = (obj) => obj.replace(/^o /, 'no ').replace(/^a /, 'na ').replace(/^os
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function contextQS(text, kind, base) {
+  if (kind === 'Alegria' || kind === 'Aflição' || kind === 'Medo') {
+    const dj = detect(text);
+    if (!dj) return base[kind];
+  }
   const d = detect(text);
   const def = base[kind] || base['Dúvida'];
   if (!d) return def;
@@ -190,3 +194,18 @@ export function planNameOf(e) {
   return t.length > 48 ? t.slice(0, 47).trim() + '…' : t;
 }
 
+
+// Lê o sentimento principal do texto. Usado quando a pessoa não escolheu o tipo:
+// quem escreve 'estou feliz e grato' não está trazendo uma dúvida.
+const MOODS = [
+  { kind: 'Alegria', re: /\b(feliz|felizes|felicidade|grat[oa]|gratidao|alegr\w*|contente|realizad[oa]|conquistei|consegui|passei|celebr\w*|orgulhos[oa]|abencoad[oa]|em paz|radiante|animad[oa])\b/ },
+  { kind: 'Medo', re: /\b(medo|receio|pavor|panico|assustad[oa]|tenho medo|temo|inseguran\w*)\b/ },
+  { kind: 'Aflição', re: /\b(triste|tristeza|ansios[oa]|ansiedade|angusti\w*|sofr\w*|dor\b|luto|perdi|chorando|sozinh[oa]|solidao|desanimad[oa]|cansad[oa]|esgotad[oa]|magoad[oa]|decepcionad[oa]|brig\w*|raiva)\b/ },
+  { kind: 'Sugestão', re: /\b(sugest\w*|dica|dicas|me indica|recomenda\w*|ideia de|como posso)\b/ },
+  { kind: 'Dúvida', re: /\b(devo|deveria|sera que|nao sei se|pensando em|pensando se|decidir|decisao|escolher|ou nao|vale a pena)\b|\?/ }
+];
+export function moodOf(text) {
+  const t = norm(text);
+  const hit = MOODS.find((m) => m.re.test(t));
+  return hit ? hit.kind : null;
+}

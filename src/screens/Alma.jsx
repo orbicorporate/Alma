@@ -4,7 +4,7 @@ import { DCLogic, css } from '../dc/runtime.js';
 import { today, addDays, iso, fromIso, dayMonth, stepInfo } from '../dates.js';
 import { PH, nextPhraseIndex } from '../phrases.js';
 import MiniCosmos from '../components/MiniCosmos.jsx';
-import { contextQS, contextOf, stepFor, planSteps, planNameOf } from '../questions.js';
+import { contextQS, contextOf, stepFor, planSteps, planNameOf, moodOf } from '../questions.js';
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
 
 class Component extends DCLogic {
@@ -175,6 +175,22 @@ class Component extends DCLogic {
         step: stepFor(s.text) + ' Depois faça esta pergunta de novo.'
       };
     }
+    const low = (x) => (x ? x.charAt(0).toLowerCase() + x.slice(1) : '');
+    if (s.kind === 'Alegria') return {
+      p1: `Você trouxe uma alegria${A[0] ? ', que vem de ' + low(A[0]) : ''}. Que bom poder celebrar com você.`,
+      p2: 'Quase todas as tradições ensinam que a gratidão multiplica o que é bom: o salmista canta, Epicuro lembra que o prazer simples é o mais firme, e o Ubuntu diz que a alegria só se completa quando é partilhada.' + (A[1] ? ` Você quer dividir com ${low(A[1]) === 'comigo mesmo' ? 'você mesmo, e isso também é bonito' : low(A[1]) === 'família' ? 'a família' : low(A[1]) === 'amigos' ? 'os amigos' : low(A[1])}.` : ''),
+      step: A[2] ? `Hoje, escolha um gesto para ${low(A[2])} essa alegria: escreva no diário o que você sente ou conte para alguém.` : 'Registre esta alegria no seu diário como gratidão, para lembrar dela nos dias mais difíceis.'
+    };
+    if (s.kind === 'Medo') return {
+      p1: `Você trouxe um medo${A[0] ? ' sobre ' + low(A[0]) : ''}. Nomear já é o primeiro passo para ele diminuir.`,
+      p2: 'As vozes concordam que o medo avisa, mas não decide. Sêneca lembra que sofremos mais na imaginação do que na realidade, e os Salmos pedem que você não carregue sozinho.' + (A[2] ? ` O que te acalma é ${low(A[2])}: use isso a seu favor.` : ''),
+      step: 'Escreva o pior cenário, depois o mais provável. Veja a diferença entre os dois com calma.'
+    };
+    if (s.kind === 'Aflição') return {
+      p1: `Você trouxe algo que pesa${A[0] ? ', ligado a ' + low(A[0]) : ''}. Obrigado por confiar isso à Alma.`,
+      p2: 'Todas as tradições falam da dor como passagem, não como destino. O budismo pede que você a olhe com compaixão, e o cristianismo lembra que ninguém precisa atravessá-la sozinho.' + (A[2] ? ` Agora você precisa de ${low(A[2])}, e isso é legítimo.` : ''),
+      step: 'Dê um passo pequeno de cuidado hoje: uma conversa, uma caminhada ou uma noite de descanso. Se o peso estiver grande demais, ligue 188 (CVV).'
+    };
     const tags = A.filter(Boolean).map((t) => t.toLowerCase()).join(', ');
     return {
       p1: tags ? `Você trouxe ${this.KP(s.kind)} e contou um pouco mais: ${tags}.` : `Você trouxe ${this.KP(s.kind)}.`,
@@ -326,7 +342,7 @@ class Component extends DCLogic {
       const on = s.kind === k;
       return {
         label: k, pressed: on ? 'true' : 'false',
-        pick: () => this.setState({ kind: k }),
+        pick: () => this.setState({ kind: k, kindPicked: true }),
         style: on ? 'background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.5); box-shadow: 0 0 22px var(--m1)' : 'background: rgba(255,255,255,.04); color: rgba(244,241,234,.78)'
       };
     });
@@ -682,7 +698,10 @@ class Component extends DCLogic {
       breathDone: () => this.setState(this.state.medit ? { screen: 'answers', medit: false } : { screen: 'ask' }),
       release: () => {
         if (!(this.state.text || '').trim()) return;
-        this.setState({ screen: 'releasing', step: 0, ans: [null, null, null] });
+        // se a pessoa não escolheu o tipo, a Alma lê o sentimento do próprio texto
+        const m = moodOf(this.state.text);
+        const kind = !this.state.kindPicked && m ? m : this.state.kind;
+        this.setState({ screen: 'releasing', step: 0, ans: [null, null, null], kind });
         clearTimeout(this.t1);
         this.t1 = setTimeout(() => this.setState({ screen: 'deepen' }), 3000);
       },
@@ -705,7 +724,7 @@ class Component extends DCLogic {
       openJournal: () => this.setState({ prev: this.state.screen, screen: 'journal', sheet: -1 }),
       back: () => this.setState(this.state.screen === 'plan' ? { screen: this.state.planPrev || 'journal' } : { screen: this.state.prev || 'ask', sheet: -1 }),
       closeSheet: () => this.setState({ sheet: -1, confirmDel: false }),
-      restart: () => this.setState({ screen: 'ask', open: -1, lit: 0, stars: [], filter: 'all', savedNow: false, ans: [null, null, null], step: 0, text: '', fromWhere: '' })
+      restart: () => this.setState({ screen: 'ask', open: -1, lit: 0, stars: [], filter: 'all', savedNow: false, ans: [null, null, null], step: 0, text: '', fromWhere: '', kindPicked: false, kind: 'Dúvida' })
     };
   }
 }
