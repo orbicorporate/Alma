@@ -1453,16 +1453,9 @@ Component.prototype.render = function render() {
                     {"Sua constelação"}
                   </h1>
                   <p style={css("margin: 6px 0 0; font-size: 14px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                    {"Cada pergunta vira uma estrela. Toque para revisitar."}
+                    {"Tudo o que você vive na Alma vira luz no seu céu."}
                   </p>
                 </div>
-                <a href="#/constelacao" className="cta" style={css('position: relative; overflow: hidden; height: 64px; border-radius: 22px; display: flex; align-items: center; gap: 14px; padding: 0 18px; text-decoration: none; color: #f4f1ea; background: radial-gradient(circle at 20% 50%, rgba(201,184,255,.35), rgba(20,16,44,.9) 60%); border: 1px solid rgba(201,184,255,.45); box-shadow: 0 0 30px rgba(201,184,255,.2)')}>
-                  <span className="orb-live" style={css('width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; box-shadow: 0 0 20px #c9b8ff')} />
-                  <span style={css('display: flex; flex-direction: column; gap: 2px')}>
-                    <span style={css('font-size: 15px; font-weight: 400')}>Abrir o céu em tela inteira</span>
-                    <span style={css('font-size: 13.5px; font-weight: 300; color: rgba(244,241,234,.65)')}>Tudo o que você viveu na Alma, em luz</span>
-                  </span>
-                </a>
                 {this.renderLogin()}
                 {R.hasNext ? (
                   <>
@@ -1529,24 +1522,25 @@ Component.prototype.render = function render() {
                     </div>
                   </>
                 ) : null}
-                <div className="glass" style={css("position: relative; height: 240px; border-radius: 26px; overflow: hidden; background: radial-gradient(circle at 50% 110%, rgba(243,217,139,.1), rgba(12,10,32,.9) 70%)")}>
-                  <MiniCosmos />
+                <a href="#/constelacao" aria-label="Abrir sua constelação em tela inteira" style={css("position: relative; display: block; height: 260px; margin: 0 -20px; overflow: hidden; text-decoration: none; color: inherit; -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 55%, transparent 100%)")}>
+                  <MiniCosmos w={390} h={260} />
                   {(R.skyLines || []).map((L20_l, I20) => (
                     <React.Fragment key={I20}>
-                      <div style={css(`position: absolute; height: 1px; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(243,217,139,.15), rgba(243,217,139,.55), rgba(243,217,139,.15)); ${(L20_l?.style) ?? ''}`)}></div>
+                      <div style={css(`position: absolute; margin-left: 20px; height: 1px; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(243,217,139,.15), rgba(243,217,139,.55), rgba(243,217,139,.15)); ${(L20_l?.style) ?? ''}`)}></div>
                     </React.Fragment>
                   ))}
                   {(R.skyStars || []).map((L21_s, I21) => (
                     <React.Fragment key={I21}>
-                      <button onClick={L21_s?.open} aria-label={L21_s?.aria} style={css(`position: absolute; width: 64px; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; ${(L21_s?.style) ?? ''}`)}>
+                      <span style={css(`position: absolute; margin-left: 20px; width: 64px; height: 64px; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; ${(L21_s?.style) ?? ''}`)}>
                         <span className="twinkle" style={css(`width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 14px 4px rgba(201,184,255,.55), 0 0 30px rgba(168,216,255,.4); ${(L21_s?.dot) ?? ''}`)}></span>
                         <span style={css("font-size: 11.5px; letter-spacing: .08em; color: rgba(244,241,234,.7)")}>
                           {L21_s?.label}
                         </span>
-                      </button>
+                      </span>
                     </React.Fragment>
                   ))}
-                </div>
+                  <span style={css("position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 12.5px; letter-spacing: .08em; color: rgba(244,241,234,.6)")}>Toque para abrir o céu em tela inteira</span>
+                </a>
                 <div style={css("display: flex; flex-direction: column; gap: 10px; margin-top: 4px")}>
                   <span style={css("font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>Suas perguntas</span>
                   <div style={css("display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px")}>
