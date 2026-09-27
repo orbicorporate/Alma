@@ -156,3 +156,27 @@
 .dz .dz-extra-ok:disabled { opacity: .4; }
 .dz-sym-you { border-left-color: #f3d98b; background: rgba(243,217,139,.07); }
 .dz-sym-you .dz-sym-n { color: #f3d98b; }
+
+/* Dia: mais claro e com menos ruído */
+.dz-daynav-t { flex-direction: row; align-items: baseline; gap: 8px; }
+.dz-daynav-t small { font-size: 14px; }
+.dz-good { font-size: 16px; font-weight: 400; }
+.dz-sky-txt { gap: 4px; }
+.dz-sky .dz-phase { font-size: 14px; color: rgba(244,241,234,.85); }
+.dz-sky .dz-phase small { font-size: 13px; color: rgba(244,241,234,.55); }
+.dz-pd { font-size: 13px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.6); }
+.dz-addgrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--s2); }
+.dz .dz-addtile { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0 8px; border-radius: 16px; font-size: 12.5px; color: rgba(244,241,234,.85); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); transition: transform .3s ease, background .3s ease; }
+.dz .dz-addtile:active { transform: scale(.95); }
+.dz-addic { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent); border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); box-shadow: 0 0 16px color-mix(in srgb, var(--c) 25%, transparent); font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; }
+.dz .dz-plan { width: 100%; display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s4); border-radius: 18px; text-align: left; border-color: rgba(143,227,176,.3); }
+.dz-check { width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid #8fe3b0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #0c1f15; transition: background .3s ease; }
+.dz-plan-done .dz-check { background: #8fe3b0; }
+.dz-plan-done .dz-plan-t { color: rgba(244,241,234,.55); }
+.dz-plan-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dz-plan-t { font-size: 15px; line-height: 1.4; }
+.dz-plan-q { font-size: 12.5px; color: rgba(244,241,234,.5); }
+
+.dz-edhead { display: flex; align-items: center; gap: var(--s3); }
+.dz-edhead-t { display: flex; flex-direction: column; gap: 2px; font-size: 18px; font-weight: 300; }
+.dz-edhead-t small { font-size: 13px; color: rgba(244,241,234,.55); }

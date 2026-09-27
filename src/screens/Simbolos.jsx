@@ -991,7 +991,6 @@ Component.prototype.render = function render() {
                     {`Sol em ${(R.horo?.sun) ?? ''} · Lua em ${(R.horo?.moon) ?? ''} · Ascendente em ${(R.horo?.asc) ?? ''}`}
                   </p>
                 </div>
-                <NatalSphere sim={this} profile={this.state.profile} />
                 <div className="scroll" style={css("display: flex; gap: 8px; overflow-x: auto; margin: 0 -20px; padding: 0 20px 2px")}>
                   {(R.periods || []).map((L9_p, I9) => (
                     <React.Fragment key={I9}>
@@ -1077,6 +1076,8 @@ Component.prototype.render = function render() {
                     </div>
                   </>
                 ) : null}
+                <div style={css("margin-top: 8px; font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>Seu mapa em movimento</div>
+                <NatalSphere sim={this} profile={this.state.profile} />
               </div>
             </div>
           </>

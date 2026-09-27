@@ -66,9 +66,10 @@ export function Moon({ f, size = 14 }) {
 
 function planStepsOn(entries, dayIso) {
   const out = [];
-  (entries || []).forEach((e) => (e.plan || []).forEach((s, j) => { if (s.iso === dayIso) out.push({ q: e.q, t: s.t, n: j + 1, done: s.done }); }));
+  (entries || []).forEach((e, ei) => (e.plan || []).forEach((s, j) => { if (s.iso === dayIso) out.push({ q: e.q, t: s.t, n: j + 1, done: s.done, ei, j }); }));
   return out;
 }
+const ICON = { sonho: '☾', intencao: '✦', gratidao: '♡', decisao: '◇', nota: '✎' };
 
 export default function Diario() {
   const data0 = load();
@@ -197,34 +198,58 @@ export default function Diario() {
   };
 
   // ---------- Dia
+  const toggleStep = (st) => {
+    const list = entries.slice(); const e = Object.assign({}, list[st.ei]);
+    e.plan = e.plan.map((x, k) => (k === st.j ? Object.assign({}, x, { done: !x.done }) : x));
+    list[st.ei] = e; setEntries(list); save({ entries: list });
+    if (!st.done) flash('Passo concluído. Que bom!');
+  };
   const renderDayCard = () => {
     const recs = byDay[sel] || [];
     const steps = planStepsOn(entries, sel);
-    const favs = [adv.agir && ['Agir', '#8fe3b0'], adv.decidir && ['Decidir', '#c9a8ff'], adv.descansar && ['Descansar', '#a8d8ff']].filter(Boolean);
     const groups = Object.keys(TYPES).map((k) => [k, recs.filter((r) => r.type === k)]).filter((g) => g[1].length);
+    const isToday = sel === iso(today());
+    const good = adv.agir ? 'Bom dia para agir' : adv.decidir ? 'Bom dia para decidir' : adv.descansar ? 'Bom dia para descansar' : 'Dia de observar e preparar';
+    const goodC = adv.agir ? '#8fe3b0' : adv.decidir ? '#c9a8ff' : adv.descansar ? '#a8d8ff' : '#f3d98b';
+    const move = (n) => { const d = fromIso(sel); d.setDate(d.getDate() + n); setSel(iso(d)); setMonth({ y: d.getFullYear(), m: d.getMonth() }); };
     return (
       <div className="dz-day-panel">
         <div className="dz-daynav">
-          <button className="dz-ic" aria-label="Dia anterior" onClick={() => { const d = fromIso(sel); d.setDate(d.getDate() - 1); setSel(iso(d)); setMonth({ y: d.getFullYear(), m: d.getMonth() }); }}>‹</button>
-          <span className="dz-daynav-t">{sel === iso(today()) ? 'Hoje' : `${WD_FULL[selDate.getDay()]}`}<small>{selDate.getDate()} de {MO_FULL[selDate.getMonth()]}</small></span>
-          <button className="dz-ic" aria-label="Próximo dia" onClick={() => { const d = fromIso(sel); d.setDate(d.getDate() + 1); setSel(iso(d)); setMonth({ y: d.getFullYear(), m: d.getMonth() }); }}>›</button>
+          <button className="dz-ic" aria-label="Dia anterior" onClick={() => move(-1)}>‹</button>
+          <span className="dz-daynav-t">{isToday ? 'Hoje' : WD_FULL[selDate.getDay()].split('-')[0]}<small>{selDate.getDate()} de {MO_FULL[selDate.getMonth()]}</small></span>
+          <button className="dz-ic" aria-label="Próximo dia" onClick={() => move(1)}>›</button>
         </div>
         <div className="glass dz-sky">
-          <div className="dz-moon-big"><Moon f={adv.phase.frac} size={52} /><div className="dz-moon-glow" /></div>
+          <div className="dz-moon-big"><Moon f={adv.phase.frac} size={56} /><div className="dz-moon-glow" /></div>
           <div className="dz-sky-txt">
-            <span className="dz-phase">{adv.phase.name} <small>{adv.phase.lit}%</small></span>
-            <div className="dz-chips">
-              {favs.length ? favs.map((f, i) => <span key={i} className="dz-chip dz-chip-sm" style={{ borderColor: f[1], color: f[1] }}>{f[0]}{adv.strong && f[0] !== 'Descansar' ? ' · forte' : ''}</span>) : <span className="dz-chip dz-chip-sm dz-chip-mute">Observar e preparar</span>}
-              {adv.pd ? <span className="dz-chip dz-chip-sm dz-chip-mute" title={PD_TEXT[adv.pd]}>Dia pessoal {adv.pd}</span> : null}
-            </div>
+            <span className="dz-good" style={{ color: goodC }}>{good}{adv.strong ? ' · forte' : ''}</span>
+            <span className="dz-phase">{adv.phase.name}<small> · {adv.phase.lit}% iluminada</small></span>
+            {adv.pd ? <span className="dz-pd">Dia pessoal {adv.pd}: {PD_TEXT[adv.pd]}.</span> : null}
+          </div>
+        </div>
+        <div className="dz-group">
+          <span className="dz-group-h">{isToday ? 'Registrar hoje' : 'Registrar neste dia'}</span>
+          <div className="dz-addgrid">
+            {Object.entries(TYPES).map(([k, t]) => (
+              <button key={k} className="dz-addtile" onClick={() => openEditor(k)} style={{ '--c': t.color }}>
+                <span className="dz-addic">{ICON[k]}</span>
+                <span>{k === 'nota' ? 'Nota' : t.label}</span>
+              </button>
+            ))}
           </div>
         </div>
         {steps.length ? (
           <div className="dz-group">
-            <span className="dz-group-h" style={{ color: '#8fe3b0' }}><i style={{ background: '#8fe3b0' }} />Passos do plano</span>
-            <div className="glass dz-steps">
-              {steps.map((s, i) => <span key={i} className={'dz-stepline' + (s.done ? ' dz-done' : '')}><b>{s.n}</b>{s.t}</span>)}
-            </div>
+            <span className="dz-group-h" style={{ color: '#8fe3b0' }}><i style={{ background: '#8fe3b0' }} />Do seu plano de ação</span>
+            {steps.map((st, i) => (
+              <button key={i} className={'glass dz-plan' + (st.done ? ' dz-plan-done' : '')} onClick={() => toggleStep(st)} aria-pressed={st.done ? 'true' : 'false'}>
+                <span className="dz-check">{st.done ? '✓' : ''}</span>
+                <span className="dz-plan-txt">
+                  <span className="dz-plan-t">{st.t}</span>
+                  <span className="dz-plan-q">Passo {st.n} · {st.done ? 'concluído' : 'toque para marcar como feito'}</span>
+                </span>
+              </button>
+            ))}
           </div>
         ) : null}
         {groups.map(([k, list]) => (
@@ -233,17 +258,7 @@ export default function Diario() {
             {list.map((r) => recCard(r, false))}
           </div>
         ))}
-        {!groups.length && !steps.length ? <p className="dz-empty-day">Nada registrado neste dia ainda.</p> : null}
-        <div className="dz-group">
-          <span className="dz-group-h">Registrar</span>
-          <div className="dz-add">
-            {Object.entries(TYPES).map(([k, t]) => (
-              <button key={k} className="dz-addbtn pill" onClick={() => openEditor(k)} style={{ borderColor: t.color + '77' }}>
-                <i style={{ background: t.color }} />{t.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        {!groups.length && !steps.length ? <p className="dz-empty-day">{isToday ? 'Nada registrado hoje ainda. Toque em um dos botões acima para começar.' : 'Nada registrado neste dia.'}</p> : null}
       </div>
     );
   };
@@ -437,7 +452,7 @@ export default function Diario() {
   const renderBoard = () => (
     <div className="dz-fade">
       <div className="dz-boardbar">
-        <span className="dz-hint">Arraste, escreva e mude a cor. Seus post-its também flutuam na constelação.</span>
+        <span className="dz-hint">Arraste, escreva e mude a cor.</span>
         <button className="dz-new pill" onClick={addPost}>+ Post-it</button>
       </div>
       <div ref={board} className="dz-board" onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
@@ -464,12 +479,10 @@ export default function Diario() {
         <button className="dz-scrim" aria-label="Fechar" onClick={() => setEditor(null)} />
         <div className="dz-sheet">
           <div className="dz-handle" />
-          <div className="dz-chips">
-            {Object.entries(TYPES).map(([k, tt]) => (
-              <button key={k} className="dz-chip" onClick={() => setEditor(Object.assign({}, e, { type: k }))} style={{ borderColor: tt.color, color: k === e.type ? '#1a1408' : tt.color, background: k === e.type ? tt.color : 'transparent' }}>{tt.label}</button>
-            ))}
+          <div className="dz-edhead" style={{ '--c': t.color }}>
+            <span className="dz-addic">{ICON[e.type]}</span>
+            <span className="dz-edhead-t">{e.id ? 'Editar ' + t.label.toLowerCase() : e.type === 'nota' ? 'Nova anotação' : (t.f ? 'Nova ' : 'Novo ') + t.label.toLowerCase()}<small>{fromIso(e.iso).getDate()} de {MO_FULL[fromIso(e.iso).getMonth()]}</small></span>
           </div>
-          <span className="kicker" style={{ fontSize: 11.5 }}>{fromIso(e.iso).getDate()} de {MO_FULL[fromIso(e.iso).getMonth()]}</span>
           <input className="dz-input" value={e.title} placeholder={e.type === 'sonho' ? 'Um nome para o sonho' : e.type === 'decisao' ? 'O que você precisa decidir?' : 'Título'} onChange={(ev) => setEditor(Object.assign({}, e, { title: ev.target.value }))} />
           <textarea className="dz-area" value={e.text} rows={5} placeholder={e.type === 'sonho' ? 'Conte o sonho: lugares, pessoas, cores, sensações.' : e.type === 'gratidao' ? 'Pelo que você é grato hoje?' : e.type === 'intencao' ? 'Qual intenção você quer sustentar?' : e.type === 'decisao' ? 'Quais são as opções e o que pesa em cada uma?' : 'Escreva livremente.'} onChange={(ev) => setEditor(Object.assign({}, e, { text: ev.target.value }))} />
           {e.type === 'sonho' ? <span className="dz-hint">Ao guardar, a Alma lê o seu sonho pela psicanálise e pela espiritualidade.</span> : null}
@@ -516,7 +529,7 @@ export default function Diario() {
           <span className="dz-title">Meu diário</span>
           <span className="dz-purpose">{{ dia: 'Seu dia, a Lua e o que você registrou.', sonhos: 'Anote sonhos e veja o que eles podem dizer.', notas: 'Intenções, gratidões e decisões em um só lugar.', quadro: 'Lembretes soltos para arrastar e colorir.', mes: 'A Lua e os dias bons para agir e decidir.', ano: 'Seu ano em cores.' }[view]}</span>
         </span>
-        <button className="dz-ic dz-todaybtn" onClick={() => { const t = today(); setSel(iso(t)); setMonth({ y: t.getFullYear(), m: t.getMonth() }); }}>Hoje</button>
+        {sel !== iso(today()) && (view === 'dia' || view === 'mes') ? <button className="dz-ic dz-todaybtn" onClick={() => { const t = today(); setSel(iso(t)); setMonth({ y: t.getFullYear(), m: t.getMonth() }); }}>Voltar a hoje</button> : null}
       </div>
       <div className="dz-tabs">
         {TABS.map(([k, l]) => <button key={k} className={'dz-tab' + (view === k || (k === 'mes' && view === 'ano') ? ' dz-tab-on' : '')} onClick={() => setView(k)} aria-pressed={view === k ? 'true' : 'false'}>{l}</button>)}

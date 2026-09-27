@@ -471,6 +471,7 @@ class Component extends DCLogic {
     });
     const nRes = ents.filter((e) => e.resolved).length;
     const JF = [{ id: 'all', label: `Todas · ${ents.length}` }, { id: 'open', label: `Em aberto · ${ents.length - nRes}` }, { id: 'resolved', label: `Resolvidas · ${nRes}` }];
+    const jhint = { all: 'Cada pergunta que você trouxe vira uma estrela. Toque numa para rever as respostas e o plano.', open: 'Perguntas que você ainda está vivendo. Quando sentir que encontrou sua resposta, abra a pergunta e marque como resolvida.', resolved: 'Perguntas que você marcou como resolvidas. Elas continuam no seu céu, brilhando em paz.' }[s.jfilter] || '';
     const jfilters = JF.map((f) => {
       const on = s.jfilter === f.id;
       return {
@@ -484,7 +485,9 @@ class Component extends DCLogic {
       .map(({ i, e }) => {
         const col = KC[e.kind] || '#f3d98b';
         return {
-          q: e.q, meta: `${e.date} · ${e.kind}${e.resolved ? ' · Resolvida' : (e.plan ? ' · Plano ' + e.plan.filter((x) => x.done).length + '/' + e.plan.length : '')}`, n: e.stars.length, resolved: !!e.resolved,
+          q: e.q, meta: `${e.date} · ${e.kind}${e.plan ? ' · plano ' + e.plan.filter((x) => x.done).length + ' de ' + e.plan.length : ''}${e.stars.length ? ' · ★ ' + e.stars.length : ''}`, n: e.stars.length, resolved: !!e.resolved,
+          status: e.resolved ? 'Resolvida' : 'Em aberto',
+          statusStyle: e.resolved ? 'color: #8fe3b0; border-color: rgba(143,227,176,.5); background: rgba(143,227,176,.1)' : 'color: #c9b8ff; border-color: rgba(201,184,255,.45); background: rgba(201,184,255,.08)',
           rowStyle: e.resolved ? 'opacity: .75' : '',
           dot: e.resolved ? 'background: #fff4d1; box-shadow: 0 0 10px #f3d98b' : `background: ${col}; box-shadow: 0 0 12px ${col}`,
           open: openSheet(i)
@@ -588,7 +591,7 @@ class Component extends DCLogic {
       },
       hasNext: !!nextStep, next: nextStep || { t: '', n: '', total: '', q: '', kind: '', when: '', bell: '', bellFill: 'none', dot: '', open: () => {}, done: () => {} },
       makePlan: () => updEntry((e) => { e.plan = this.planFor(e.kind, e.q); return e; }),
-      skyStars, skyLines, entryRows, jfilters, noEntries: entryRows.length === 0, sheet, sheetOpen: s.sheet >= 0, entryCount: ents.length,
+      skyStars, skyLines, entryRows, jfilters, jhint, noEntries: entryRows.length === 0, sheet, sheetOpen: s.sheet >= 0, entryCount: ents.length,
       resolveLabel: se && se.resolved ? 'Reabrir esta pergunta' : 'Já resolvi',
       resolveStyle: se && se.resolved ? '' : 'border-color: rgba(143,227,176,.45); background: rgba(143,227,176,.08)',
       confirmOn: s.confirmDel, confirmOff: !s.confirmDel,
@@ -781,7 +784,7 @@ Component.prototype.render = function render() {
         ))}
         {R.compactHeader ? (
           <>
-            <div style={css("position: absolute; top: calc(-1 * var(--sat, 0px)); left: -600px; right: -600px; height: calc(112px + var(--sat, 0px)); z-index: 3; pointer-events: none; background: linear-gradient(180deg, #1b1542 55%, rgba(27,21,66,0))")}></div>
+            <div style={css("position: absolute; top: calc(-1 * var(--sat, 0px)); left: -600px; right: -600px; height: calc(128px + var(--sat, 0px)); z-index: 3; pointer-events: none; background: linear-gradient(180deg, #1b1542 68%, rgba(27,21,66,0))")}></div>
           </>
         ) : null}
         <div className="orbwrap" style={css(R.orbStyle)}>
@@ -1526,15 +1529,6 @@ Component.prototype.render = function render() {
                     </div>
                   </>
                 ) : null}
-                <div style={css("display: flex; gap: 8px")}>
-                  {(R.jfilters || []).map((L19_f, I19) => (
-                    <React.Fragment key={I19}>
-                      <button className="pill" onClick={L19_f?.pick} aria-pressed={L19_f?.pressed} style={css(`height: 44px; padding: 0 16px; border-radius: 999px; font-size: 14px; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); ${(L19_f?.style) ?? ''}`)}>
-                        {L19_f?.label}
-                      </button>
-                    </React.Fragment>
-                  ))}
-                </div>
                 <div className="glass" style={css("position: relative; height: 240px; border-radius: 26px; overflow: hidden; background: radial-gradient(circle at 50% 110%, rgba(243,217,139,.1), rgba(12,10,32,.9) 70%)")}>
                   <MiniCosmos />
                   {(R.skyLines || []).map((L20_l, I20) => (
@@ -1553,33 +1547,34 @@ Component.prototype.render = function render() {
                     </React.Fragment>
                   ))}
                 </div>
+                <div style={css("display: flex; flex-direction: column; gap: 10px; margin-top: 4px")}>
+                  <span style={css("font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>Suas perguntas</span>
+                  <div style={css("display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px")}>
+                  {(R.jfilters || []).map((L19_f, I19) => (
+                    <React.Fragment key={I19}>
+                      <button className="pill" onClick={L19_f?.pick} aria-pressed={L19_f?.pressed} style={css(`height: 42px; padding: 0 8px; border-radius: 999px; font-size: 13.5px; text-align: center; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); ${(L19_f?.style) ?? ''}`)}>
+                        {L19_f?.label}
+                      </button>
+                    </React.Fragment>
+                  ))}
+                </div>
+                  <p style={css("margin: 0; font-size: 13.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>{R.jhint}</p>
+                </div>
                 <div style={css("display: flex; flex-direction: column; gap: 10px")}>
                   {(R.entryRows || []).map((L22_e, I22) => (
                     <React.Fragment key={I22}>
                       <button className="glass pill" onClick={L22_e?.open} style={css(`width: 100%; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; text-align: left; ${(L22_e?.rowStyle) ?? ''}`)}>
                         <span style={css(`width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; ${(L22_e?.dot) ?? ''}`)}></span>
                         <span style={css("display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 0")}>
-                          <span style={css("font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.5)")}>
+                          <span style={css("font-size: 12.5px; color: rgba(244,241,234,.55)")}>
                             {L22_e?.meta}
                           </span>
                           <span style={css("font-size: 15px; font-weight: 300; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap")}>
                             {L22_e?.q}
                           </span>
                         </span>
-                        {L22_e?.resolved ? (
-                          <>
-                            <span aria-label="Resolvida" style={css("width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(143,227,176,.14); border: 1px solid rgba(143,227,176,.5)")}>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8fe3b0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                <path d="M5 12.5l4.5 4.5L19 7.5" />
-                              </svg>
-                            </span>
-                          </>
-                        ) : null}
-                        <span style={css("display: flex; align-items: center; gap: 4px; font-size: 14px; color: #f3d98b")}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="#f3d98b" aria-hidden="true">
-                            <path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" />
-                          </svg>
-                          {L22_e?.n}
+                        <span style={css(`flex-shrink: 0; height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid; font-size: 12.5px; display: inline-flex; align-items: center; ${(L22_e?.statusStyle) ?? ''}`)}>
+                          {L22_e?.status}
                         </span>
                       </button>
                     </React.Fragment>
