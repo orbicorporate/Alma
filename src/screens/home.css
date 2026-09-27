@@ -46,3 +46,22 @@
 .hm-tile b { font-size: 15px; font-weight: 500; }
 .hm-tile span:last-child { font-size: 13px; line-height: 1.4; color: rgba(244,241,234,.6); }
 .hm-tour { align-self: center; height: 44px; padding: 0 18px; margin-top: var(--s2); font-size: 14px; color: rgba(244,241,234,.7); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(244,241,234,.3); }
+
+.hm-tip { gap: var(--s3); border-color: rgba(243,217,139,.3); background: linear-gradient(150deg, rgba(243,217,139,.1), rgba(255,255,255,.04) 60%); }
+.hm-tip-w { border-color: rgba(185,166,255,.3); background: linear-gradient(150deg, rgba(185,166,255,.12), rgba(255,255,255,.04) 60%); }
+.hm-tip-top { display: flex; align-items: center; justify-content: space-between; }
+.hm-tip-moon { filter: drop-shadow(0 0 8px rgba(244,239,224,.4)); display: flex; }
+.hm-tip-t { font-size: 22px; font-weight: 300; line-height: 1.25; }
+.hm-tip-act { margin: 0; font-size: 16px; font-weight: 300; line-height: 1.5; }
+.hm-marks { display: flex; flex-direction: column; gap: var(--s2); }
+.hm-mark { display: flex; align-items: center; gap: var(--s2); font-size: 14px; color: rgba(244,241,234,.8); }
+.hm-mark i { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.hm-mark b { font-weight: 500; }
+.hm-mark span { color: rgba(244,241,234,.6); }
+.hm .hm-why { align-self: flex-start; height: 34px; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; color: rgba(244,241,234,.75); }
+.hm-why-ar { display: inline-block; font-size: 18px; transform: rotate(90deg); transition: transform .3s ease; }
+.hm-why-ar.on { transform: rotate(-90deg); }
+.hm-why-list { display: flex; flex-direction: column; gap: var(--s3); padding-top: var(--s1); border-top: 1px solid rgba(255,255,255,.1); animation: hmIn .5s ease both; }
+.hm-why-i { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.78); }
+.hm-why-k { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.55); font-weight: 400; }
+.hm .hm-why-cta { font-size: 13.5px; color: #f3d98b; min-height: 36px; }

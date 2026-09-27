@@ -766,6 +766,13 @@ Component.prototype.render = function render() {
                       </span>
                     </span>
                   </button>
+                  <button className="glass pill" onClick={() => { window.location.hash = '#/banhos'; }} style={css("grid-column: span 2; border-radius: 24px; padding: 18px; text-align: left; display: flex; align-items: center; gap: 16px; border-color: rgba(143,227,176,.35)")}>
+                    <span style={css("width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #8fe3b0 40%, rgba(143,227,176,0) 75%); box-shadow: 0 0 24px rgba(143,227,176,.35)")}></span>
+                    <span style={css("display: flex; flex-direction: column; gap: 4px")}>
+                      <span style={css("font-size: 16px; font-weight: 400")}>Banhos da Lua</span>
+                      <span style={css("font-size: 13.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>Limpeza, amor, prosperidade, calma. Banhos de ervas que combinam com a Lua de hoje</span>
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>

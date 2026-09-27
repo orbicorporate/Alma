@@ -3,6 +3,7 @@ import { load, save, onData, getAuth, onAuth } from '../store.js';
 import { today, iso, WD_FULL, MO_FULL, stepInfo } from '../dates.js';
 import { phaseOf, dayAdvice, PD_TEXT } from '../cosmos.js';
 import { phraseOfDay } from '../phrases.js';
+import { dayTip, weekTip } from '../tips.js';
 import { Moon } from './Diario.jsx';
 import './home.css';
 
@@ -53,6 +54,11 @@ export default function Home() {
     setData(Object.assign({}, data, { entries: list }));
   };
 
+  const tipD = useMemo(() => dayTip(t, data.profile), [data.profile, iso(t)]);
+  const tipW = useMemo(() => weekTip(t, data.profile), [data.profile, iso(t)]);
+  const [whyD, setWhyD] = useState(false);
+  const [whyW, setWhyW] = useState(false);
+  const toDiary = (v) => { try { sessionStorage.setItem('diario:view', v); } catch (e) { /* sem armazenamento */ } window.dispatchEvent(new CustomEvent('diario:go', { detail: { view: v } })); go('#/diario'); };
   const favs = [adv.agir && ['Agir', '#8fe3b0'], adv.decidir && ['Decidir', '#c9a8ff'], adv.descansar && ['Descansar', '#a8d8ff']].filter(Boolean);
   const rel = next ? (next.due < 0 ? 'atrasado' : next.due === 0 ? 'hoje' : next.due === 1 ? 'amanhã' : `em ${next.due} dias`) : '';
   const counts = { q: entries.length, j: (data.journal || []).filter((x) => !x.linkOf).length };
@@ -95,17 +101,43 @@ export default function Home() {
           </section>
         ) : null}
 
-        <section className="hm-card hm-moon">
-          <div className="hm-moon-img"><Moon f={adv.phase.frac} size={56} /></div>
-          <div className="hm-moon-txt">
-            <div className="hm-k">Lua de hoje</div>
-            <div className="hm-t">{adv.phase.name}</div>
-            <p className="hm-sub">{adv.phase.text}</p>
-            <div className="hm-chips">
-              {favs.length ? favs.map((f, i) => <span key={i} className="hm-chip" style={{ borderColor: f[1], color: f[1] }}>Bom para {f[0].toLowerCase()}</span>) : <span className="hm-chip">Observar e preparar</span>}
-            </div>
-            {adv.pd ? <p className="hm-sub">Dia pessoal {adv.pd}: {PD_TEXT[adv.pd]}.</p> : null}
+        <section className="hm-card hm-tip">
+          <div className="hm-tip-top">
+            <span className="hm-k" style={{ color: '#f3d98b' }}>Dica do dia</span>
+            <span className="hm-tip-moon"><Moon f={adv.phase.frac} size={22} /></span>
           </div>
+          <div className="hm-tip-t">{tipD.title}</div>
+          <p className="hm-tip-act">{tipD.act}</p>
+          <p className="hm-sub">{tipD.line}</p>
+          {favs.length ? (
+            <div className="hm-chips">
+              {favs.map((f, i) => <span key={i} className="hm-chip" style={{ borderColor: f[1], color: f[1] }}>Bom para {f[0].toLowerCase()}</span>)}
+            </div>
+          ) : null}
+          <button className="hm-why" onClick={() => setWhyD(!whyD)} aria-expanded={whyD}>{whyD ? 'Fechar' : 'Por que essa dica?'}<span className={'hm-why-ar' + (whyD ? ' on' : '')}>›</span></button>
+          {whyD ? (
+            <div className="hm-why-list">
+              {tipD.why.map((w) => <div key={w.k} className="hm-why-i"><span className="hm-why-k">{w.k} · {w.v}</span><span>{w.t}</span></div>)}
+              {!tipD.personal ? <button className="hm-why-cta" onClick={() => { window.dispatchEvent(new CustomEvent('sym:go', { detail: 'horo' })); go('#/simbolos'); }}>Crie seu perfil para somar horóscopo e numerologia ›</button> : null}
+            </div>
+          ) : null}
+        </section>
+
+        <section className="hm-card hm-tip hm-tip-w">
+          <span className="hm-k" style={{ color: '#c9b8ff' }}>Dica da semana</span>
+          <div className="hm-tip-t">{tipW.title}</div>
+          <p className="hm-sub">{tipW.line}</p>
+          {tipW.marks.length ? (
+            <div className="hm-marks">
+              {tipW.marks.map((m) => <span key={m.k} className="hm-mark"><i style={{ background: m.c, boxShadow: `0 0 8px ${m.c}` }} /><b>{m.k}</b><span>{m.v}</span></span>)}
+            </div>
+          ) : null}
+          <button className="hm-why" onClick={() => setWhyW(!whyW)} aria-expanded={whyW}>{whyW ? 'Fechar' : 'Por que essa dica?'}<span className={'hm-why-ar' + (whyW ? ' on' : '')}>›</span></button>
+          {whyW ? (
+            <div className="hm-why-list">
+              {tipW.why.map((w) => <div key={w.k} className="hm-why-i"><span className="hm-why-k">{w.k} · {w.v}</span><span>{w.t}</span></div>)}
+            </div>
+          ) : null}
         </section>
 
         <section className="hm-card hm-phrase">
@@ -116,10 +148,20 @@ export default function Home() {
 
         <div className="hm-k hm-sec">Atalhos</div>
         <div className="hm-grid">
-          <button className="hm-tile" onClick={() => go('#/diario')}>
+          <button className="hm-tile" onClick={() => toDiary('dia')}>
             <span className="hm-tile-ic" style={{ color: '#a8d8ff' }}>✎</span>
-            <b>Registrar no diário</b>
-            <span>Sonho, gratidão, decisão</span>
+            <b>Registrar o dia</b>
+            <span>Gratidão, intenção, decisão</span>
+          </button>
+          <button className="hm-tile" onClick={() => toDiary('sonhos')}>
+            <span className="hm-tile-ic" style={{ color: '#c9a8ff' }}>☁︎</span>
+            <b>Sonhos</b>
+            <span>Anote e veja o significado</span>
+          </button>
+          <button className="hm-tile" onClick={() => go('#/banhos')}>
+            <span className="hm-tile-ic" style={{ color: '#8fe3b0' }}>❀</span>
+            <b>Banhos da Lua</b>
+            <span>Limpeza, amor, prosperidade</span>
           </button>
           <button className="hm-tile" onClick={() => { window.dispatchEvent(new CustomEvent('sym:go', { detail: 'tarot' })); go('#/simbolos'); }}>
             <span className="hm-tile-ic" style={{ color: '#f3d98b' }}>✦</span>
@@ -128,7 +170,7 @@ export default function Home() {
           </button>
           <button className="hm-tile" onClick={() => { window.dispatchEvent(new CustomEvent('sym:go', { detail: 'horo' })); go('#/simbolos'); }}>
             <span className="hm-tile-ic" style={{ color: '#c9b8ff' }}>☾</span>
-            <b>Horóscopo de hoje</b>
+            <b>Horóscopo</b>
             <span>Pelo seu mapa</span>
           </button>
           <button className="hm-tile" onClick={() => go('#/constelacao')}>

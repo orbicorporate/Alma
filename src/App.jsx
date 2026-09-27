@@ -4,9 +4,10 @@ import Simbolos from './screens/Simbolos.jsx';
 import Diario from './screens/Diario.jsx';
 import Constelacao from './screens/Constelacao.jsx';
 import Home from './screens/Home.jsx';
+import Banhos from './screens/Banhos.jsx';
 import TabBar from './components/TabBar.jsx';
 
-const routeOf = () => { const h = window.location.hash; return h.startsWith('#/simbolos') ? 'simbolos' : h.startsWith('#/diario') ? 'diario' : h.startsWith('#/constelacao') ? 'constelacao' : h.startsWith('#/inicio') ? 'inicio' : 'alma'; };
+const routeOf = () => { const h = window.location.hash; return h.startsWith('#/simbolos') ? 'simbolos' : h.startsWith('#/diario') ? 'diario' : h.startsWith('#/constelacao') ? 'constelacao' : h.startsWith('#/inicio') ? 'inicio' : h.startsWith('#/banhos') ? 'banhos' : 'alma'; };
 
 export default function App() {
   const [route, setRoute] = useState(routeOf());
@@ -25,7 +26,7 @@ export default function App() {
   const src = route === 'simbolos' ? 'sym' : route;
   const almaScreen = (chrome.alma || {}).screen || 'intro';
   const visible = !((chrome[src] || {}).hide) && !(route === 'alma' && (chrome.alma || {}).hide === undefined);
-  const active = route === 'inicio' ? 'inicio' : route === 'diario' ? 'diario' : route === 'simbolos' ? 'ceu' : route === 'constelacao' ? 'minha'
+  const active = route === 'inicio' ? 'inicio' : route === 'diario' ? 'diario' : route === 'simbolos' || route === 'banhos' ? 'ceu' : route === 'constelacao' ? 'minha'
     : (['journal', 'plan'].includes(almaScreen) ? 'minha' : 'perguntar');
   const onTab = (k) => {
     const go = (d) => window.dispatchEvent(new CustomEvent('alma:go', { detail: d }));
@@ -89,6 +90,7 @@ export default function App() {
         <div className="route" style={{ display: route === 'simbolos' ? 'block' : 'none', background: '#0a0918' }}><Simbolos /></div>
         {route === 'diario' ? <div className="route" style={{ background: '#0b0a16' }}><Diario /></div> : null}
         {route === 'constelacao' ? <div className="route" style={{ background: '#05040c' }}><Constelacao /></div> : null}
+        {route === 'banhos' ? <div className="route" style={{ background: '#120e2e' }}><Banhos /></div> : null}
         {route === 'inicio' ? <div className="route" style={{ background: '#120e2e' }}><Home /></div> : null}
         <TabBar active={active} visible={visible} onTab={onTab} route={route} />
       </div>
