@@ -30,7 +30,22 @@ const TOPICS = [
     pull: ['Amor', 'Proximidade', 'Cuidado', 'Paz em casa', 'Orgulho'],
     hold: ['Conflitos', 'Culpa', 'Distância', 'Cobranças', 'Mágoas antigas'],
     fear: ['Perder alguém', 'Decepcionar', 'Brigar', 'Não estar presente'] },
-  { k: 'mudanca', re: /\b(mudar de cidade|mudar de pais|mudanca|morar|intercambio|exterior|viajar|viagem)\b/,
+  { k: 'viagem', re: /\b(ferias|viagem|viajar|viajo|passeio|turismo|eua|estados unidos|europa|disney|orlando|miami|nova york|paris|londres|portugal|lisboa|italia|espanha|japao|chile|argentina|mexico|cancun|nordeste|praia|mochilao|cruzeiro|passagem|passagens)\b/,
+    obj: { _: 'a viagem' },
+    pull: ['Descansar', 'Conhecer lugares novos', 'Viver experiências', 'Estar com quem amo', 'Realizar um sonho'],
+    hold: ['Dinheiro', 'Trabalho', 'Tempo de férias', 'Documentos e visto', 'Medo de gastar demais'],
+    fear: ['Gastar demais', 'Algo dar errado', 'Me arrepender', 'Ir sozinho'] },
+  { k: 'casa', re: /\b(reforma|reformar|apartamento novo|casa nova|alugar|aluguel|comprar uma casa|comprar um apartamento|decorar)\b/,
+    obj: { reforma: 'a reforma', reformar: 'a reforma', aluguel: 'o aluguel', alugar: 'alugar', _: 'a casa' },
+    pull: ['Conforto', 'Ter meu canto', 'Segurança', 'Espaço para a família', 'Um sonho antigo'],
+    hold: ['Dinheiro', 'Parcelas longas', 'Localização', 'Tempo e obra', 'Medo de errar'],
+    fear: ['Me endividar', 'Escolher errado', 'Dar dor de cabeça', 'Me arrepender'] },
+  { k: 'pet', re: /\b(cachorro|cachorrinho|gato|gatinho|pet|adotar)\b/,
+    obj: { _: 'a adoção' },
+    pull: ['Companhia', 'Amor', 'Alegria em casa', 'Cuidar de alguém', 'Rotina mais leve'],
+    hold: ['Tempo', 'Espaço', 'Custos', 'Viagens', 'Responsabilidade'],
+    fear: ['Não dar conta', 'Ele ficar sozinho', 'Custos altos', 'Me apegar'] },
+  { k: 'mudanca', re: /\b(mudar de cidade|mudar de pais|me mudar|mudanca|morar|intercambio|exterior)\b/,
     obj: { intercambio: 'o intercâmbio', viagem: 'a viagem', viajar: 'viajar', _: 'a mudança' },
     pull: ['Recomeço', 'Liberdade', 'Qualidade de vida', 'Novas oportunidades', 'Conhecer o mundo'],
     hold: ['Pessoas que amo', 'Trabalho', 'Dinheiro', 'Medo do novo', 'Minhas raízes'],
@@ -82,6 +97,10 @@ function detect(text) {
   let obj = best.tp.obj[best.w] || best.tp.obj._;
   if (raw) obj = (/^aulas/i.test(raw[1]) ? 'as ' : 'a ') + raw[1].toLowerCase();
   if (raw && /^curso/i.test(raw[1])) obj = 'o ' + raw[1].toLowerCase();
+  if (best.tp.k === 'viagem' || best.tp.k === 'mudanca') {
+    const dest = (text || '').match(/\b(?:para|pra|pro) (os |as |o |a )?(eua|estados unidos|[A-ZÀ-Ú][\wÀ-ú]+(?: [A-ZÀ-Ú][\wÀ-ú]+)?)/i);
+    if (dest) { const d = /^eua$/i.test(dest[2]) ? 'EUA' : dest[2].replace(/^\w/, (c) => c.toUpperCase()); obj = `${best.tp.k === 'viagem' ? 'a viagem' : 'a mudança'} para ${dest[1] || ''}${d}`; }
+  }
   const act = ACTIONS.find((a) => a.re.test(t)) || null;
   return { topic: best.tp, obj, act };
 }
@@ -130,6 +149,9 @@ const STEP = {
   hobby: 'Faça um teste de 30 dias com o menor tempo possível por dia e observe como você se sente.',
   trabalho: 'Converse com alguém que já está onde você quer chegar e liste, em números, o que ganha e o que perde.',
   estudo: 'Converse com quem já fez esse caminho e calcule o tempo real que você tem por semana.',
+  viagem: 'Coloque no papel o custo total da viagem e compare com sua reserva antes de decidir.',
+  casa: 'Faça as contas com calma: valor total, parcelas e uma reserva para imprevistos.',
+  pet: 'Passe um fim de semana cuidando do bichinho de alguém para sentir a rotina de verdade.',
   mudanca: 'Antes da mudança, viva um mês por lá como morador, não como turista: rotina, trabalho, dia de chuva.',
   amor: 'Tenha uma conversa honesta, sem pressa, sobre o que você sente e o que precisa.',
   saude: 'Escolha a menor versão possível desse hábito e mantenha por 14 dias.',
@@ -140,6 +162,9 @@ const STEP = {
 };
 const PLAN = {
   _: ['Escrever numa folha o que te move e o que te segura', 'Conversar com duas pessoas de confiança sobre isso', 'Buscar as informações que ainda faltam', 'Fazer um teste pequeno antes da decisão', 'Revisitar esta pergunta na Alma e decidir'],
+  viagem: ['Definir quanto você pode gastar', 'Pesquisar passagens e hospedagem', 'Conferir documentos, visto e datas', 'Montar um roteiro leve', 'Revisitar esta pergunta na Alma e decidir'],
+  casa: ['Definir quanto você pode investir', 'Visitar ou orçar pelo menos três opções', 'Pedir a opinião de alguém de confiança', 'Esperar 7 dias antes de fechar', 'Revisitar esta pergunta na Alma e decidir'],
+  pet: ['Pesquisar o porte e a rotina ideal para você', 'Calcular os custos do mês', 'Visitar uma ONG ou abrigo', 'Combinar quem ajuda nas viagens', 'Revisitar esta pergunta na Alma e decidir'],
   mudanca: ['Escrever numa folha o que te move e o que te segura', 'Conversar com duas pessoas que você ama sobre isso', 'Pesquisar custo de vida, trabalho e bairros', 'Passar um mês lá vivendo como morador', 'Revisitar esta pergunta na Alma e decidir'],
   musica: ['Escrever por que você começou', 'Olhar o quanto já evoluiu desde o início', 'Ajustar horário ou formato para caber na rotina', 'Praticar 15 minutos por dia durante um mês', 'Revisitar esta pergunta na Alma e decidir'],
   hobby: ['Escrever por que você começou', 'Olhar o quanto já evoluiu desde o início', 'Ajustar horário ou formato para caber na rotina', 'Praticar um pouco por dia durante um mês', 'Revisitar esta pergunta na Alma e decidir'],

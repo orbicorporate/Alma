@@ -8,31 +8,31 @@
 .aj .aj-back { width: 40px; height: 44px; margin-left: -10px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 200; }
 .aj-title { font-size: 26px; font-weight: 300; }
 .aj-sec { display: flex; flex-direction: column; gap: var(--s2); }
-.aj-k { font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6); padding-left: 4px; }
+.aj-k { font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6); padding-left: 4px; }
 .aj-card { border-radius: 22px; padding: var(--s4); display: flex; flex-direction: column; gap: var(--s3); background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.13); box-shadow: inset 0 1px 0 rgba(255,255,255,.1); }
 .aj-list { padding: 4px 0; gap: 0; }
 .aj .aj-row { display: flex; align-items: center; gap: var(--s3); padding: 12px var(--s4); min-height: 60px; box-sizing: border-box; width: 100%; }
 .aj .aj-row + .aj-row { border-top: 1px solid rgba(255,255,255,.07); }
-.aj-ic { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #c9b8ff; background: rgba(201,184,255,.12); border: 1px solid rgba(201,184,255,.3); font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; }
+.aj-ic { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16.5px; color: #c9b8ff; background: rgba(201,184,255,.12); border: 1px solid rgba(201,184,255,.3); font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; }
 .aj-danger .aj-ic { color: #ffa3a3; background: rgba(255,163,163,.1); border-color: rgba(255,163,163,.3); }
 .aj-danger .aj-txt > span { color: #ffb8b8; }
-.aj-txt { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 15.5px; }
-.aj-txt small { font-size: 13px; font-weight: 300; line-height: 1.4; color: rgba(244,241,234,.6); }
+.aj-txt { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 16.5px; }
+.aj-txt small { font-size: 14.5px; font-weight: 300; line-height: 1.4; color: rgba(244,241,234,.6); }
 .aj-chev { font-size: 22px; font-weight: 200; color: rgba(244,241,234,.45); }
 .aj-acc { display: flex; align-items: center; gap: var(--s3); }
 .aj-avatar { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 19px; color: #1a1030; background: linear-gradient(135deg, #e4d6ff, #b9a6ff 60%, #f5a8c8); box-shadow: 0 0 20px rgba(201,184,255,.45); }
-.aj-p { font-size: 14.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.85); }
-.aj-small { font-size: 13px; line-height: 1.45; color: rgba(244,241,234,.6); }
-.aj .aj-btn { height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,.22); font-size: 14.5px; text-align: center; white-space: nowrap; }
+.aj-p { font-size: 16px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.85); }
+.aj-small { font-size: 14.5px; line-height: 1.45; color: rgba(244,241,234,.6); }
+.aj .aj-btn { height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,.22); font-size: 16px; text-align: center; white-space: nowrap; }
 .aj .aj-btn-full { width: 100%; }
 .aj .aj-btn-light { background: #f4f1ea; color: #1a1030; border: 0; font-weight: 500; }
 .aj .aj-btn-danger { color: #ffb8b8; border-color: rgba(255,163,163,.45); background: rgba(255,163,163,.08); }
 .aj-btns { display: flex; gap: var(--s2); }
-.aj-confirm { gap: var(--s3); font-size: 14.5px; font-weight: 300; line-height: 1.5; border-color: rgba(255,163,163,.35); }
+.aj-confirm { gap: var(--s3); font-size: 16px; font-weight: 300; line-height: 1.5; border-color: rgba(255,163,163,.35); }
 .aj-inline { display: flex; gap: var(--s2); }
-.aj-input { flex-grow: 1; min-width: 0; height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.05); color: #f4f1ea; font: inherit; font-size: 15px; outline: none; }
+.aj-input { flex-grow: 1; min-width: 0; height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.05); color: #f4f1ea; font: inherit; font-size: 16.5px; outline: none; }
 .aj-toggle { width: 46px; height: 28px; flex-shrink: 0; border-radius: 999px; background: rgba(255,255,255,.14); position: relative; transition: background .3s ease; }
 .aj-toggle i { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #f4f1ea; transition: transform .3s ease; }
 .aj-toggle.on { background: #8fe3b0; }
 .aj-toggle.on i { transform: translateX(18px); }
-.aj-toast { position: absolute; left: var(--s5); right: var(--s5); bottom: 110px; z-index: 30; min-height: 44px; box-sizing: border-box; padding: 10px 18px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: rgba(22,20,40,.95); border: 1px solid rgba(255,255,255,.15); }
+.aj-toast { position: absolute; left: var(--s5); right: var(--s5); bottom: 110px; z-index: 30; min-height: 44px; box-sizing: border-box; padding: 10px 18px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 15.5px; background: rgba(22,20,40,.95); border: 1px solid rgba(255,255,255,.15); }

@@ -31,21 +31,24 @@ export default function NatalSphere({ sim, profile }) {
   const [settled, setSettled] = useState(false);
   const [sel, setSel] = useState('sun');
   const [needsMotion, setNeedsMotion] = useState(false);
+  useEffect(() => { if (!landed) return; const k2 = setTimeout(() => setSettled(true), 2400); return () => clearTimeout(k2); }, [landed]);
   const box = useRef(null);
 
   useEffect(() => {
     let raf, last = performance.now();
     const loop = (t) => { const dt = Math.min(64, t - last); last = t; setRot((r) => (r + dt * 0.004) % 360); raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop);
-    const k = setTimeout(() => setLanded(true), 60);
-    const k2 = setTimeout(() => setSettled(true), 2600);
+    // os planetas caem na órbita quando a esfera aparece na tela
+    let k = null;
+    const io = typeof IntersectionObserver !== 'undefined' ? new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { k = setTimeout(() => setLanded(true), 60); io.disconnect(); } }, { threshold: 0.35 }) : null;
+    if (io && box.current) io.observe(box.current); else k = setTimeout(() => setLanded(true), 60);
     const onOri = (e) => {
       if (e.gamma == null) return;
       setTilt({ x: Math.max(-1, Math.min(1, e.gamma / 30)), y: Math.max(-1, Math.min(1, (e.beta - 45) / 30)) });
     };
     window.addEventListener('deviceorientation', onOri);
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') setNeedsMotion(true);
-    return () => { cancelAnimationFrame(raf); clearTimeout(k); clearTimeout(k2); window.removeEventListener('deviceorientation', onOri); };
+    return () => { cancelAnimationFrame(raf); clearTimeout(k); io && io.disconnect(); window.removeEventListener('deviceorientation', onOri); };
   }, []);
 
   // Trânsitos de hoje sobre os pontos do mapa (orbe de até 3°).
@@ -114,13 +117,13 @@ export default function NatalSphere({ sim, profile }) {
           const sc = 0.72 + 0.38 * (pos.depth + 1) / 2;
           const isSel = sel === p.k, isAct = !!active[p.k];
           return (
-            <div key={p.k} className="sp-slot" style={{ left: pos.x - 20, top: pos.y - 20, zIndex: pos.depth > 0 ? 5 : 1, opacity: 0.5 + 0.5 * (pos.depth + 1) / 2 }}>
+            <div key={p.k} className="sp-slot" style={{ left: pos.x - 20, top: pos.y - 20, zIndex: pos.depth > 0 ? 5 : 1, opacity: landed ? 0.5 + 0.5 * (pos.depth + 1) / 2 : 0, transition: 'opacity .8s ease' }}>
               <button
                 className={'sp-planet sym' + (isAct ? ' sp-active' : '') + (isSel ? ' sp-sel' : '')}
                 onClick={() => setSel(p.k)}
                 aria-label={`${p.name} em ${sim.SIGNS[p.sign]}`}
                 aria-pressed={isSel ? 'true' : 'false'}
-                style={{ color: p.color, borderColor: p.color + (isSel ? '' : '88'), boxShadow: `0 0 ${isSel ? 26 : 14}px ${p.color}${isSel ? 'aa' : '55'}`, transform: `translateY(${landed ? 0 : -380}px) scale(${sc * (isSel ? 1.18 : 1)})`, transition: settled ? 'box-shadow .4s ease, border-color .4s ease' : `transform 1.3s cubic-bezier(.2,.9,.3,1.15) ${i * 110}ms`, fontSize: p.k === 'asc' ? 12 : 17 }}
+                style={{ color: p.color, borderColor: p.color + (isSel ? '' : '88'), boxShadow: `0 0 ${isSel ? 26 : 14}px ${p.color}${isSel ? 'aa' : '55'}`, transform: `translateY(${landed ? 0 : -150}px) scale(${sc * (isSel ? 1.18 : 1)})`, transition: settled ? 'box-shadow .4s ease, border-color .4s ease' : `transform 1.3s cubic-bezier(.2,.9,.3,1.15) ${i * 110}ms`, fontSize: p.k === 'asc' ? 12 : 17 }}
               >{p.g}</button>
             </div>
           );
@@ -140,7 +143,7 @@ export default function NatalSphere({ sim, profile }) {
             <span className="sp-sub">{Math.floor(s.deg)}° · Casa {s.house} · {sim.HOUSE[s.house - 1]}</span>
           </span>
         </div>
-        <div className="kicker" style={{ fontSize: 11.5, marginTop: 4 }}>Como age em você</div>
+        <div className="kicker" style={{ fontSize: 13, marginTop: 4 }}>Como age em você</div>
         <p className="sp-text">{how}</p>
         {act.length ? (
           <div className="sp-today">
@@ -150,7 +153,7 @@ export default function NatalSphere({ sim, profile }) {
             ))}
           </div>
         ) : null}
-        <div className="kicker" style={{ fontSize: 11.5, marginTop: 6 }}>Dicas para cada área</div>
+        <div className="kicker" style={{ fontSize: 13, marginTop: 6 }}>Dicas para cada área</div>
         <div className="sp-tips">
           {AREAS.map((a, j) => (
             <div key={j} className="sp-tip">

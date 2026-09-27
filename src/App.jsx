@@ -47,20 +47,15 @@ export default function App() {
   useLayoutEffect(() => {
     const fit = () => {
       const w = window.innerWidth, h = window.innerHeight;
-      if (w < 700) {
-        // No celular: o conteúdo cabe inteiro e o fundo do app preenche a tela toda, em qualquer proporção.
-        // área do relógio e da câmera do iPhone: o conteúdo começa abaixo dela,
-        // e a escala garante que as 844 unidades de conteúdo caibam no espaço que sobra
-        const probe = document.createElement('div');
-        probe.style.cssText = 'position:fixed;top:0;left:0;height:0;padding-top:env(safe-area-inset-top);visibility:hidden';
-        document.body.appendChild(probe);
-        const top = probe.offsetHeight; probe.remove();
-        const sc = Math.min(w / 390, (h - top) / 844);
-        setSat(Math.ceil(top / sc));
-        setScale(sc); setFw(w / sc); setFh(h / sc); setFill(true);
-      } else {
-        setScale(Math.min(w / 390, h / 844, 1.25)); setFw(390); setFh(844); setFill(false); setSat(0);
-      }
+      // Em qualquer tela (celular ou navegador), a coluna do app fica no centro
+      // e os fundos, auroras e estrelas preenchem as laterais.
+      const probe = document.createElement('div');
+      probe.style.cssText = 'position:fixed;top:0;left:0;height:0;padding-top:env(safe-area-inset-top);visibility:hidden';
+      document.body.appendChild(probe);
+      const top = probe.offsetHeight; probe.remove();
+      const sc = w < 700 ? Math.min(w / 390, (h - top) / 844) : Math.min((h - top) / 844, 1.15);
+      setSat(Math.ceil(top / sc));
+      setScale(sc); setFw(w / sc); setFh(h / sc); setFill(true);
     };
     fit();
     window.addEventListener('resize', fit);

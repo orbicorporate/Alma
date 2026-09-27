@@ -117,7 +117,10 @@ export default function Constelacao() {
   useLayoutEffect(() => {
     const fit = () => { const r = cv.current && cv.current.closest('.route'); if (r) setDim({ W: Math.max(390, r.offsetWidth), H: Math.max(600, r.offsetHeight) }); };
     fit(); window.addEventListener('resize', fit);
-    return () => window.removeEventListener('resize', fit);
+    const r = cv.current && cv.current.closest('.route');
+    const ro = r && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(fit) : null;
+    if (ro) ro.observe(r);
+    return () => { window.removeEventListener('resize', fit); ro && ro.disconnect(); };
   }, []);
   st.current.dim = dim;
 
@@ -316,7 +319,7 @@ export default function Constelacao() {
         }
         ctx.globalCompositeOperation = 'source-over';
         if (z > 1.05 && it.kind !== 'estrela') {
-          ctx.globalAlpha = r * Math.min(1, (z - 1.05) * 3) * 0.9; ctx.fillStyle = '#f4f1ea'; ctx.font = '300 11px Manrope, sans-serif'; ctx.textAlign = 'center';
+          ctx.globalAlpha = r * Math.min(1, (z - 1.05) * 3) * 0.9; ctx.fillStyle = '#f4f1ea'; ctx.font = '300 12.5px Manrope, sans-serif'; ctx.textAlign = 'center';
           const lab = (it.title || '').length > 26 ? it.title.slice(0, 25) + '…' : it.title || '';
           ctx.fillText(lab, p.x, p.y + size * 2.2 + 12); ctx.textAlign = 'left'; ctx.globalAlpha = 1;
         }
@@ -339,7 +342,7 @@ export default function Constelacao() {
         const topFade = Math.min(1, Math.max(0, (ly - 170) / 60)), inFade = Math.min(1, Math.max(0, (t - 1.5) / 1.5));
         if (topFade * inFade < 0.02 || ly > H - 180) return;
         ctx.globalAlpha = inFade * 0.8 * topFade;
-        ctx.fillStyle = th.color; ctx.font = '400 11.5px Manrope, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillStyle = th.color; ctx.font = '400 13px Manrope, sans-serif'; ctx.textAlign = 'center';
         ctx.shadowColor = th.color; ctx.shadowBlur = 12;
         ctx.fillText(th.label.toUpperCase().split('').join(' '), c0.x, ly);
         ctx.shadowBlur = 0; ctx.textAlign = 'left';
