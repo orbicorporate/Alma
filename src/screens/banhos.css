@@ -32,7 +32,10 @@
 .bh-note { font-size: 13.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.65); }
 .bh .bh-card { display: flex; align-items: center; gap: var(--s3); width: 100%; box-sizing: border-box; padding: var(--s4); border-radius: 20px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); transition: transform .3s ease, background .3s ease; animation: bhIn .6s ease both; }
 .bh .bh-card:hover { transform: translateY(-2px); background: rgba(255,255,255,.09); }
-.bh-orb { width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; align-self: flex-start; background: radial-gradient(circle at 35% 30%, #fff, var(--c) 45%, rgba(0,0,0,0) 75%); box-shadow: 0 0 18px var(--c); opacity: .9; }
+.bh-orb { position: relative; overflow: hidden; isolation: isolate; width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; align-self: flex-start; background: var(--c); box-shadow: 0 0 18px var(--c); }
+.bh-orb::before { content: ''; position: absolute; inset: -35%; border-radius: 50%; background: conic-gradient(from 0deg, var(--c), #ffffff, var(--c), #b9a6ff, var(--c)); filter: blur(5px); animation: bhSpin 5s linear infinite; z-index: -1; }
+.bh-orb::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.9), rgba(255,255,255,.25) 26%, transparent 52%); }
+@keyframes bhSpin { to { transform: rotate(360deg); } }
 .bh-orb-lg { width: 54px; height: 54px; animation: bhPulse 4s ease-in-out infinite; }
 @keyframes bhPulse { 50% { transform: scale(1.08); } }
 .bh-card-txt { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex-grow: 1; }

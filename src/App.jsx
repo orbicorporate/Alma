@@ -47,13 +47,14 @@ export default function App() {
       const w = window.innerWidth, h = window.innerHeight;
       if (w < 700) {
         // No celular: o conteúdo cabe inteiro e o fundo do app preenche a tela toda, em qualquer proporção.
-        const sc = Math.min(w / 390, h / 844);
-        // área do relógio e da câmera do iPhone: o conteúdo começa abaixo dela
+        // área do relógio e da câmera do iPhone: o conteúdo começa abaixo dela,
+        // e a escala garante que as 844 unidades de conteúdo caibam no espaço que sobra
         const probe = document.createElement('div');
         probe.style.cssText = 'position:fixed;top:0;left:0;height:0;padding-top:env(safe-area-inset-top);visibility:hidden';
         document.body.appendChild(probe);
         const top = probe.offsetHeight; probe.remove();
-        setSat(Math.round(top / sc));
+        const sc = Math.min(w / 390, (h - top) / 844);
+        setSat(Math.ceil(top / sc));
         setScale(sc); setFw(w / sc); setFh(h / sc); setFill(true);
       } else {
         setScale(Math.min(w / 390, h / 844, 1.25)); setFw(390); setFh(844); setFill(false); setSat(0);

@@ -4,6 +4,7 @@ import { DCLogic, css } from '../dc/runtime.js';
 import { today, addDays, iso, dayMonth, stepInfo } from '../dates.js';
 import { PH, nextPhraseIndex } from '../phrases.js';
 import MiniCosmos from '../components/MiniCosmos.jsx';
+import { contextQS, contextOf, stepFor, planSteps } from '../questions.js';
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
 
 class Component extends DCLogic {
@@ -165,11 +166,13 @@ class Component extends DCLogic {
       const move = MOVE[A[0]] || (A[0] ? low(A[0]) : 'algo que você sente, mesmo sem nome ainda');
       const hold = HOLD[A[1]] || (A[1] ? low(A[1]) : 'algo que ainda não tem nome');
       const feel = FEEL[A[2]] || (A[2] && A[2] !== 'Ainda não sei' ? low(A[2]) : null);
+      const cx = contextOf(s.text);
+      const about = cx ? ` sobre ${cx.obj}` : '';
       return {
-        p1: `Você trouxe uma escolha, não um problema. O que te move é ${move}; o que te segura é ${hold}.`,
-        p2: 'Quase todas as vozes concordam que buscar o que te chama é legítimo. Mas pedem pés no chão: Sêneca lembra que a alma vai junto na mala, e Confúcio pede que você separe o que sabe do que ainda é imagem de férias. ' +
-          (feel ? `Ao se imaginar lá, você se sente ${feel}. Um sentimento assim costuma ser bússola, não capricho.` : 'Você ainda não sabe como se sentiria, e tudo bem: é exatamente isso que um teste pequeno responde.'),
-        step: 'Antes da mudança, viva um mês por lá como morador, não como turista: rotina, trabalho, dia de chuva. Depois faça esta pergunta de novo.'
+        p1: `Você trouxe uma escolha${about}, não um problema. O que te move é ${move}; o que te pede atenção é ${hold}.`,
+        p2: 'Quase todas as vozes concordam que o que te chama merece ser ouvido. Mas pedem pés no chão: Sêneca lembra que levamos a nós mesmos aonde vamos, e Confúcio pede que você separe o que sabe do que ainda é imaginação. ' +
+          (feel ? `Ao se imaginar nesse caminho, você se sente ${feel}. Um sentimento assim costuma ser bússola, não capricho.` : 'Você ainda não sabe como se sentiria, e tudo bem: é exatamente isso que um teste pequeno responde.'),
+        step: stepFor(s.text) + ' Depois faça esta pergunta de novo.'
       };
     }
     const tags = A.filter(Boolean).map((t) => t.toLowerCase()).join(', ');
@@ -179,16 +182,10 @@ class Component extends DCLogic {
       step: 'Marque com estrela a voz que mais tocou você e releia amanhã cedo, com calma.'
     };
   }
-  planFor(kind) {
+  planFor(kind, text) {
     const D = [0, 7, 9, 36, 66], G = [0, 1, 3, 14];
     const mk = (list, offs) => list.map((t, i) => ({ t, iso: iso(addDays(today(), offs[i])), done: false, remind: i < 2 }));
-    if (kind === 'Dúvida') return mk([
-      'Escrever numa folha o que te move e o que te segura',
-      'Conversar com duas pessoas que você ama sobre isso',
-      'Pesquisar custo de vida, trabalho e bairros',
-      'Passar um mês lá vivendo como morador',
-      'Revisitar esta pergunta na Alma e decidir'
-    ], D);
+    if (kind === 'Dúvida') return mk(planSteps(text), D);
     return mk([
       'Reler a voz que mais tocou você',
       'Dar um passo pequeno e concreto',
@@ -311,7 +308,7 @@ class Component extends DCLogic {
       w, style: `--dx: ${((rnd(i, 7) - 0.5) * 140).toFixed(0)}px; --rot: ${((rnd(i, 8) - 0.5) * 40).toFixed(0)}deg; animation-delay: ${400 + i * 70}ms`
     }));
 
-    const qs = this.QS[s.kind] || this.QS['Dúvida'];
+    const qs = contextQS(s.text, s.kind, this.QS);
     const cq = qs[Math.min(s.step, 2)];
     const bars = [0, 1, 2].map((i) => ({ style: i <= s.step ? 'background: #f3d98b; box-shadow: 0 0 10px rgba(243,217,139,.6)' : 'background: rgba(255,255,255,.16)' }));
     const dtags = cq.tags.map((tg) => {
@@ -565,8 +562,8 @@ class Component extends DCLogic {
       saveLabel: s.savedNow ? 'Guardado na sua constelação' : 'Guardar na minha Alma',
       saveStyle: s.savedNow ? 'opacity: .6' : 'box-shadow: 0 0 30px rgba(243,217,139,.22)',
       isPlan: scr === 'plan', pl: this.planView(),
-      previewSteps: this.planFor(s.kind).slice(0, 3).map((x, i) => ({ n: i + 1, t: x.t })),
-      previewMore: `+ ${this.planFor(s.kind).length - 3} passos, com datas e lembretes`,
+      previewSteps: this.planFor(s.kind, s.text).slice(0, 3).map((x, i) => ({ n: i + 1, t: x.t })),
+      previewMore: `+ ${this.planFor(s.kind, s.text).length - 3} passos, com datas e lembretes`,
       planCta: (s.savedNow && s.savedIdx >= 0 && ents[s.savedIdx] && ents[s.savedIdx].plan) ? 'Ver meu plano de ação' : 'Criar meu plano de ação',
       createPlan: () => {
         const st = this.state;
@@ -580,17 +577,17 @@ class Component extends DCLogic {
           });
           idx = list.length - 1;
         }
-        if (!list[idx].plan) list[idx] = Object.assign({}, list[idx], { plan: this.planFor(list[idx].kind) });
+        if (!list[idx].plan) list[idx] = Object.assign({}, list[idx], { plan: this.planFor(list[idx].kind, list[idx].q) });
         this.setState({ entries: list, savedNow: true, savedIdx: idx, screen: 'plan', planIdx: idx, planPrev: 'answers' });
       },
       openPlanFromSheet: () => this.setState({ screen: 'plan', planIdx: this.state.sheet, planPrev: 'journal', sheet: -1 }),
       makePlanFromSheet: () => {
         const k = this.state.sheet;
-        updEntry((e) => { e.plan = this.planFor(e.kind); return e; });
+        updEntry((e) => { e.plan = this.planFor(e.kind, e.q); return e; });
         this.setState({ screen: 'plan', planIdx: k, planPrev: 'journal', sheet: -1 });
       },
       hasNext: !!nextStep, next: nextStep || { t: '', n: '', total: '', q: '', kind: '', when: '', bell: '', bellFill: 'none', dot: '', open: () => {}, done: () => {} },
-      makePlan: () => updEntry((e) => { e.plan = this.planFor(e.kind); return e; }),
+      makePlan: () => updEntry((e) => { e.plan = this.planFor(e.kind, e.q); return e; }),
       skyStars, skyLines, entryRows, jfilters, noEntries: entryRows.length === 0, sheet, sheetOpen: s.sheet >= 0, entryCount: ents.length,
       resolveLabel: se && se.resolved ? 'Reabrir esta pergunta' : 'Já resolvi',
       resolveStyle: se && se.resolved ? '' : 'border-color: rgba(143,227,176,.45); background: rgba(143,227,176,.08)',
@@ -791,6 +788,7 @@ Component.prototype.render = function render() {
           <div className="halo"></div>
           <div className="ring"></div>
           <div className="ring ring2"></div>
+          <div className="core"><i></i></div>
           <div className="blob b1"></div>
           <div className="blob b2"></div>
           <div className="blob b3"></div>
@@ -1456,7 +1454,7 @@ Component.prototype.render = function render() {
                   </p>
                 </div>
                 <a href="#/constelacao" className="cta" style={css('position: relative; overflow: hidden; height: 64px; border-radius: 22px; display: flex; align-items: center; gap: 14px; padding: 0 18px; text-decoration: none; color: #f4f1ea; background: radial-gradient(circle at 20% 50%, rgba(201,184,255,.35), rgba(20,16,44,.9) 60%); border: 1px solid rgba(201,184,255,.45); box-shadow: 0 0 30px rgba(201,184,255,.2)')}>
-                  <span style={css('width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #c9b8ff 45%, rgba(201,184,255,0) 72%); box-shadow: 0 0 20px #c9b8ff')} />
+                  <span className="orb-live" style={css('width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; box-shadow: 0 0 20px #c9b8ff')} />
                   <span style={css('display: flex; flex-direction: column; gap: 2px')}>
                     <span style={css('font-size: 15px; font-weight: 400')}>Abrir o céu em tela inteira</span>
                     <span style={css('font-size: 13.5px; font-weight: 300; color: rgba(244,241,234,.65)')}>Tudo o que você viveu na Alma, em luz</span>

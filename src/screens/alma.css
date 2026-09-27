@@ -73,3 +73,11 @@
   background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(96,72,200,.45), transparent 70%), radial-gradient(ellipse 50% 35% at 50% 100%, rgba(58,40,130,.35), transparent 70%), linear-gradient(180deg, #1b1542 0%, #120e2e 45%, #0c0a1c 100%); }
 .sc-main .alma.reading .reading-bg { opacity: 1; }
 .sc-main .alma.reading .aurora { opacity: .18; }
+
+.sc-main .core{position:absolute;inset:4.5%;border-radius:50%;overflow:hidden;opacity:1}
+.sc-main .core i{position:absolute;inset:-35%;border-radius:50%;background:conic-gradient(from 0deg,#7d5cff,#ff8ec4,var(--m2),#ffbe7a,#52d6c4,var(--m3),#5f9dff,var(--m1),#7d5cff);filter:blur(12px) saturate(130%);animation:coreSpin 6s linear infinite}
+@keyframes coreSpin{to{transform:rotate(360deg)}}
+.sc-main .halo{background:conic-gradient(from 0deg,var(--m1),var(--m2),var(--m3),var(--m1));animation:pulse 6s ease-in-out infinite,coreSpin 12s linear infinite reverse}
+@media (prefers-reduced-motion:reduce){.sc-main .core i,.sc-main .halo{animation:none}}
+.sc-main .blob{opacity:.5}
+.sc-main .core::after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 50%,transparent 45%,rgba(20,10,60,.35))}
