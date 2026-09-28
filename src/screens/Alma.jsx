@@ -6,6 +6,7 @@ import { PH, nextPhraseIndex } from '../phrases.js';
 import MiniCosmos from '../components/MiniCosmos.jsx';
 import { voiceFor } from '../voices.js';
 import { aiQuestions, aiCouncil } from '../ai.js';
+import MovieTip from '../components/MovieTip.jsx';
 import { contextQS, contextOf, stepFor, planSteps, planNameOf, moodOf } from '../questions.js';
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
 
@@ -1323,6 +1324,7 @@ Component.prototype.render = function render() {
                     </p>
                   </div>
                 </div>
+                <MovieTip text={this.state.text} kind={this.state.kind} />
                 <div className="glass cardin" style={css("border-radius: 26px; padding: 22px 14px 20px; border-color: rgba(143,227,176,.4); box-shadow: 0 0 40px rgba(143,227,176,.08), inset 0 1px 0 rgba(255,255,255,.12); animation-delay: 300ms")}>
                   <div style={css("display: flex; align-items: center; gap: 10px")}>
                     <span style={css("width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(143,227,176,.14); color: #8fe3b0")}>
