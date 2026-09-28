@@ -1,7 +1,7 @@
 // Alma AI (Vercel): perguntas de aprofundamento e respostas do Conselho escritas por um modelo Claude,
 // no contexto exato do que a pessoa trouxe. A chave fica na variável ANTHROPIC_API_KEY do projeto na Vercel.
 const MODEL_Q = process.env.ALMA_MODEL_QUESTIONS || 'claude-sonnet-5';
-const MODEL_C = process.env.ALMA_MODEL_COUNCIL || 'claude-opus-5-5';
+const MODEL_C = process.env.ALMA_MODEL_COUNCIL || 'claude-sonnet-5';
 const hits = new Map();
 function limited(ip) {
   const now = Date.now(), arr = (hits.get(ip) || []).filter((t) => now - t < 3600000);
