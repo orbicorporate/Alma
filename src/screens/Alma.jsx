@@ -5,6 +5,7 @@ import { today, addDays, iso, fromIso, dayMonth, stepInfo } from '../dates.js';
 import { PH, nextPhraseIndex } from '../phrases.js';
 import MiniCosmos from '../components/MiniCosmos.jsx';
 import { voiceFor } from '../voices.js';
+import { aiQuestions, aiCouncil } from '../ai.js';
 import { contextQS, contextOf, stepFor, planSteps, planNameOf, moodOf } from '../questions.js';
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
 
@@ -144,7 +145,15 @@ class Component extends DCLogic {
   }
   startCouncil() {
     clearInterval(this.ci);
-    this.setState({ screen: 'council', lit: 0, focus: -1 });
+    this.setState({ screen: 'council', lit: 0, focus: -1, aiCouncil: null, aiState: 'c', councilT0: Date.now() });
+    const s0 = this.state, text = s0.text;
+    const qs = (s0.aiQs || contextQS(s0.text, s0.kind, this.QS)).map((q) => q.q);
+    const voices = this.AG.map((a, i) => { const v = this.voice(i); return { name: v.name, ref: v.ref, tr: v.tr }; });
+    aiCouncil({ text, kind: s0.kind, questions: qs, answers: s0.ans, voices }).then((r) => {
+      if (this.state.text !== text) return;
+      this.setState({ aiCouncil: r, aiState: r ? 'ok' : 'off' });
+    });
+    clearTimeout(this.tcw); this.tcw = setTimeout(() => { if (this.state.aiState === 'c') this.setState({ aiState: 'slow' }); }, 30500);
     this.ci = setInterval(() => {
       const n = this.state.lit + 1;
       this.setState({ lit: n });
@@ -157,8 +166,21 @@ class Component extends DCLogic {
     if (s.step < 2) this.setState({ step: s.step + 1 });
     else this.startCouncil();
   }
+  // Duas vozes do Conselho, escolhidas a partir do próprio texto, para a síntese variar a cada pergunta.
+  pickVoices() {
+    const t = (this.state.text || '') + this.state.kind + (this.state.ans || []).join('');
+    let h = 0; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0;
+    const n = this.AG.length, a = h % n, b = (a + 1 + ((h >>> 5) % (n - 1))) % n;
+    return { h, v1: this.voice(a), v2: this.voice(b) };
+  }
+  voicesLine() {
+    const { h, v1, v2 } = this.pickVoices();
+    const lead = ['Duas vozes do Conselho se destacam para você.', 'Entre as catorze, duas falam mais perto do seu momento.', 'Vindas de lugares diferentes, duas vozes se encontram aqui.'][h % 3];
+    return `${lead} ${v1.name}: “${v1.tr}” E ${v2.name}: “${v2.tr}”`;
+  }
   composeAlma() {
     const s = this.state, A = s.ans;
+    if (s.aiCouncil && s.aiCouncil.alma && s.aiCouncil.alma.p1) return s.aiCouncil.alma;
     if (s.kind === 'Dúvida') {
       const MOVE = { 'Paz': 'a paz', 'Natureza': 'a natureza', 'Liberdade': 'a liberdade', 'Recomeço': 'um recomeço', 'Qualidade de vida': 'mais qualidade de vida' };
       const HOLD = { 'Trabalho': 'o trabalho', 'Dinheiro': 'a questão financeira', 'Pessoas que amo': 'as pessoas que você ama', 'Medo de errar': 'o medo de errar', 'Só a coragem': 'apenas a coragem de começar' };
@@ -170,8 +192,8 @@ class Component extends DCLogic {
       const cx = contextOf(s.text);
       const about = cx ? ` sobre ${cx.obj}` : '';
       return {
-        p1: `Você trouxe uma escolha${about}, não um problema. O que te move é ${move}; o que te pede atenção é ${hold}.`,
-        p2: 'Quase todas as vozes concordam que o que te chama merece ser ouvido. Mas pedem pés no chão: Epicteto pede que você separe o que depende de você do que não depende, e Confúcio, o que você sabe do que ainda é imaginação. ' +
+        p1: [`Você trouxe uma escolha${about}, não um problema.`, `Há uma decisão viva em você${about}.`, `Você está diante de um caminho${about}, e isso pede escuta.`][this.pickVoices().h % 3] + ` O que te move: ${move}. O que te pede atenção: ${hold}.`,
+        p2: this.voicesLine() + ' ' +
           (feel ? `Ao se imaginar nesse caminho, você se sente ${feel}. Um sentimento assim costuma ser bússola, não capricho.` : 'Você ainda não sabe como se sentiria, e tudo bem: é exatamente isso que um teste pequeno responde.'),
         step: stepFor(s.text) + ' Depois faça esta pergunta de novo.'
       };
@@ -179,29 +201,31 @@ class Component extends DCLogic {
     const low = (x) => (x ? x.charAt(0).toLowerCase() + x.slice(1) : '');
     if (s.kind === 'Alegria') return {
       p1: `Você trouxe uma alegria${A[0] ? ', que vem de ' + low(A[0]) : ''}. Que bom poder celebrar com você.`,
-      p2: 'Quase todas as tradições ensinam que a gratidão multiplica o que é bom: o salmista canta, Epicuro lembra que o prazer simples é o mais firme, e o Ubuntu diz que a alegria só se completa quando é partilhada.' + (A[1] ? ` Você quer dividir com ${low(A[1]) === 'comigo mesmo' ? 'você mesmo, e isso também é bonito' : low(A[1]) === 'família' ? 'a família' : low(A[1]) === 'amigos' ? 'os amigos' : low(A[1])}.` : ''),
+      p2: this.voicesLine() + (A[1] ? ` Você quer dividir com ${low(A[1]) === 'comigo mesmo' ? 'você mesmo, e isso também é bonito' : low(A[1]) === 'família' ? 'a família' : low(A[1]) === 'amigos' ? 'os amigos' : low(A[1])}.` : ''),
       step: A[2] ? `Hoje, escolha um gesto para ${low(A[2])} essa alegria: escreva no diário o que você sente ou conte para alguém.` : 'Registre esta alegria no seu diário como gratidão, para lembrar dela nos dias mais difíceis.'
     };
     if (s.kind === 'Medo') return {
       p1: `Você trouxe um medo${A[0] ? ' sobre ' + low(A[0]) : ''}. Nomear já é o primeiro passo para ele diminuir.`,
-      p2: 'As vozes concordam que o medo avisa, mas não decide. Sêneca lembra que sofremos mais na imaginação do que na realidade, e os Salmos pedem que você não carregue sozinho.' + (A[2] ? ` O que te acalma é ${low(A[2])}: use isso a seu favor.` : ''),
+      p2: 'O medo avisa, mas não decide. ' + this.voicesLine() + (A[2] ? ` O que te acalma é ${low(A[2])}: use isso a seu favor.` : ''),
       step: 'Escreva o pior cenário, depois o mais provável. Veja a diferença entre os dois com calma.'
     };
     if (s.kind === 'Aflição') return {
       p1: `Você trouxe algo que pesa${A[0] ? ', ligado a ' + low(A[0]) : ''}. Obrigado por confiar isso à Alma.`,
-      p2: 'Todas as tradições falam da dor como passagem, não como destino. O budismo pede que você a olhe com compaixão, e o cristianismo lembra que ninguém precisa atravessá-la sozinho.' + (A[2] ? ` Agora você precisa de ${low(A[2])}, e isso é legítimo.` : ''),
+      p2: 'A dor é passagem, não destino. ' + this.voicesLine() + (A[2] ? ` Agora você precisa de ${low(A[2])}, e isso é legítimo.` : ''),
       step: 'Dê um passo pequeno de cuidado hoje: uma conversa, uma caminhada ou uma noite de descanso. Se o peso estiver grande demais, ligue 188 (CVV).'
     };
     const tags = A.filter(Boolean).map((t) => t.toLowerCase()).join(', ');
     return {
       p1: tags ? `Você trouxe ${this.KP(s.kind)} e contou um pouco mais: ${tags}.` : `Você trouxe ${this.KP(s.kind)}.`,
-      p2: 'Vindas de lugares muito diferentes, as vozes apontam para o mesmo chão: o passo possível de hoje, feito com inteireza, e a confiança de que você não caminha sozinho.',
+      p2: this.voicesLine(),
       step: 'Marque com estrela a voz que mais tocou você e releia amanhã cedo, com calma.'
     };
   }
   planFor(kind, text) {
     const D = [0, 7, 9, 36, 66], G = [0, 1, 3, 14];
-    const mk = (list, offs) => list.map((t, i) => ({ t, iso: iso(addDays(today(), offs[i])), done: false, remind: i < 2 }));
+    const mk = (list, offs) => list.map((t, i) => ({ t, iso: iso(addDays(today(), offs[Math.min(i, offs.length - 1)] + (i >= offs.length ? 7 * (i - offs.length + 1) : 0))), done: false, remind: i < 2 }));
+    const ai = this.state.aiCouncil;
+    if (ai && ai.plan && ai.plan.length >= 3 && text === this.state.text) return mk(ai.plan, [0, 3, 7, 14, 30, 45]);
     if (kind === 'Dúvida') return mk(planSteps(text), D);
     return mk([
       'Reler a voz que mais tocou você',
@@ -362,7 +386,7 @@ class Component extends DCLogic {
       w, style: `--dx: ${((rnd(i, 7) - 0.5) * 140).toFixed(0)}px; --rot: ${((rnd(i, 8) - 0.5) * 40).toFixed(0)}deg; animation-delay: ${400 + i * 70}ms`
     }));
 
-    const qs = contextQS(s.text, s.kind, this.QS);
+    const qs = s.aiQs || contextQS(s.text, s.kind, this.QS);
     const cq = qs[Math.min(s.step, 2)];
     const bars = [0, 1, 2].map((i) => ({ style: i <= s.step ? 'background: #f3d98b; box-shadow: 0 0 10px rgba(243,217,139,.6)' : 'background: rgba(255,255,255,.16)' }));
     const dtags = cq.tags.map((tg) => {
@@ -448,7 +472,8 @@ class Component extends DCLogic {
     if (s.filter === 'stars') idx = idx.filter((i) => s.stars.includes(i));
     else if (typeof s.filter === 'number') idx = [s.filter];
     const cards = idx.map((i, pos) => {
-      const a = this.voice(i);
+      const a0 = this.voice(i);
+      const a = s.aiCouncil && s.aiCouncil.reflections[i] ? Object.assign({}, a0, { reflection: s.aiCouncil.reflections[i] }) : a0;
       const open = s.open === i;
       const on = s.stars.includes(i);
       const base = Math.min(pos, 5) * 180;
@@ -614,7 +639,7 @@ class Component extends DCLogic {
         if (a.enabled && !a.loggedIn && !skipped) this.setState({ screen: 'welcome', loginMsg: '' });
         else { this.setState({ screen: 'ask' }); window.location.hash = '#/inicio'; }
       },
-      rays, councilAgents, councilStatus, councilSub, statusColor, councilReady: s.lit >= N,
+      rays, councilAgents, councilStatus, councilSub, statusColor, councilReady: s.lit >= N && s.aiState !== 'c', councilThinking: s.lit >= N && s.aiState === 'c',
       cards, filters, noCards: cards.length === 0,
       voicesOpen: s.voicesOpen, voicesClosed: !s.voicesOpen, voiceCount: AG.length,
       voiceSyms: AG.map((a, i) => Object.assign(icon(a), {
@@ -693,7 +718,8 @@ class Component extends DCLogic {
       isBreath: scr === 'breath', isAsk: scr === 'ask', isRelease: scr === 'releasing', isDeepen: scr === 'deepen',
       isCouncil: scr === 'council', isAnswers: scr === 'answers', isJournal: scr === 'journal',
       compactHeader: scr === 'answers' || scr === 'journal' || scr === 'plan',
-      showBack: scr === 'plan', showWord: scr !== 'plan', showJournal: scr === 'ask' || scr === 'answers',
+      showBack: ['plan', 'answers', 'journal', 'deepen'].includes(scr), showWord: !['plan', 'answers', 'journal', 'deepen'].includes(scr),
+      backLabel: scr === 'plan' ? (s.planPrev === 'answers' ? 'Respostas' : 'Minha Alma') : scr === 'answers' ? 'Pergunta' : scr === 'deepen' ? (s.step > 0 ? 'Anterior' : 'Pergunta') : 'Voltar', showJournal: scr === 'ask' || scr === 'answers',
       breathWord: s.inhale ? 'Inspire' : 'Solte',
       breathWordStyle: s.inhale ? 'letter-spacing: .14em; color: #f4f1ea' : 'letter-spacing: .02em; color: rgba(244,241,234,.8)',
       breathSub: s.medit ? 'Com o que depende de você, inspire. Com o que não depende, solte. Fique o tempo que precisar.' : 'Três respirações antes de perguntar. A Alma escuta melhor no silêncio.',
@@ -712,9 +738,17 @@ class Component extends DCLogic {
         // se a pessoa não escolheu o tipo, a Alma lê o sentimento do próprio texto
         const m = moodOf(this.state.text);
         const kind = !this.state.kindPicked && m ? m : this.state.kind;
-        this.setState({ screen: 'releasing', step: 0, ans: [null, null, null], kind });
+        this.setState({ screen: 'releasing', step: 0, ans: [null, null, null], kind, aiQs: null, aiCouncil: null, aiState: 'q' });
         clearTimeout(this.t1);
-        this.t1 = setTimeout(() => this.setState({ screen: 'deepen' }), 3000);
+        const text = this.state.text, t0 = Date.now();
+        let done = false;
+        const go = () => { if (this.state.screen === 'releasing') this.setState({ screen: 'deepen' }); };
+        aiQuestions(text, kind).then((r) => {
+          done = true;
+          if (r && this.state.text === text) this.setState(Object.assign({ aiQs: r.questions }, !this.state.kindPicked && r.kind ? { kind: r.kind } : {}));
+          setTimeout(go, Math.max(0, 3000 - (Date.now() - t0)));
+        });
+        this.t1 = setTimeout(() => { if (!done) this.t1 = setTimeout(go, 6000); else go(); }, 3000);
       },
       skipQ: () => this.advance(),
       hear: () => this.setState({ screen: 'answers', open: -1, filter: 'all', voicesOpen: false }),
@@ -733,7 +767,14 @@ class Component extends DCLogic {
         this.flash('Uma nova estrela na sua constelação');
       },
       openJournal: () => this.setState({ prev: this.state.screen, screen: 'journal', sheet: -1 }),
-      back: () => this.setState(this.state.screen === 'plan' ? { screen: this.state.planPrev || 'journal' } : { screen: this.state.prev || 'ask', sheet: -1 }),
+      back: () => {
+        const st = this.state;
+        if (st.screen === 'plan') this.setState({ screen: st.planPrev || 'journal', planEdit: null, nameEdit: null });
+        else if (st.screen === 'answers') this.setState({ screen: 'ask', open: -1 });
+        else if (st.screen === 'deepen') { clearTimeout(this.tq); this.setState(st.step > 0 ? { step: st.step - 1 } : { screen: 'ask' }); }
+        else if (st.screen === 'journal') { window.location.hash = '#/inicio'; }
+        else this.setState({ screen: st.prev || 'ask', sheet: -1 });
+      },
       closeSheet: () => this.setState({ sheet: -1, confirmDel: false }),
       restart: () => this.setState({ screen: 'ask', open: -1, lit: 0, stars: [], filter: 'all', savedNow: false, ans: [null, null, null], step: 0, text: '', fromWhere: '', kindPicked: false, kind: 'Dúvida' })
     };
@@ -782,25 +823,25 @@ Object.assign(Component.prototype, {
           </div>
           <div style={css('display: flex; flex-direction: column; gap: 8px; margin: 4px 0 6px')}>
             {perks.map((p, i) => (
-              <span key={i} className="fade" style={css(`display: flex; align-items: center; gap: 10px; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.82); animation-delay: ${0.3 + i * 0.15}s`)}>
+              <span key={i} className="fade" style={css(`display: flex; align-items: center; gap: 10px; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.82); animation-delay: ${0.3 + i * 0.15}s`)}>
                 <i style={css(`width: 8px; height: 8px; border-radius: 50%; background: ${p[0]}; box-shadow: 0 0 10px ${p[0]}; flex-shrink: 0`)} />{p[1]}
               </span>
             ))}
           </div>
-          <button className="cta" onClick={async () => { const r = await signInWithGoogle(); if (r.error) this.setState({ loginMsg: r.error }); }} style={css('height: 54px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16.5px; font-weight: 500; color: #1f1f1f; background: #ffffff; box-shadow: 0 0 30px rgba(255,255,255,.15)')}>
+          <button className="cta" onClick={async () => { const r = await signInWithGoogle(); if (r.error) this.setState({ loginMsg: r.error }); }} style={css('height: 54px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17.5px; font-weight: 500; color: #1f1f1f; background: #ffffff; box-shadow: 0 0 30px rgba(255,255,255,.15)')}>
             {G}Continuar com Google
           </button>
-          <div style={css('display: flex; align-items: center; gap: 10px; font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.4)')}>
+          <div style={css('display: flex; align-items: center; gap: 10px; font-size: 16px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.4)')}>
             <span style={css('flex-grow: 1; height: 1px; background: rgba(255,255,255,.12)')} />ou com e-mail<span style={css('flex-grow: 1; height: 1px; background: rgba(255,255,255,.12)')} />
           </div>
           <div style={css('display: flex; gap: 8px')}>
-            <input type="email" value={this.state.loginEmail} onChange={(e) => this.setState({ loginEmail: e.target.value, loginMsg: '' })} placeholder="seu@email.com" aria-label="Seu e-mail" style={css('flex-grow: 1; min-width: 0; height: 50px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #f4f1ea; font: inherit; font-size: 16.5px; outline: none')} />
-            <button className="cta" onClick={() => this.sendLink()} style={css('flex-shrink: 0; height: 50px; padding: 0 18px; border-radius: 999px; font-size: 16.5px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #c9b8ff, #efe8ff 50%, #b8d8ff)')}>Enviar link</button>
+            <input type="email" value={this.state.loginEmail} onChange={(e) => this.setState({ loginEmail: e.target.value, loginMsg: '' })} placeholder="seu@email.com" aria-label="Seu e-mail" style={css('flex-grow: 1; min-width: 0; height: 50px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #f4f1ea; font: inherit; font-size: 17.5px; outline: none')} />
+            <button className="cta" onClick={() => this.sendLink()} style={css('flex-shrink: 0; height: 50px; padding: 0 18px; border-radius: 999px; font-size: 17.5px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #c9b8ff, #efe8ff 50%, #b8d8ff)')}>Enviar link</button>
           </div>
-          {this.state.loginMsg ? <span style={css('text-align: center; font-size: 16px; line-height: 1.5; color: #f3d98b')}>{this.state.loginMsg}</span> : <span style={css('text-align: center; font-size: 16px; line-height: 1.5; color: rgba(244,241,234,.5)')}>Sem senha: enviamos um link de acesso para o seu e-mail.</span>}
+          {this.state.loginMsg ? <span style={css('text-align: center; font-size: 17px; line-height: 1.5; color: #f3d98b')}>{this.state.loginMsg}</span> : <span style={css('text-align: center; font-size: 17px; line-height: 1.5; color: rgba(244,241,234,.5)')}>Sem senha: enviamos um link de acesso para o seu e-mail.</span>}
           <div style={css('flex-grow: 1')} />
-          <button onClick={skip} style={css('height: 44px; align-self: center; padding: 0 18px; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.7)')}>Continuar sem conta</button>
-          <span style={css('text-align: center; font-size: 15px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.42)')}>Sem conta, tudo fica salvo só neste aparelho. Você pode entrar depois na sua constelação.</span>
+          <button onClick={skip} style={css('height: 44px; align-self: center; padding: 0 18px; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.7)')}>Continuar sem conta</button>
+          <span style={css('text-align: center; font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.42)')}>Sem conta, tudo fica salvo só neste aparelho. Você pode entrar depois na sua constelação.</span>
         </div>
       </div>
     );
@@ -810,29 +851,29 @@ Object.assign(Component.prototype, {
     if (a.loggedIn) {
       return (
         <div style={css('border-radius: 18px; padding: 12px 16px; background: rgba(143,227,176,.07); border: 1px solid rgba(143,227,176,.25); display: flex; align-items: center; gap: 10px')}>
-          <span style={css('flex-grow: 1; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.8)')}>Constelação salva na nuvem · {a.email}</span>
-          <button onClick={() => signOut()} style={css('height: 36px; padding: 0 12px; font-size: 16px; color: rgba(244,241,234,.7)')}>Sair</button>
+          <span style={css('flex-grow: 1; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.8)')}>Constelação salva na nuvem · {a.email}</span>
+          <button onClick={() => signOut()} style={css('height: 36px; padding: 0 12px; font-size: 17px; color: rgba(244,241,234,.7)')}>Sair</button>
         </div>
       );
     }
     return (
       <div className="glass" style={css('border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px')}>
         <span className="kicker" style={css('color: #c9b8ff')}>Guarde sua constelação</span>
-        <span style={css('font-size: 16.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)')}>Entre com seu e-mail para ver suas perguntas, estrelas e planos em qualquer aparelho. Sem senha: enviamos um link de acesso.</span>
+        <span style={css('font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)')}>Entre com seu e-mail para ver suas perguntas, estrelas e planos em qualquer aparelho. Sem senha: enviamos um link de acesso.</span>
         {a.enabled ? (
           <>
-            <button className="cta" onClick={async () => { const r = await signInWithGoogle(); if (r.error) this.setState({ loginMsg: r.error }); }} style={css('height: 46px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16.5px; font-weight: 500; color: #1f1f1f; background: #ffffff')}>
+            <button className="cta" onClick={async () => { const r = await signInWithGoogle(); if (r.error) this.setState({ loginMsg: r.error }); }} style={css('height: 46px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17.5px; font-weight: 500; color: #1f1f1f; background: #ffffff')}>
               <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.3 0-11.6-4.2-13.5-10l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>
               Continuar com Google
             </button>
-            <span style={css('text-align: center; font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.4)')}>ou</span>
-            <input type="email" value={this.state.loginEmail} onChange={(e) => this.setState({ loginEmail: e.target.value, loginMsg: '' })} placeholder="seu@email.com" aria-label="Seu e-mail" style={css('height: 46px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: #f4f1ea; font: inherit; font-size: 16.5px; outline: none')} />
-            <button className="cta" onClick={() => this.sendLink()} style={css('height: 46px; border-radius: 999px; font-size: 16.5px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #c9b8ff, #efe8ff 50%, #b8d8ff)')}>Enviar link de acesso</button>
+            <span style={css('text-align: center; font-size: 16px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.4)')}>ou</span>
+            <input type="email" value={this.state.loginEmail} onChange={(e) => this.setState({ loginEmail: e.target.value, loginMsg: '' })} placeholder="seu@email.com" aria-label="Seu e-mail" style={css('height: 46px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: #f4f1ea; font: inherit; font-size: 17.5px; outline: none')} />
+            <button className="cta" onClick={() => this.sendLink()} style={css('height: 46px; border-radius: 999px; font-size: 17.5px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #c9b8ff, #efe8ff 50%, #b8d8ff)')}>Enviar link de acesso</button>
           </>
         ) : (
-          <span style={css('font-size: 16px; color: rgba(244,241,234,.5)')}>Por enquanto, tudo fica salvo neste aparelho.</span>
+          <span style={css('font-size: 17px; color: rgba(244,241,234,.5)')}>Por enquanto, tudo fica salvo neste aparelho.</span>
         )}
-        {this.state.loginMsg ? <span style={css('font-size: 16px; line-height: 1.5; color: #f3d98b')}>{this.state.loginMsg}</span> : null}
+        {this.state.loginMsg ? <span style={css('font-size: 17px; line-height: 1.5; color: #f3d98b')}>{this.state.loginMsg}</span> : null}
       </div>
     );
   }
@@ -870,10 +911,11 @@ Component.prototype.render = function render() {
         <div style={css("position: absolute; top: 36px; left: 12px; right: 12px; height: 44px; z-index: 5; display: flex; align-items: center; justify-content: space-between; pointer-events: none")}>
           {R.showBack ? (
             <>
-              <button onClick={R.back} aria-label="Voltar" style={css("pointer-events: auto; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center")}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <button onClick={R.back} aria-label={'Voltar: ' + R.backLabel} style={css("pointer-events: auto; height: 40px; padding: 0 14px 0 8px; border-radius: 999px; display: flex; align-items: center; gap: 4px; font-size: 16px; color: #f4f1ea; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px)")}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M15 5l-7 7 7 7" />
                 </svg>
+                {R.backLabel}
               </button>
             </>
           ) : null}
@@ -930,7 +972,7 @@ Component.prototype.render = function render() {
                       </span>
                       <span style={css("width: 28px; height: 1px; background: linear-gradient(90deg, #f3d98b, transparent)")}></span>
                     </div>
-                    <p className="fade" style={css(`margin: 8px 0 0; font-size: 14.5px; letter-spacing: .2em; text-transform: uppercase; color: rgba(244,241,234,.6); ${(R.ph?.goldStyle) ?? ''}`)}>
+                    <p className="fade" style={css(`margin: 8px 0 0; font-size: 15.5px; letter-spacing: .2em; text-transform: uppercase; color: rgba(244,241,234,.6); ${(R.ph?.goldStyle) ?? ''}`)}>
                       {R.ph?.from}
                     </p>
                   </div>
@@ -938,7 +980,7 @@ Component.prototype.render = function render() {
                     <button className="glass cta" onClick={R.startJourney} style={css("height: 56px; padding: 0 48px; border-radius: 999px; font-size: 17px; letter-spacing: .06em")}>
                       {"Começar"}
                     </button>
-                    <button onClick={R.nextPhrase} style={css("height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 16.5px; color: rgba(244,241,234,.6)")}>
+                    <button onClick={R.nextPhrase} style={css("height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.6)")}>
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M20 12a8 8 0 1 1-2.4-5.7" />
                         <path d="M20 4v5h-5" />
@@ -967,7 +1009,7 @@ Component.prototype.render = function render() {
                       </span>
                       <span style={css("width: 28px; height: 1px; background: linear-gradient(90deg, #f3d98b, transparent)")}></span>
                     </div>
-                    <p className="fade" style={css(`margin: 8px 0 0; font-size: 14.5px; letter-spacing: .2em; text-transform: uppercase; color: rgba(244,241,234,.6); ${(R.ph?.goldStyle) ?? ''}`)}>
+                    <p className="fade" style={css(`margin: 8px 0 0; font-size: 15.5px; letter-spacing: .2em; text-transform: uppercase; color: rgba(244,241,234,.6); ${(R.ph?.goldStyle) ?? ''}`)}>
                       {R.ph?.from}
                     </p>
                   </div>
@@ -975,7 +1017,7 @@ Component.prototype.render = function render() {
                     <button className="glass cta" onClick={R.startJourney} style={css("height: 56px; padding: 0 48px; border-radius: 999px; font-size: 17px; letter-spacing: .06em")}>
                       {"Começar"}
                     </button>
-                    <button onClick={R.nextPhrase} style={css("height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 16.5px; color: rgba(244,241,234,.6)")}>
+                    <button onClick={R.nextPhrase} style={css("height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.6)")}>
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M20 12a8 8 0 1 1-2.4-5.7" />
                         <path d="M20 4v5h-5" />
@@ -995,7 +1037,7 @@ Component.prototype.render = function render() {
               <div className="breathword" style={css(`position: absolute; top: 478px; left: 0; right: 0; text-align: center; font-size: 42px; font-weight: 200; ${(R.breathWordStyle) ?? ''}`)}>
                 {R.breathWord}
               </div>
-              <p style={css("position: absolute; top: 546px; left: 44px; right: 44px; margin: 0; text-align: center; font-size: 16.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
+              <p style={css("position: absolute; top: 546px; left: 44px; right: 44px; margin: 0; text-align: center; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
                 {R.breathSub}
               </p>
               <div style={css("position: absolute; top: 636px; left: 0; right: 0; display: flex; justify-content: center; gap: 12px")}>
@@ -1017,7 +1059,7 @@ Component.prototype.render = function render() {
               {R.showSkip ? (
                 <>
                   <div style={css("position: absolute; top: 760px; left: 0; right: 0; display: flex; justify-content: center")}>
-                    <button onClick={R.enter} style={css("height: 44px; padding: 0 20px; font-size: 16px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,241,234,.55)")}>
+                    <button onClick={R.enter} style={css("height: 44px; padding: 0 20px; font-size: 17px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,241,234,.55)")}>
                       {"Pular"}
                     </button>
                   </div>
@@ -1053,14 +1095,14 @@ Component.prototype.render = function render() {
                 <div style={css("display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px")}>
                   {(R.chips || []).map((L7_c, I7) => (
                     <React.Fragment key={I7}>
-                      <button className="pill" onClick={L7_c?.pick} aria-pressed={L7_c?.pressed} style={css(`height: 44px; border-radius: 999px; font-size: 16.5px; font-weight: 400; text-align: center; border: 1px solid rgba(255,255,255,.14); ${(L7_c?.style) ?? ''}`)}>
+                      <button className="pill" onClick={L7_c?.pick} aria-pressed={L7_c?.pressed} style={css(`height: 44px; border-radius: 999px; font-size: 17.5px; font-weight: 400; text-align: center; border: 1px solid rgba(255,255,255,.14); ${(L7_c?.style) ?? ''}`)}>
                         {L7_c?.label}
                       </button>
                     </React.Fragment>
                   ))}
                 </div>
                 <div className="glass" style={css("height: 158px; border-radius: 26px; box-sizing: border-box; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px")}>
-                  <label htmlFor="alma-q" className="kicker" style={css(`font-size: 14px; ${(R.qLabelStyle) ?? ''}`)}>
+                  <label htmlFor="alma-q" className="kicker" style={css(`font-size: 15px; ${(R.qLabelStyle) ?? ''}`)}>
                     {R.qLabel}
                   </label>
                   <textarea id="alma-q" value={R.text} onChange={R.onText} placeholder="Uma dúvida, um medo, uma alegria. Ninguém está com pressa aqui." style={css("flex-grow: 1; font-size: 18px; font-weight: 300; line-height: 1.45")}></textarea>
@@ -1069,7 +1111,7 @@ Component.prototype.render = function render() {
                   <button className="cta" onClick={R.release} style={css("width: 100%; height: 58px; border-radius: 999px; font-size: 17px; font-weight: 500; letter-spacing: .02em; text-align: center; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a); box-shadow: 0 0 30px rgba(243,217,139,.22)")}>
                     {"Soltar para a Alma"}
                   </button>
-                  <span style={css("font-size: 16px; font-weight: 300; color: rgba(244,241,234,.5)")}>
+                  <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.5)")}>
                     {"Catorze sabedorias vão refletir com você"}
                   </span>
                 </div>
@@ -1118,7 +1160,7 @@ Component.prototype.render = function render() {
                   <div style={css("display: flex; flex-wrap: wrap; justify-content: center; gap: 10px")}>
                     {(R.dtags || []).map((L10_t, I10) => (
                       <React.Fragment key={I10}>
-                        <button className="pill" onClick={L10_t?.pick} aria-pressed={L10_t?.pressed} style={css(`height: 46px; padding: 0 20px; border-radius: 999px; font-size: 16.5px; font-weight: 400; border: 1px solid rgba(255,255,255,.16); ${(L10_t?.style) ?? ''}`)}>
+                        <button className="pill" onClick={L10_t?.pick} aria-pressed={L10_t?.pressed} style={css(`height: 46px; padding: 0 20px; border-radius: 999px; font-size: 17.5px; font-weight: 400; border: 1px solid rgba(255,255,255,.16); ${(L10_t?.style) ?? ''}`)}>
                           {L10_t?.label}
                         </button>
                       </React.Fragment>
@@ -1126,7 +1168,7 @@ Component.prototype.render = function render() {
                   </div>
                   {R.showOtherBtn ? (
                     <>
-                      <button className="pill" onClick={R.openOther} style={css("align-self: center; height: 44px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; font-size: 16.5px; color: rgba(244,241,234,.75); border: 1px dashed rgba(255,255,255,.28)")}>
+                      <button className="pill" onClick={R.openOther} style={css("align-self: center; height: 44px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.75); border: 1px dashed rgba(255,255,255,.28)")}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <path d="M4 20h4L19 9l-4-4L4 16z" />
                           <path d="M13.5 6.5l4 4" />
@@ -1150,14 +1192,14 @@ Component.prototype.render = function render() {
                 </div>
                 <div style={css("flex-grow: 1")}></div>
                 <div className="glass" style={css("border-radius: 20px; padding: 14px 18px")}>
-                  <div className="kicker" style={css("font-size: 14px")}>
+                  <div className="kicker" style={css("font-size: 15px")}>
                     {"Você trouxe"}
                   </div>
-                  <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.78)")}>
+                  <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.78)")}>
                     {R.textShort}
                   </p>
                 </div>
-                <button onClick={R.skipQ} style={css("height: 44px; align-self: center; padding: 0 20px; font-size: 16px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,241,234,.5)")}>
+                <button onClick={R.skipQ} style={css("height: 44px; align-self: center; padding: 0 20px; font-size: 17px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,241,234,.5)")}>
                   {"Pular pergunta"}
                 </button>
               </div>
@@ -1170,7 +1212,7 @@ Component.prototype.render = function render() {
               <h1 style={css("position: absolute; top: 104px; left: 0; right: 0; margin: 0; text-align: center; font-size: 32px; font-weight: 200; letter-spacing: .02em")}>
                 {"O Conselho"}
               </h1>
-              <p style={css("position: absolute; top: 152px; left: 40px; right: 40px; margin: 0; text-align: center; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+              <p style={css("position: absolute; top: 152px; left: 40px; right: 40px; margin: 0; text-align: center; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                 {"Catorze sabedorias refletem sobre o que você trouxe"}
               </p>
               <div style={css("position: absolute; left: 49px; top: 234px; width: 292px; height: 292px; border-radius: 50%; border: 1px solid rgba(255,255,255,.07)")}></div>
@@ -1198,7 +1240,7 @@ Component.prototype.render = function render() {
                     ) : null}
                     {L12_a?.showName ? (
                       <>
-                        <span className="fade" style={css(`position: absolute; top: 54px; left: 50%; transform: translateX(-50%); height: 26px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; white-space: nowrap; font-size: 16px; letter-spacing: .04em; background: rgba(22,20,40,.85); border: 1px solid ${(L12_a?.color) ?? ''}; color: #f4f1ea; pointer-events: none`)}>
+                        <span className="fade" style={css(`position: absolute; top: 54px; left: 50%; transform: translateX(-50%); height: 26px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; white-space: nowrap; font-size: 17px; letter-spacing: .04em; background: rgba(22,20,40,.85); border: 1px solid ${(L12_a?.color) ?? ''}; color: #f4f1ea; pointer-events: none`)}>
                           {L12_a?.name}
                         </span>
                       </>
@@ -1210,10 +1252,16 @@ Component.prototype.render = function render() {
                 <span style={css(`font-size: 18px; font-weight: 300; color: ${(R.statusColor) ?? ''}; transition: color .6s ease`)}>
                   {R.councilStatus}
                 </span>
-                <span style={css("font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.55)")}>
+                <span style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.55)")}>
                   {R.councilSub}
                 </span>
               </div>
+              {R.councilThinking ? (
+                <div className="fade" style={css("position: absolute; top: 650px; left: 20px; right: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center")}>
+                  <span className="twinkle" style={css("width: 10px; height: 10px; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 16px #f3d98b")}></span>
+                  <span style={css("font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.8)")}>As vozes estão escrevendo para você, com calma e profundidade…</span>
+                </div>
+              ) : null}
               {R.councilReady ? (
                 <>
                   <div className="fade" style={css("position: absolute; top: 640px; left: 20px; right: 20px")}>
@@ -1239,16 +1287,16 @@ Component.prototype.render = function render() {
                   </h1>
                 </div>
                 <div className="glass" style={css("border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px")}>
-                  <div className="kicker" style={css("font-size: 14px")}>
+                  <div className="kicker" style={css("font-size: 15px")}>
                     {"Você trouxe"}
                   </div>
-                  <p style={css("margin: 0; font-size: 16.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.88)")}>
+                  <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.88)")}>
                     {R.text}
                   </p>
                   <div style={css("display: flex; flex-wrap: wrap; gap: 6px")}>
                     {(R.givenTags || []).map((L13_g, I13) => (
                       <React.Fragment key={I13}>
-                        <span style={css("height: 26px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 16px; background: rgba(255,255,255,.08); color: rgba(244,241,234,.8)")}>
+                        <span style={css("height: 26px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 17px; background: rgba(255,255,255,.08); color: rgba(244,241,234,.8)")}>
                           {L13_g?.t}
                         </span>
                       </React.Fragment>
@@ -1257,20 +1305,20 @@ Component.prototype.render = function render() {
                 </div>
                 <div className="glass cardin" style={css("border-radius: 26px; padding: 22px 20px; position: relative; overflow: hidden; border-color: rgba(243,217,139,.36)")}>
                   <div className="goldglow"></div>
-                  <div className="goldtext" style={css("position: relative; font-size: 15px; letter-spacing: .26em; text-transform: uppercase")}>
+                  <div className="goldtext" style={css("position: relative; font-size: 16px; letter-spacing: .26em; text-transform: uppercase")}>
                     {"A resposta da Alma"}
                   </div>
                   <p style={css("position: relative; margin: 12px 0 0; font-size: 17px; font-weight: 300; line-height: 1.55")}>
                     {R.almaP1}
                   </p>
-                  <p style={css("position: relative; margin: 10px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.82)")}>
+                  <p style={css("position: relative; margin: 10px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.82)")}>
                     {R.almaP2}
                   </p>
                   <div style={css("position: relative; margin-top: 16px; padding: 14px 16px; border-radius: 18px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.2)")}>
-                    <div style={css("font-size: 14px; letter-spacing: .2em; text-transform: uppercase; color: #f3d98b")}>
+                    <div style={css("font-size: 15px; letter-spacing: .2em; text-transform: uppercase; color: #f3d98b")}>
                       {"Um passo possível"}
                     </div>
-                    <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 400; line-height: 1.55")}>
+                    <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55")}>
                       {R.almaStep}
                     </p>
                   </div>
@@ -1290,23 +1338,23 @@ Component.prototype.render = function render() {
                   <h2 style={css("margin: 14px 0 0; font-size: 22px; line-height: 1.3; font-weight: 300")}>
                     {"Transforme estas respostas em um plano"}
                   </h2>
-                  <p style={css("margin: 8px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.75)")}>
+                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.75)")}>
                     {"A Alma cria um passo a passo com datas e lembretes, e acompanha você até resolver."}
                   </p>
                   <div style={css("margin-top: 16px; display: flex; flex-direction: column; gap: 10px")}>
                     {(R.previewSteps || []).map((L14_pv, I14) => (
                       <React.Fragment key={I14}>
                         <div style={css("display: flex; align-items: center; gap: 12px")}>
-                          <span style={css("width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #8fe3b0; border: 1px solid rgba(143,227,176,.55)")}>
+                          <span style={css("width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #8fe3b0; border: 1px solid rgba(143,227,176,.55)")}>
                             {L14_pv?.n}
                           </span>
-                          <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.4; color: rgba(244,241,234,.88)")}>
+                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.4; color: rgba(244,241,234,.88)")}>
                             {L14_pv?.t}
                           </span>
                         </div>
                       </React.Fragment>
                     ))}
-                    <span style={css("padding-left: 38px; font-size: 16px; color: rgba(244,241,234,.5)")}>
+                    <span style={css("padding-left: 38px; font-size: 17px; color: rgba(244,241,234,.5)")}>
                       {R.previewMore}
                     </span>
                   </div>
@@ -1324,7 +1372,7 @@ Component.prototype.render = function render() {
                         <span style={css("font-size: 20px; font-weight: 300; line-height: 1.3")}>
                           {`${(R.voiceCount) ?? ''} sabedorias refletiram sobre o que você trouxe`}
                         </span>
-                        <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>
+                        <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>
                           {"Cada uma traz um texto original e uma reflexão. Toque num símbolo para ouvir uma voz, ou veja todas."}
                         </span>
                       </div>
@@ -1356,7 +1404,7 @@ Component.prototype.render = function render() {
                           <path d="M6 9l6 6 6-6" />
                         </svg>
                       </button>
-                      <span style={css("text-align: center; font-size: 16px; font-weight: 300; color: rgba(244,241,234,.5)")}>
+                      <span style={css("text-align: center; font-size: 17px; font-weight: 300; color: rgba(244,241,234,.5)")}>
                         {R.starHint}
                       </span>
                     </div>
@@ -1369,14 +1417,14 @@ Component.prototype.render = function render() {
                         <div className="kicker">
                           {"As vozes"}
                         </div>
-                        <div style={css("font-size: 16px; font-weight: 300; color: rgba(244,241,234,.55)")}>
+                        <div style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.55)")}>
                           {R.starHint}
                         </div>
                       </div>
                       <div className="scroll" style={css("display: flex; gap: 8px; overflow-x: auto; margin: 0 -14px; padding: 0 14px 4px")}>
                         {(R.filters || []).map((L16_f, I16) => (
                           <React.Fragment key={I16}>
-                            <button className="pill" onClick={L16_f?.pick} aria-pressed={L16_f?.pressed} style={css(`flex-shrink: 0; height: 44px; padding: 0 16px; border-radius: 999px; display: flex; align-items: center; gap: 8px; font-size: 16.5px; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); ${(L16_f?.style) ?? ''}`)}>
+                            <button className="pill" onClick={L16_f?.pick} aria-pressed={L16_f?.pressed} style={css(`flex-shrink: 0; height: 44px; padding: 0 16px; border-radius: 999px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); ${(L16_f?.style) ?? ''}`)}>
                               <span style={css(`width: 7px; height: 7px; border-radius: 50%; background: ${(L16_f?.color) ?? ''}`)}></span>
                               {L16_f?.label}
                             </button>
@@ -1385,7 +1433,7 @@ Component.prototype.render = function render() {
                       </div>
                       {R.noCards ? (
                         <>
-                          <p style={css("margin: 8px 0; text-align: center; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                          <p style={css("margin: 8px 0; text-align: center; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                             {"Toque na estrela das respostas que mais tocarem você."}
                           </p>
                         </>
@@ -1411,10 +1459,10 @@ Component.prototype.render = function render() {
                                 ) : null}
                               </span>
                               <span style={css("display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0")}>
-                                <span style={css("font-size: 16.5px; font-weight: 500")}>
+                                <span style={css("font-size: 17.5px; font-weight: 500")}>
                                   {L17_c?.name}
                                 </span>
-                                <span style={css("font-size: 16px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                                <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                                   {L17_c?.ref}
                                 </span>
                               </span>
@@ -1438,7 +1486,7 @@ Component.prototype.render = function render() {
                             <div className="orig" dir={L17_c?.dir} style={css(`margin-top: 14px; line-height: 1.6; ${(L17_c?.origStyle) ?? ''}`)}>
                               {L17_c?.orig}
                             </div>
-                            <div style={css("margin-top: 4px; font-size: 14px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,241,234,.42)")}>
+                            <div style={css("margin-top: 4px; font-size: 15px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,241,234,.42)")}>
                               {`${(L17_c?.lang) ?? ''} · tradução livre`}
                             </div>
                             <div style={css("margin-top: 10px; font-size: 17px; font-weight: 300; line-height: 1.5")}>
@@ -1450,7 +1498,7 @@ Component.prototype.render = function render() {
                                 </React.Fragment>
                               ))}
                             </div>
-                            <button onClick={L17_c?.toggle} aria-expanded={L17_c?.expanded} style={css(`width: 100%; height: 44px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 16px; letter-spacing: .12em; text-transform: uppercase; color: ${(L17_c?.color) ?? ''}`)}>
+                            <button onClick={L17_c?.toggle} aria-expanded={L17_c?.expanded} style={css(`width: 100%; height: 44px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 17px; letter-spacing: .12em; text-transform: uppercase; color: ${(L17_c?.color) ?? ''}`)}>
                               <span>
                                 {"O que essa voz quer te dizer"}
                               </span>
@@ -1460,7 +1508,7 @@ Component.prototype.render = function render() {
                             </button>
                             {L17_c?.open ? (
                               <>
-                                <p className="fade" style={css("margin: 0 0 12px; font-size: 16.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.85)")}>
+                                <p className="fade" style={css("margin: 0 0 12px; font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.85)")}>
                                   {L17_c?.reflection}
                                 </p>
                               </>
@@ -1468,7 +1516,7 @@ Component.prototype.render = function render() {
                           </div>
                         </React.Fragment>
                       ))}
-                      <button onClick={R.closeVoices} style={css("height: 44px; align-self: center; padding: 0 18px; display: flex; align-items: center; gap: 8px; font-size: 16.5px; color: rgba(244,241,234,.65)")}>
+                      <button onClick={R.closeVoices} style={css("height: 44px; align-self: center; padding: 0 18px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.65)")}>
                         {"Recolher conselhos"}
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                           <path d="M6 15l6-6 6 6" />
@@ -1484,7 +1532,7 @@ Component.prototype.render = function render() {
                   {R.saveLabel}
                 </button>
                 <div style={css("display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px")}>
-                  <button className="glass pill" onClick={R.meditate} style={css("height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16.5px")}>
+                  <button className="glass pill" onClick={R.meditate} style={css("height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17.5px")}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" strokeWidth="1.4" aria-hidden="true">
                       <circle cx="12" cy="12" r="3" />
                       <circle cx="12" cy="12" r="7" opacity=".6" />
@@ -1492,7 +1540,7 @@ Component.prototype.render = function render() {
                     </svg>
                     {"Respirar 2 min"}
                   </button>
-                  <button className="glass pill" onClick={R.share} style={css("height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16.5px")}>
+                  <button className="glass pill" onClick={R.share} style={css("height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17.5px")}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M12 15V3" />
                       <path d="M7 8l5-5 5 5" />
@@ -1501,10 +1549,10 @@ Component.prototype.render = function render() {
                     {"Compartilhar"}
                   </button>
                 </div>
-                <button onClick={R.restart} style={css("height: 48px; align-self: center; padding: 0 20px; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.8)")}>
+                <button onClick={R.restart} style={css("height: 48px; align-self: center; padding: 0 20px; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.8)")}>
                   {"Fazer outra pergunta"}
                 </button>
-                <p style={css("margin: 0; text-align: center; font-size: 16px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.5)")}>
+                <p style={css("margin: 0; text-align: center; font-size: 17px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.5)")}>
                   {"Se o peso estiver grande demais, você não precisa carregar sozinho. CVV, ligue 188, 24 horas, gratuito."}
                 </p>
               </div>
@@ -1522,24 +1570,24 @@ Component.prototype.render = function render() {
                   <h1 style={css("margin: 8px 0 0; font-size: 28px; line-height: 1.2; font-weight: 300")}>
                     {"Sua constelação"}
                   </h1>
-                  <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                  <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                     {"Tudo o que você vive na Alma vira luz no seu céu."}
                   </p>
                 </div>
                 {this.renderLogin()}
-                <a href="#/ajustes" style={css("align-self: flex-start; height: 36px; display: flex; align-items: center; gap: 8px; font-size: 16.5px; color: rgba(244,241,234,.75); text-decoration: none")}>⚙︎ Ajustes e conta ›</a>
+                <a href="#/ajustes" style={css("align-self: flex-start; height: 36px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.75); text-decoration: none")}>⚙︎ Ajustes e conta ›</a>
                 {R.hasPlans ? (
                   <div style={css("display: flex; flex-direction: column; gap: 10px")}>
-                    <span style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>Seus planos de ação</span>
-                    <p style={css("margin: 0; font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>Cada pergunta pode virar um plano com passos e datas. Os passos do dia também aparecem no seu Diário.</p>
+                    <span style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>Seus planos de ação</span>
+                    <p style={css("margin: 0; font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>Cada pergunta pode virar um plano com passos e datas. Os passos do dia também aparecem no seu Diário.</p>
                     {(R.plans || []).map((pl, k) => (
                       <button key={k} className="glass pill" onClick={pl.open} style={css("width: 100%; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; text-align: left; border-color: rgba(143,227,176,.28)")}>
                         <span style={css(`width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; ${pl.ring}`)}>
-                          <span style={css("width: 36px; height: 36px; border-radius: 50%; background: #16132c; display: flex; align-items: center; justify-content: center; font-size: 14.5px; color: #8fe3b0")}>{pl.prog.split(' ')[0]}/{pl.prog.split(' ')[2]}</span>
+                          <span style={css("width: 36px; height: 36px; border-radius: 50%; background: #16132c; display: flex; align-items: center; justify-content: center; font-size: 15.5px; color: #8fe3b0")}>{pl.prog.split(' ')[0]}/{pl.prog.split(' ')[2]}</span>
                         </span>
                         <span style={css("display: flex; flex-direction: column; gap: 4px; min-width: 0; flex-grow: 1")}>
-                          <span style={css("font-size: 16.5px; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap")}>{pl.q}</span>
-                          <span style={css(`font-size: 15.5px; line-height: 1.4; ${pl.nextStyle}`)}>{pl.next}</span>
+                          <span style={css("font-size: 17.5px; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap")}>{pl.q}</span>
+                          <span style={css(`font-size: 16.5px; line-height: 1.4; ${pl.nextStyle}`)}>{pl.next}</span>
                         </span>
                         <span aria-hidden="true" style={css("font-size: 22px; font-weight: 200; color: rgba(244,241,234,.5)")}>›</span>
                       </button>
@@ -1557,26 +1605,26 @@ Component.prototype.render = function render() {
                     <React.Fragment key={I21}>
                       <span style={css(`position: absolute; margin-left: 14px; width: 64px; height: 64px; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; ${(L21_s?.style) ?? ''}`)}>
                         <span className="twinkle" style={css(`width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 14px 4px rgba(201,184,255,.55), 0 0 30px rgba(168,216,255,.4); ${(L21_s?.dot) ?? ''}`)}></span>
-                        <span style={css("font-size: 14px; letter-spacing: .08em; color: rgba(244,241,234,.7)")}>
+                        <span style={css("font-size: 15px; letter-spacing: .08em; color: rgba(244,241,234,.7)")}>
                           {L21_s?.label}
                         </span>
                       </span>
                     </React.Fragment>
                   ))}
-                  <span style={css("position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 15px; letter-spacing: .08em; color: rgba(244,241,234,.6)")}>Toque para abrir o céu em tela inteira</span>
+                  <span style={css("position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 16px; letter-spacing: .08em; color: rgba(244,241,234,.6)")}>Toque para abrir o céu em tela inteira</span>
                 </a>
                 <div style={css("display: flex; flex-direction: column; gap: 10px; margin-top: 4px")}>
-                  <span style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>Suas perguntas</span>
+                  <span style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>Suas perguntas</span>
                   <div style={css("display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px")}>
                   {(R.jfilters || []).map((L19_f, I19) => (
                     <React.Fragment key={I19}>
-                      <button className="pill" onClick={L19_f?.pick} aria-pressed={L19_f?.pressed} style={css(`height: 42px; padding: 0 4px; border-radius: 999px; font-size: 15px; letter-spacing: -.01em; text-align: center; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); ${(L19_f?.style) ?? ''}`)}>
+                      <button className="pill" onClick={L19_f?.pick} aria-pressed={L19_f?.pressed} style={css(`height: 42px; padding: 0 4px; border-radius: 999px; font-size: 16px; letter-spacing: -.01em; text-align: center; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); ${(L19_f?.style) ?? ''}`)}>
                         {L19_f?.label}
                       </button>
                     </React.Fragment>
                   ))}
                 </div>
-                  <p style={css("margin: 0; font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>{R.jhint}</p>
+                  <p style={css("margin: 0; font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>{R.jhint}</p>
                 </div>
                 <div style={css("display: flex; flex-direction: column; gap: 10px")}>
                   {(R.entryRows || []).map((L22_e, I22) => (
@@ -1584,14 +1632,14 @@ Component.prototype.render = function render() {
                       <button className="glass pill" onClick={L22_e?.open} style={css(`width: 100%; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; text-align: left; ${(L22_e?.rowStyle) ?? ''}`)}>
                         <span style={css(`width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; ${(L22_e?.dot) ?? ''}`)}></span>
                         <span style={css("display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 0")}>
-                          <span style={css("font-size: 15px; color: rgba(244,241,234,.55)")}>
+                          <span style={css("font-size: 16px; color: rgba(244,241,234,.55)")}>
                             {L22_e?.meta}
                           </span>
-                          <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap")}>
+                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap")}>
                             {L22_e?.q}
                           </span>
                         </span>
-                        <span style={css(`flex-shrink: 0; height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid; font-size: 15px; display: inline-flex; align-items: center; ${(L22_e?.statusStyle) ?? ''}`)}>
+                        <span style={css(`flex-shrink: 0; height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid; font-size: 16px; display: inline-flex; align-items: center; ${(L22_e?.statusStyle) ?? ''}`)}>
                           {L22_e?.status}
                         </span>
                       </button>
@@ -1599,7 +1647,7 @@ Component.prototype.render = function render() {
                   ))}
                   {R.noEntries ? (
                     <>
-                      <p style={css("margin: 8px 0; text-align: center; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.55)")}>
+                      <p style={css("margin: 8px 0; text-align: center; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.55)")}>
                         {"Nenhuma estrela aqui por enquanto."}
                       </p>
                     </>
@@ -1631,7 +1679,7 @@ Component.prototype.render = function render() {
                       <span className="pl-pencil" aria-hidden="true">✎</span>
                     </button>
                   )}
-                  <p style={css("margin: 8px 0 0; font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
+                  <p style={css("margin: 8px 0 0; font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
                     {`Da pergunta ${R.pl?.q ?? ''}`}
                   </p>
                 </div>
@@ -1647,17 +1695,17 @@ Component.prototype.render = function render() {
                     <span style={css("font-size: 17px; font-weight: 400")}>
                       {R.pl?.headline}
                     </span>
-                    <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.65)")}>
+                    <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.65)")}>
                       {R.pl?.sub}
                     </span>
                   </div>
                 </div>
                 <div style={css("display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px")}>
                   <div style={css("border-radius: 18px; padding: 12px 10px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center")}>
-                    <span style={css("width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #f3d98b; border: 1px solid rgba(243,217,139,.6)")}>
+                    <span style={css("width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #f3d98b; border: 1px solid rgba(243,217,139,.6)")}>
                       {"1"}
                     </span>
-                    <span style={css("font-size: 15px; line-height: 1.4; color: rgba(244,241,234,.7)")}>
+                    <span style={css("font-size: 16px; line-height: 1.4; color: rgba(244,241,234,.7)")}>
                       {"Siga na ordem, um passo por vez"}
                     </span>
                   </div>
@@ -1666,7 +1714,7 @@ Component.prototype.render = function render() {
                       <path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" />
                       <path d="M10 20.5a2 2 0 0 0 4 0" />
                     </svg>
-                    <span style={css("font-size: 15px; line-height: 1.4; color: rgba(244,241,234,.7)")}>
+                    <span style={css("font-size: 16px; line-height: 1.4; color: rgba(244,241,234,.7)")}>
                       {"A Alma te lembra no dia de cada passo"}
                     </span>
                   </div>
@@ -1676,7 +1724,7 @@ Component.prototype.render = function render() {
                         <path d="M5 12.5l4.5 4.5L19 7.5" />
                       </svg>
                     </span>
-                    <span style={css("font-size: 15px; line-height: 1.4; color: rgba(244,241,234,.7)")}>
+                    <span style={css("font-size: 16px; line-height: 1.4; color: rgba(244,241,234,.7)")}>
                       {"Marque ao concluir e veja seu avanço"}
                     </span>
                   </div>
@@ -1685,7 +1733,7 @@ Component.prototype.render = function render() {
                   <React.Fragment key={I23}>
                     <div className="glass cardin" style={css(`border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color .6s ease, opacity .6s ease; ${(L23_st?.cardStyle) ?? ''}`)}>
                       <div style={css("display: flex; align-items: center; gap: 12px")}>
-                        <span style={css(`width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16.5px; font-weight: 400; transition: background .5s ease; ${(L23_st?.numStyle) ?? ''}`)}>
+                        <span style={css(`width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17.5px; font-weight: 400; transition: background .5s ease; ${(L23_st?.numStyle) ?? ''}`)}>
                           {L23_st?.done ? (
                             <>
                               <span className="pop" style={css("display: flex")}>
@@ -1701,12 +1749,12 @@ Component.prototype.render = function render() {
                             </>
                           ) : null}
                         </span>
-                        <span className="kicker" style={css("flex-grow: 1; font-size: 14px")}>
+                        <span className="kicker" style={css("flex-grow: 1; font-size: 15px")}>
                           {L23_st?.kicker}
                         </span>
                         {L23_st?.badgeOn ? (
                           <>
-                            <span style={css(`height: 24px; padding: 0 10px; border-radius: 999px; display: flex; align-items: center; font-size: 15px; font-weight: 500; ${(L23_st?.badgeStyle) ?? ''}`)}>
+                            <span style={css(`height: 24px; padding: 0 10px; border-radius: 999px; display: flex; align-items: center; font-size: 16px; font-weight: 500; ${(L23_st?.badgeStyle) ?? ''}`)}>
                               {L23_st?.badge}
                             </span>
                           </>
@@ -1733,14 +1781,14 @@ Component.prototype.render = function render() {
                         {L23_st?.t}
                       </p>
                       <div style={css("display: flex; flex-wrap: wrap; gap: 8px")}>
-                        <span style={css(`height: 34px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px; font-size: 16px; background: rgba(255,255,255,.06); color: ${(L23_st?.dateColor) ?? ''}`)}>
+                        <span style={css(`height: 34px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px; font-size: 17px; background: rgba(255,255,255,.06); color: ${(L23_st?.dateColor) ?? ''}`)}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
                             <path d="M3.5 10h17M8 3v4M16 3v4" />
                           </svg>
                           {L23_st?.date}
                         </span>
-                        <button onClick={L23_st?.bell} aria-pressed={L23_st?.remindP} style={css(`height: 34px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px; font-size: 16px; ${(L23_st?.bellStyle) ?? ''}`)}>
+                        <button onClick={L23_st?.bell} aria-pressed={L23_st?.remindP} style={css(`height: 34px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px; font-size: 17px; ${(L23_st?.bellStyle) ?? ''}`)}>
                           <svg width="15" height="15" viewBox="0 0 24 24" fill={L23_st?.bellFill} stroke={L23_st?.bellStroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" />
                             <path d="M10 20.5a2 2 0 0 0 4 0" fill="none" />
@@ -1753,7 +1801,7 @@ Component.prototype.render = function render() {
                       ) : null}
                       {L23_st?.isCurrent ? (
                         <>
-                          <button className="cta" onClick={L23_st?.complete} style={css("height: 50px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16.5px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
+                          <button className="cta" onClick={L23_st?.complete} style={css("height: 50px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17.5px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0c1f15" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                               <path d="M5 12.5l4.5 4.5L19 7.5" />
                             </svg>
@@ -1763,14 +1811,14 @@ Component.prototype.render = function render() {
                       ) : null}
                       {L23_st?.isFuture ? (
                         <>
-                          <button onClick={L23_st?.complete} style={css("height: 44px; border-radius: 999px; font-size: 16.5px; color: rgba(244,241,234,.7); border: 1px solid rgba(255,255,255,.14)")}>
+                          <button onClick={L23_st?.complete} style={css("height: 44px; border-radius: 999px; font-size: 17.5px; color: rgba(244,241,234,.7); border: 1px solid rgba(255,255,255,.14)")}>
                             {"Já fiz este passo"}
                           </button>
                         </>
                       ) : null}
                       {L23_st?.done ? (
                         <>
-                          <button onClick={L23_st?.undo} style={css("height: 44px; align-self: flex-start; padding: 0 4px; font-size: 16.5px; color: rgba(244,241,234,.55)")}>
+                          <button onClick={L23_st?.undo} style={css("height: 44px; align-self: flex-start; padding: 0 4px; font-size: 17.5px; color: rgba(244,241,234,.55)")}>
                             {"Desfazer"}
                           </button>
                         </>
@@ -1781,26 +1829,26 @@ Component.prototype.render = function render() {
                 <button className="pl-add" onClick={R.pl?.addStep}>+ Adicionar um passo</button>
                 {R.pl?.confirmPlanDel ? (
                   <div className="glass" style={css("border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px; border-color: rgba(255,163,163,.4)")}>
-                    <span style={css("font-size: 16px; font-weight: 300; line-height: 1.5")}>Excluir este plano e todos os passos? A pergunta continua no seu céu.</span>
+                    <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5")}>Excluir este plano e todos os passos? A pergunta continua no seu céu.</span>
                     <div style={css("display: flex; gap: 8px")}>
                       <button className="pl-btn pl-btn-del" onClick={R.pl.delPlan}>Excluir plano</button>
                       <button className="pl-btn" onClick={R.pl.cancelDelPlan}>Cancelar</button>
                     </div>
                   </div>
                 ) : (
-                  <button onClick={R.pl?.askDelPlan} style={css("align-self: center; height: 40px; padding: 0 16px; font-size: 16.5px; color: rgba(255,163,163,.85)")}>Excluir este plano</button>
+                  <button onClick={R.pl?.askDelPlan} style={css("align-self: center; height: 40px; padding: 0 16px; font-size: 17.5px; color: rgba(255,163,163,.85)")}>Excluir este plano</button>
                 )}
                 {R.pl?.allDone ? (
                   <>
                     <div className="glass cardin" style={css("border-radius: 26px; padding: 22px 20px; position: relative; overflow: hidden; border-color: rgba(243,217,139,.4); text-align: center")}>
                       <div className="goldglow"></div>
-                      <div className="goldtext" style={css("position: relative; font-size: 16px; letter-spacing: .26em; text-transform: uppercase")}>
+                      <div className="goldtext" style={css("position: relative; font-size: 17px; letter-spacing: .26em; text-transform: uppercase")}>
                         {"Plano concluído"}
                       </div>
                       <p style={css("position: relative; margin: 10px 0 16px; font-size: 17px; font-weight: 300; line-height: 1.5")}>
                         {"Você caminhou até o fim. Essa pergunta já encontrou sua resposta?"}
                       </p>
-                      <button onClick={R.pl?.resolve} className="cta" style={css("position: relative; width: 100%; height: 50px; border-radius: 999px; font-size: 16.5px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a)")}>
+                      <button onClick={R.pl?.resolve} className="cta" style={css("position: relative; width: 100%; height: 50px; border-radius: 999px; font-size: 17.5px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a)")}>
                         {R.pl?.resolveLabel}
                       </button>
                     </div>
@@ -1834,20 +1882,20 @@ Component.prototype.render = function render() {
                 <div style={css("display: flex; flex-wrap: wrap; gap: 6px")}>
                   {(R.sheet?.tags || []).map((L24_g, I24) => (
                     <React.Fragment key={I24}>
-                      <span style={css("height: 26px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 16px; background: rgba(255,255,255,.08); color: rgba(244,241,234,.8)")}>
+                      <span style={css("height: 26px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 17px; background: rgba(255,255,255,.08); color: rgba(244,241,234,.8)")}>
                         {L24_g?.t}
                       </span>
                     </React.Fragment>
                   ))}
                 </div>
                 <div style={css("border-radius: 22px; padding: 18px; position: relative; overflow: hidden; background: rgba(243,217,139,.06); border: 1px solid rgba(243,217,139,.3)")}>
-                  <div className="goldtext" style={css("font-size: 15px; letter-spacing: .26em; text-transform: uppercase")}>
+                  <div className="goldtext" style={css("font-size: 16px; letter-spacing: .26em; text-transform: uppercase")}>
                     {"A resposta da Alma"}
                   </div>
-                  <p style={css("margin: 10px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.6")}>
+                  <p style={css("margin: 10px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6")}>
                     {R.sheet?.alma}
                   </p>
-                  <p style={css("margin: 10px 0 0; font-size: 16.5px; font-weight: 400; line-height: 1.55; color: #f3d98b")}>
+                  <p style={css("margin: 10px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55; color: #f3d98b")}>
                     {R.sheet?.step}
                   </p>
                 </div>
@@ -1858,17 +1906,17 @@ Component.prototype.render = function render() {
                         <span className="kicker" style={css("color: #8fe3b0")}>
                           {"Plano de ação"}
                         </span>
-                        <span style={css("font-size: 16.5px; color: #8fe3b0")}>
+                        <span style={css("font-size: 17.5px; color: #8fe3b0")}>
                           {R.sheet?.progress}
                         </span>
                       </span>
                       <span style={css("width: 100%; height: 4px; border-radius: 4px; background: rgba(255,255,255,.1); overflow: hidden; display: block")}>
                         <span style={css(`display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #8fe3b0, #f3d98b); ${(R.sheet?.barStyle) ?? ''}`)}></span>
                       </span>
-                      <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.85)")}>
+                      <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.85)")}>
                         {R.sheet?.nextText}
                       </span>
-                      <span style={css("font-size: 16.5px; font-weight: 500; color: #f4f1ea")}>
+                      <span style={css("font-size: 17.5px; font-weight: 500; color: #f4f1ea")}>
                         {"Abrir plano"}
                       </span>
                     </button>
@@ -1880,10 +1928,10 @@ Component.prototype.render = function render() {
                       <span className="kicker" style={css("color: #8fe3b0")}>
                         {"Plano de ação"}
                       </span>
-                      <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.8)")}>
+                      <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.8)")}>
                         {"Esta pergunta ainda não tem plano. A Alma cria um passo a passo com datas e lembretes para você agir."}
                       </span>
-                      <button className="cta" onClick={R.makePlanFromSheet} style={css("height: 50px; border-radius: 999px; font-size: 16.5px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
+                      <button className="cta" onClick={R.makePlanFromSheet} style={css("height: 50px; border-radius: 999px; font-size: 17.5px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
                         {"Criar plano de ação"}
                       </button>
                     </div>
@@ -1894,7 +1942,7 @@ Component.prototype.render = function render() {
                 </div>
                 {R.sheet?.none ? (
                   <>
-                    <p style={css("margin: 0; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                    <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                       {"Nenhuma resposta estrelada nesta pergunta."}
                     </p>
                   </>
@@ -1903,10 +1951,10 @@ Component.prototype.render = function render() {
                   <React.Fragment key={I25}>
                     <div className="glass" style={css("border-radius: 20px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px")}>
                       <div style={css("display: flex; align-items: center; gap: 8px")}>
-                        <span style={css(`font-size: 16.5px; font-weight: 500; color: ${(L25_s?.color) ?? ''}`)}>
+                        <span style={css(`font-size: 17.5px; font-weight: 500; color: ${(L25_s?.color) ?? ''}`)}>
                           {L25_s?.name}
                         </span>
-                        <span style={css("flex-grow: 1; font-size: 16px; font-weight: 300; color: rgba(244,241,234,.55)")}>
+                        <span style={css("flex-grow: 1; font-size: 17px; font-weight: 300; color: rgba(244,241,234,.55)")}>
                           {L25_s?.ref}
                         </span>
                         <button onClick={L25_s?.remove} aria-label="Tirar estrela" style={css("width: 44px; height: 44px; margin: -12px -10px -12px 0; display: flex; align-items: center; justify-content: center")}>
@@ -1915,14 +1963,14 @@ Component.prototype.render = function render() {
                           </svg>
                         </button>
                       </div>
-                      <p style={css("margin: 0; font-size: 16.5px; font-weight: 300; line-height: 1.5")}>
+                      <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.5")}>
                         {L25_s?.tr}
                       </p>
                     </div>
                   </React.Fragment>
                 ))}
                 <div style={css("height: 1px; margin: 6px 0; background: rgba(255,255,255,.1)")}></div>
-                <button className="glass pill" onClick={R.toggleResolved} style={css(`height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16.5px; ${(R.resolveStyle) ?? ''}`)}>
+                <button className="glass pill" onClick={R.toggleResolved} style={css(`height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17.5px; ${(R.resolveStyle) ?? ''}`)}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8fe3b0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M5 12.5l4.5 4.5L19 7.5" />
                   </svg>
@@ -1930,7 +1978,7 @@ Component.prototype.render = function render() {
                 </button>
                 {R.confirmOff ? (
                   <>
-                    <button onClick={R.askDelete} style={css("height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16.5px; color: #ffa3a3")}>
+                    <button onClick={R.askDelete} style={css("height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17.5px; color: #ffa3a3")}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
                       </svg>
@@ -1941,14 +1989,14 @@ Component.prototype.render = function render() {
                 {R.confirmOn ? (
                   <>
                     <div className="fade" style={css("border-radius: 18px; padding: 14px 16px; background: rgba(255,120,120,.08); border: 1px solid rgba(255,150,150,.32); display: flex; flex-direction: column; gap: 12px")}>
-                      <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.5")}>
+                      <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.5")}>
                         {"Apagar esta pergunta e as respostas estreladas? Não dá para desfazer."}
                       </span>
                       <div style={css("display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px")}>
-                        <button className="glass" onClick={R.cancelDelete} style={css("height: 44px; border-radius: 14px; font-size: 16.5px")}>
+                        <button className="glass" onClick={R.cancelDelete} style={css("height: 44px; border-radius: 14px; font-size: 17.5px")}>
                           {"Cancelar"}
                         </button>
-                        <button onClick={R.doDelete} style={css("height: 44px; border-radius: 14px; font-size: 16.5px; font-weight: 500; background: #ff9c9c; color: #2a0b0b")}>
+                        <button onClick={R.doDelete} style={css("height: 44px; border-radius: 14px; font-size: 17.5px; font-weight: 500; background: #ff9c9c; color: #2a0b0b")}>
                           {"Excluir"}
                         </button>
                       </div>
@@ -1961,7 +2009,7 @@ Component.prototype.render = function render() {
         ) : null}
         {R.toastOn ? (
           <>
-            <div className="toast glass" style={css("height: 48px; padding: 0 20px; border-radius: 999px; display: flex; align-items: center; gap: 10px; font-size: 16.5px; white-space: nowrap; background: rgba(22,20,40,.85)")}>
+            <div className="toast glass" style={css("height: 48px; padding: 0 20px; border-radius: 999px; display: flex; align-items: center; gap: 10px; font-size: 17.5px; white-space: nowrap; background: rgba(22,20,40,.85)")}>
               <svg className="twinkle" width="16" height="16" viewBox="0 0 24 24" fill="#f3d98b" aria-hidden="true">
                 <path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" />
               </svg>

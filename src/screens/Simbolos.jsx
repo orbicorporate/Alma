@@ -647,7 +647,7 @@ Component.prototype.render = function render() {
                   <path d="M15 5l-7 7 7 7" />
                 </svg>
               </button>
-              <span className="kicker" style={css("font-size: 14px")}>
+              <span className="kicker" style={css("font-size: 15px")}>
                 {R.crumb}
               </span>
             </>
@@ -658,15 +658,15 @@ Component.prototype.render = function render() {
             <div className="screen scroll">
               <div style={css("box-sizing: border-box; padding: 64px 14px 40px; display: flex; flex-direction: column; gap: 16px")}>
                 <SkyHero onOpen={R.goHoro} />
-                <p style={css("margin: -4px 0 4px; text-align: center; font-size: 16.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
+                <p style={css("margin: -4px 0 4px; text-align: center; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
                   {"Astrologia, numerologia e tarô como espelhos para se conhecer. Convites à reflexão, não sentenças sobre o futuro."}
                 </p>
                 {!this.state.profileSaved ? (
                 <button className="glass pill" onClick={R.goProfile} style={css("width: 100%; border-radius: 24px; padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 10px; border-color: rgba(243,217,139,.45)")}>
-                  <span style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>Comece por aqui</span>
+                  <span style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>Comece por aqui</span>
                   <span style={css("font-size: 18px; font-weight: 300; line-height: 1.35")}>Crie seu perfil de nascimento</span>
-                  <span style={css("font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.7)")}>Com data, hora e cidade, a Alma calcula seu mapa, seu horóscopo e seus números. Leva menos de um minuto.</span>
-                  <span style={css("align-self: flex-start; margin-top: 4px; height: 40px; padding: 0 18px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 16.5px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #ffc79a)")}>Criar meu perfil</span>
+                  <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.7)")}>Com data, hora e cidade, a Alma calcula seu mapa, seu horóscopo e seus números. Leva menos de um minuto.</span>
+                  <span style={css("align-self: flex-start; margin-top: 4px; height: 40px; padding: 0 18px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 17.5px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #ffc79a)")}>Criar meu perfil</span>
                 </button>
               ) : null}
               {this.state.profileSaved ? (
@@ -675,7 +675,7 @@ Component.prototype.render = function render() {
                     <span className="kicker">
                       {this.state.profileSaved ? 'Seu perfil da alma' : 'Perfil de exemplo'}
                     </span>
-                    <span style={css("font-size: 16px; color: #f3d98b")}>
+                    <span style={css("font-size: 17px; color: #f3d98b")}>
                       {this.state.profileSaved ? 'Editar' : 'Criar'}
                     </span>
                   </span>
@@ -683,7 +683,7 @@ Component.prototype.render = function render() {
                     <span style={css("font-size: 18px; font-weight: 400")}>
                       {R.pf?.name}
                     </span>
-                    <span style={css("font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.65)")}>
+                    <span style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.65)")}>
                       {R.pf?.line}
                     </span>
                   </span>
@@ -694,10 +694,10 @@ Component.prototype.render = function render() {
                           <span className="sym" style={css(`font-size: 22px; line-height: 1; color: ${(L2_b?.color) ?? ''}`)}>
                             {L2_b?.glyph}
                           </span>
-                          <span style={css("font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.5)")}>
+                          <span style={css("font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.5)")}>
                             {L2_b?.label}
                           </span>
-                          <span style={css("font-size: 16.5px")}>
+                          <span style={css("font-size: 17.5px")}>
                             {L2_b?.sign}
                           </span>
                         </span>
@@ -713,13 +713,13 @@ Component.prototype.render = function render() {
                       <span className="cardback" style={css("position: absolute; left: 12px; top: 0; width: 46px; height: 72px; border-radius: 8px; transform: rotate(8deg)")}></span>
                     </span>
                     <span style={css("display: flex; flex-direction: column; gap: 6px")}>
-                      <span className="goldtext" style={css("font-size: 15px; letter-spacing: .22em; text-transform: uppercase")}>
+                      <span className="goldtext" style={css("font-size: 16px; letter-spacing: .22em; text-transform: uppercase")}>
                         {"Tarô guiado"}
                       </span>
                       <span style={css("font-size: 18px; font-weight: 300; line-height: 1.3")}>
                         {"Jogue as cartas com a Alma"}
                       </span>
-                      <span style={css("font-size: 16px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                      <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                         {"Embaralhe, corte e escolha. Ela lê cada carta."}
                       </span>
                     </span>
@@ -731,7 +731,7 @@ Component.prototype.render = function render() {
                     <span style={css("font-size: 17px; font-weight: 400")}>
                       {"Horóscopo"}
                     </span>
-                    <span style={css("font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
+                    <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
                       {"Do dia a um ano, pelo seu mapa completo"}
                     </span>
                   </button>
@@ -744,7 +744,7 @@ Component.prototype.render = function render() {
                     <span style={css("font-size: 17px; font-weight: 400")}>
                       {"Mapa natal"}
                     </span>
-                    <span style={css("font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
+                    <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
                       {"Planetas, signos e casas do seu nascimento"}
                     </span>
                   </button>
@@ -756,7 +756,7 @@ Component.prototype.render = function render() {
                       <span style={css("font-size: 17px; font-weight: 400")}>
                         {"Numerologia completa"}
                       </span>
-                      <span style={css("font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
+                      <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
                         {this.state.profileSaved ? `Caminho de vida ${(R.num?.path?.n) ?? ''}, expressão, alma, ciclos e seu ano pessoal` : 'Caminho de vida, expressão, alma, ciclos e seu ano pessoal'}
                       </span>
                     </span>
@@ -765,7 +765,7 @@ Component.prototype.render = function render() {
                     <span className="sky-bubble orb-live" style={css("width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; --o1: #8fe3b0; --o2: #a8e0e0; box-shadow: 0 0 24px rgba(143,227,176,.45)")}></span>
                     <span style={css("display: flex; flex-direction: column; gap: 4px")}>
                       <span style={css("font-size: 17px; font-weight: 400")}>Banhos da Lua</span>
-                      <span style={css("font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>Limpeza, amor, prosperidade, calma. Banhos de ervas que combinam com a Lua de hoje</span>
+                      <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>Limpeza, amor, prosperidade, calma. Banhos de ervas que combinam com a Lua de hoje</span>
                     </span>
                   </button>
                 </div>
@@ -784,33 +784,33 @@ Component.prototype.render = function render() {
                   <h1 style={css("margin: 8px 0 0; font-size: 28px; line-height: 1.2; font-weight: 300")}>
                     {"Conte à Alma quando você chegou"}
                   </h1>
-                  <p style={css("margin: 8px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
+                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
                     {"Com data, hora e cidade, a leitura vai muito além do signo: ascendente, Lua, casas e ciclos pessoais."}
                   </p>
                 </div>
                 <div className="glass" style={css("border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 14px")}>
                   <label style={css("display: flex; flex-direction: column; gap: 6px")}>
-                    <span className="kicker" style={css("font-size: 14px")}>
+                    <span className="kicker" style={css("font-size: 15px")}>
                       {"Nome completo de registro"}
                     </span>
                     <input value={R.dName} onChange={R.onName} style={css("height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); font-size: 17px; font-weight: 300; outline: none")} />
                   </label>
                   <div style={css("display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px")}>
                     <label style={css("display: flex; flex-direction: column; gap: 6px")}>
-                      <span className="kicker" style={css("font-size: 14px; letter-spacing: .12em")}>
+                      <span className="kicker" style={css("font-size: 15px; letter-spacing: .12em")}>
                         {"Data de nascimento"}
                       </span>
                       <input value={R.dDate} onChange={R.onDate} placeholder="dd/mm/aaaa" inputMode="numeric" maxLength="10" autoComplete="bday" style={css("height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); font-size: 17px; font-weight: 300; outline: none; min-width: 0")} />
                     </label>
                     <label style={css("display: flex; flex-direction: column; gap: 6px")}>
-                      <span className="kicker" style={css("font-size: 14px; letter-spacing: .12em")}>
+                      <span className="kicker" style={css("font-size: 15px; letter-spacing: .12em")}>
                         {"Hora em que nasceu"}
                       </span>
                       <input value={R.dTime} onChange={R.onTime} placeholder="hh:mm" inputMode="numeric" maxLength="5" style={css("height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); font-size: 17px; font-weight: 300; outline: none; min-width: 0")} />
                     </label>
                   </div>
                   <label style={css("display: flex; flex-direction: column; gap: 6px")}>
-                    <span className="kicker" style={css("font-size: 14px")}>
+                    <span className="kicker" style={css("font-size: 15px")}>
                       {"Cidade de nascimento"}
                     </span>
                     <select value={R.dCity} onChange={R.onCity} style={css("height: 48px; padding: 0 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: #1a1733; font-size: 17px; font-weight: 300; outline: none")}>
@@ -825,7 +825,7 @@ Component.prototype.render = function render() {
                   </label>
                   {R.hasErr ? (
                     <>
-                      <p style={css("margin: 0; font-size: 16.5px; color: #ffb0a0")}>
+                      <p style={css("margin: 0; font-size: 17.5px; color: #ffb0a0")}>
                         {R.perr}
                       </p>
                     </>
@@ -836,14 +836,14 @@ Component.prototype.render = function render() {
                     <circle cx="12" cy="12" r="9" />
                     <path d="M12 7v5l3 2" />
                   </svg>
-                  <span style={css("font-size: 16px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.7)")}>
+                  <span style={css("font-size: 17px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.7)")}>
                     {"A hora muda o ascendente e as casas. Sem a hora certa, use 12:00: signos e numerologia continuam válidos, e o ascendente fica aproximado."}
                   </span>
                 </div>
                 <button className="cta" onClick={R.saveProfile} style={css("height: 58px; border-radius: 999px; font-size: 17px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a); box-shadow: 0 0 30px rgba(243,217,139,.22)")}>
                   {"Calcular meu céu"}
                 </button>
-                <p style={css("margin: 0; text-align: center; font-size: 15px; font-weight: 300; color: rgba(244,241,234,.45)")}>
+                <p style={css("margin: 0; text-align: center; font-size: 16px; font-weight: 300; color: rgba(244,241,234,.45)")}>
                   {"Seus dados de nascimento ficam só no seu perfil."}
                 </p>
               </div>
@@ -867,7 +867,7 @@ Component.prototype.render = function render() {
                 <span className="fade" style={css("font-size: 22px; font-weight: 200")}>
                   {"Lendo o céu do seu nascimento"}
                 </span>
-                <span className="fade" style={css("font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.65); animation-delay: .5s")}>
+                <span className="fade" style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.65); animation-delay: .5s")}>
                   {R.pf?.line}
                 </span>
               </div>
@@ -885,7 +885,7 @@ Component.prototype.render = function render() {
                   <h1 style={css("margin: 8px 0 0; font-size: 26px; line-height: 1.2; font-weight: 300")}>
                     {`O céu de ${(R.pf?.first) ?? ''}`}
                   </h1>
-                  <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                  <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                     {R.pf?.line}
                   </p>
                 </div>
@@ -901,18 +901,18 @@ Component.prototype.render = function render() {
                     ))}
                     {(R.mandala?.signs || []).map((L6_g, I6) => (
                       <React.Fragment key={I6}>
-                        <span className="sym" style={css(`position: absolute; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 16.5px; ${(L6_g?.style) ?? ''}`)}>
+                        <span className="sym" style={css(`position: absolute; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 17.5px; ${(L6_g?.style) ?? ''}`)}>
                           {L6_g?.g}
                         </span>
                       </React.Fragment>
                     ))}
                     <div style={css("position: absolute; left: 10px; top: 159px; width: 150px; height: 2px; background: linear-gradient(90deg, #f3d98b, rgba(243,217,139,0)); box-shadow: 0 0 10px #f3d98b")}></div>
-                    <span style={css("position: absolute; left: 14px; top: 140px; font-size: 13px; letter-spacing: .18em; color: #f3d98b")}>
+                    <span style={css("position: absolute; left: 14px; top: 140px; font-size: 14px; letter-spacing: .18em; color: #f3d98b")}>
                       {"ASC"}
                     </span>
                     {(R.mandala?.planets || []).map((L7_p, I7) => (
                       <React.Fragment key={I7}>
-                        <span className="pdot sym" style={css(`position: absolute; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16.5px; background: rgba(12,10,28,.85); ${(L7_p?.style) ?? ''}`)}>
+                        <span className="pdot sym" style={css(`position: absolute; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17.5px; background: rgba(12,10,28,.85); ${(L7_p?.style) ?? ''}`)}>
                           {L7_p?.g}
                         </span>
                       </React.Fragment>
@@ -928,10 +928,10 @@ Component.prototype.render = function render() {
                             {L8_r?.g}
                           </span>
                           <span style={css("flex-grow: 1; display: flex; flex-direction: column; gap: 2px")}>
-                            <span style={css("font-size: 16.5px")}>
+                            <span style={css("font-size: 17.5px")}>
                               {`${(L8_r?.name) ?? ''} em ${(L8_r?.sign) ?? ''}`}
                             </span>
-                            <span style={css("font-size: 16px; font-weight: 300; color: rgba(244,241,234,.55)")}>
+                            <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.55)")}>
                               {`${(L8_r?.deg) ?? ''} · ${(L8_r?.house) ?? ''}`}
                             </span>
                           </span>
@@ -941,7 +941,7 @@ Component.prototype.render = function render() {
                         </span>
                         {L8_r?.open ? (
                           <>
-                            <span className="fade" style={css("font-size: 16.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.82)")}>
+                            <span className="fade" style={css("font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.82)")}>
                               {L8_r?.text}
                             </span>
                           </>
@@ -957,7 +957,7 @@ Component.prototype.render = function render() {
                   <span style={css("font-size: 18px; font-weight: 300; line-height: 1.35")}>
                     {"Veja como os planetas de hoje conversam com o seu mapa"}
                   </span>
-                  <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.65)")}>
+                  <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.65)")}>
                     {"Leituras para hoje, a semana, o mês, os próximos 6 meses e o próximo ano."}
                   </span>
                   <button className="cta" onClick={R.mapToHoro} style={css("height: 54px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a); box-shadow: 0 0 30px rgba(243,217,139,.22)")}>
@@ -966,11 +966,11 @@ Component.prototype.render = function render() {
                     </span>
                     {"Ver meu horóscopo"}
                   </button>
-                  <button className="pill" onClick={R.mapToNum} style={css("height: 44px; border-radius: 999px; font-size: 16.5px; color: rgba(244,241,234,.8); border: 1px solid rgba(255,255,255,.16)")}>
+                  <button className="pill" onClick={R.mapToNum} style={css("height: 44px; border-radius: 999px; font-size: 17.5px; color: rgba(244,241,234,.8); border: 1px solid rgba(255,255,255,.16)")}>
                     {"Ver minha numerologia"}
                   </button>
                 </div>
-                <p style={css("margin: 0; font-size: 15px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.45)")}>
+                <p style={css("margin: 0; font-size: 16px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.45)")}>
                   {"Posições calculadas por efemérides aproximadas (precisão de cerca de 1°), zodíaco tropical e casas por signo inteiro. Fuso sem horário de verão histórico."}
                 </p>
               </div>
@@ -988,14 +988,14 @@ Component.prototype.render = function render() {
                   <h1 style={css("margin: 8px 0 0; font-size: 26px; line-height: 1.2; font-weight: 300")}>
                     {R.horo?.title}
                   </h1>
-                  <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                  <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                     {`Sol em ${(R.horo?.sun) ?? ''} · Lua em ${(R.horo?.moon) ?? ''} · Ascendente em ${(R.horo?.asc) ?? ''}`}
                   </p>
                 </div>
                 <div className="scroll" style={css("display: flex; gap: 8px; overflow-x: auto; margin: 0 -14px; padding: 0 14px 2px")}>
                   {(R.periods || []).map((L9_p, I9) => (
                     <React.Fragment key={I9}>
-                      <button className="pill" onClick={L9_p?.pick} aria-pressed={L9_p?.pressed} style={css(`flex-shrink: 0; height: 44px; padding: 0 18px; border-radius: 999px; font-size: 16.5px; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); ${(L9_p?.style) ?? ''}`)}>
+                      <button className="pill" onClick={L9_p?.pick} aria-pressed={L9_p?.pressed} style={css(`flex-shrink: 0; height: 44px; padding: 0 18px; border-radius: 999px; font-size: 17.5px; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); ${(L9_p?.style) ?? ''}`)}>
                         {L9_p?.label}
                       </button>
                     </React.Fragment>
@@ -1007,7 +1007,7 @@ Component.prototype.render = function render() {
                       {R.horo?.g}
                     </span>
                     <span style={css("display: flex; flex-direction: column; gap: 2px")}>
-                      <span className="kicker" style={css("font-size: 14px")}>
+                      <span className="kicker" style={css("font-size: 15px")}>
                         {R.horo?.range}
                       </span>
                       <span style={css("font-size: 17px")}>
@@ -1018,12 +1018,12 @@ Component.prototype.render = function render() {
                   <p style={css("margin: 0; font-size: 17px; font-weight: 300; line-height: 1.65")}>
                     {R.horo?.p1}
                   </p>
-                  <p style={css("margin: 0; font-size: 16.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.82)")}>
+                  <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.82)")}>
                     {R.horo?.p2}
                   </p>
                   {R.horo?.hasExtra ? (
                     <>
-                      <p style={css("margin: 0; font-size: 16.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.72)")}>
+                      <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.72)")}>
                         {R.horo?.extra}
                       </p>
                     </>
@@ -1033,14 +1033,14 @@ Component.prototype.render = function render() {
                   {(R.horo?.areas || []).map((L10_a, I10) => (
                     <React.Fragment key={I10}>
                       <div className="glass" style={css("border-radius: 20px; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start")}>
-                        <span style={css(`width: 34px; height: 34px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.06); color: ${(L10_a?.color) ?? ''}; font-size: 16px; font-weight: 500`)}>
+                        <span style={css(`width: 34px; height: 34px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.06); color: ${(L10_a?.color) ?? ''}; font-size: 17px; font-weight: 500`)}>
                           {L10_a?.ic}
                         </span>
                         <span style={css("display: flex; flex-direction: column; gap: 4px")}>
-                          <span className="kicker" style={css(`font-size: 14px; color: ${(L10_a?.color) ?? ''}`)}>
+                          <span className="kicker" style={css(`font-size: 15px; color: ${(L10_a?.color) ?? ''}`)}>
                             {L10_a?.label}
                           </span>
-                          <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                             {L10_a?.text}
                           </span>
                         </span>
@@ -1049,14 +1049,14 @@ Component.prototype.render = function render() {
                   ))}
                 </div>
                 <div style={css("border-radius: 22px; padding: 16px 18px; background: rgba(243,217,139,.07); border: 1px solid rgba(243,217,139,.28)")}>
-                  <div className="goldtext" style={css("font-size: 15px; letter-spacing: .24em; text-transform: uppercase")}>
+                  <div className="goldtext" style={css("font-size: 16px; letter-spacing: .24em; text-transform: uppercase")}>
                     {"Convite do período"}
                   </div>
-                  <p style={css("margin: 8px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                     {R.horo?.invite}
                   </p>
                 </div>
-                <button onClick={R.toggleTech} aria-expanded={R.techExpanded} style={css("height: 44px; display: flex; align-items: center; justify-content: space-between; font-size: 16px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>
+                <button onClick={R.toggleTech} aria-expanded={R.techExpanded} style={css("height: 44px; display: flex; align-items: center; justify-content: space-between; font-size: 17px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>
                   <span>
                     {"Base técnica da leitura"}
                   </span>
@@ -1069,7 +1069,7 @@ Component.prototype.render = function render() {
                     <div className="fade" style={css("border-radius: 18px; padding: 14px 16px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; gap: 8px")}>
                       {(R.horo?.tech || []).map((L11_t, I11) => (
                         <React.Fragment key={I11}>
-                          <span style={css("font-size: 16px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
+                          <span style={css("font-size: 17px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
                             {L11_t?.t}
                           </span>
                         </React.Fragment>
@@ -1077,7 +1077,7 @@ Component.prototype.render = function render() {
                     </div>
                   </>
                 ) : null}
-                <div style={css("margin-top: 8px; font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>Seu mapa em movimento</div>
+                <div style={css("margin-top: 8px; font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>Seu mapa em movimento</div>
                 <NatalSphere sim={this} profile={this.state.profile} />
               </div>
             </div>
@@ -1094,7 +1094,7 @@ Component.prototype.render = function render() {
                   <h1 style={css("margin: 8px 0 0; font-size: 26px; line-height: 1.2; font-weight: 300")}>
                     {`Os números de ${(R.pf?.first) ?? ''}`}
                   </h1>
-                  <p style={css("margin: 8px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
+                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
                     {"A numerologia pitagórica transforma seu nome de registro e sua data de nascimento em números de 1 a 9, além dos números mestres 11, 22 e 33. Cada número é um símbolo para refletir sobre quem você é e o momento que vive. Toque em cada um para entender."}
                   </p>
                 </div>
@@ -1111,10 +1111,10 @@ Component.prototype.render = function render() {
                   <span style={css("font-size: 20px; font-weight: 300")}>
                     {R.px?.title}
                   </span>
-                  <p style={css("margin: 0; font-size: 16.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.8)")}>
+                  <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.8)")}>
                     {R.px?.short}
                   </p>
-                  <button onClick={R.px?.toggle} aria-expanded={R.px?.expanded} style={css("height: 44px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; font-size: 16.5px; color: #f3d98b; border: 1px solid rgba(243,217,139,.4)")}>
+                  <button onClick={R.px?.toggle} aria-expanded={R.px?.expanded} style={css("height: 44px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: #f3d98b; border: 1px solid rgba(243,217,139,.4)")}>
                     {R.px?.btn}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" style={css(R.px?.chev)} aria-hidden="true">
                       <path d="M6 9l6 6 6-6" />
@@ -1124,15 +1124,15 @@ Component.prototype.render = function render() {
                     <>
                       <div className="fade" style={css("display: flex; flex-direction: column; gap: 14px; text-align: left")}>
                         <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                          <span className="kicker" style={css("font-size: 14px")}>
+                          <span className="kicker" style={css("font-size: 15px")}>
                             {"O que é"}
                           </span>
-                          <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.8)")}>
+                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.8)")}>
                             {R.px?.what}
                           </span>
                         </div>
                         <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                          <span className="kicker" style={css("font-size: 14px; color: #f3d98b")}>
+                          <span className="kicker" style={css("font-size: 15px; color: #f3d98b")}>
                             {`Seu número: ${(R.px?.n) ?? ''} · ${(R.px?.title) ?? ''}`}
                           </span>
                           <span style={css("font-size: 17px; font-weight: 300; line-height: 1.6")}>
@@ -1143,26 +1143,26 @@ Component.prototype.render = function render() {
                           <>
                             <div style={css("display: flex; flex-direction: column; gap: 8px")}>
                               <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
+                                <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
                                   {"Sua luz"}
                                 </div>
-                                <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                   {R.px?.luz}
                                 </p>
                               </div>
                               <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
+                                <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
                                   {"Seu desafio"}
                                 </div>
-                                <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                   {R.px?.sombra}
                                 </p>
                               </div>
                               <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.28)")}>
-                                <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>
+                                <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>
                                   {"Convite"}
                                 </div>
-                                <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 400; line-height: 1.55")}>
+                                <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55")}>
                                   {R.px?.convite}
                                 </p>
                               </div>
@@ -1175,13 +1175,13 @@ Component.prototype.render = function render() {
                               {R.px?.isPY ? (
                                 <>
                                   <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                                    <span style={css("font-size: 16px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                                    <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                                       {`Você está no ano ${(R.px?.n) ?? ''} de um ciclo de 9`}
                                     </span>
                                     <div style={css("display: flex; gap: 6px")}>
                                       {(R.px?.dots || []).map((L12_d, I12) => (
                                         <React.Fragment key={I12}>
-                                          <span style={css(`flex-grow: 1; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; ${(L12_d?.style) ?? ''}`)}>
+                                          <span style={css(`flex-grow: 1; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; ${(L12_d?.style) ?? ''}`)}>
                                             {L12_d?.n}
                                           </span>
                                         </React.Fragment>
@@ -1191,18 +1191,18 @@ Component.prototype.render = function render() {
                                 </>
                               ) : null}
                               <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
+                                <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
                                   {"Favorece"}
                                 </div>
-                                <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                   {R.px?.fazer}
                                 </p>
                               </div>
                               <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
+                                <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
                                   {"Evite"}
                                 </div>
-                                <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                   {R.px?.evitar}
                                 </p>
                               </div>
@@ -1210,13 +1210,13 @@ Component.prototype.render = function render() {
                           </>
                         ) : null}
                         <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; gap: 6px")}>
-                          <span className="kicker" style={css("font-size: 14px")}>
+                          <span className="kicker" style={css("font-size: 15px")}>
                             {"Como calculamos"}
                           </span>
-                          <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
+                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
                             {R.px?.how}
                           </span>
-                          <span style={css("font-size: 16px; font-weight: 400; color: #f3d98b")}>
+                          <span style={css("font-size: 17px; font-weight: 400; color: #f3d98b")}>
                             {R.px?.calc}
                           </span>
                         </div>
@@ -1235,10 +1235,10 @@ Component.prototype.render = function render() {
                           {L13_it?.n}
                         </span>
                         <span style={css("flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px")}>
-                          <span style={css("font-size: 16.5px; font-weight: 400")}>
+                          <span style={css("font-size: 17.5px; font-weight: 400")}>
                             {L13_it?.label}
                           </span>
-                          <span style={css("font-size: 16px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.6)")}>
+                          <span style={css("font-size: 17px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.6)")}>
                             {`${(L13_it?.title) ?? ''} · ${(L13_it?.short) ?? ''}`}
                           </span>
                         </span>
@@ -1251,15 +1251,15 @@ Component.prototype.render = function render() {
                           <div style={css("padding: 0 16px 18px")}>
                             <div className="fade" style={css("display: flex; flex-direction: column; gap: 14px; text-align: left")}>
                               <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 14px")}>
+                                <span className="kicker" style={css("font-size: 15px")}>
                                   {"O que é"}
                                 </span>
-                                <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.8)")}>
+                                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.8)")}>
                                   {L13_it?.what}
                                 </span>
                               </div>
                               <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 14px; color: #f3d98b")}>
+                                <span className="kicker" style={css("font-size: 15px; color: #f3d98b")}>
                                   {`Seu número: ${(L13_it?.n) ?? ''} · ${(L13_it?.title) ?? ''}`}
                                 </span>
                                 <span style={css("font-size: 17px; font-weight: 300; line-height: 1.6")}>
@@ -1270,26 +1270,26 @@ Component.prototype.render = function render() {
                                 <>
                                   <div style={css("display: flex; flex-direction: column; gap: 8px")}>
                                     <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                      <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
+                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
                                         {"Sua luz"}
                                       </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                         {L13_it?.luz}
                                       </p>
                                     </div>
                                     <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                      <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
+                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
                                         {"Seu desafio"}
                                       </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                         {L13_it?.sombra}
                                       </p>
                                     </div>
                                     <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.28)")}>
-                                      <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>
+                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>
                                         {"Convite"}
                                       </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 400; line-height: 1.55")}>
+                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55")}>
                                         {L13_it?.convite}
                                       </p>
                                     </div>
@@ -1302,13 +1302,13 @@ Component.prototype.render = function render() {
                                     {L13_it?.isPY ? (
                                       <>
                                         <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                                          <span style={css("font-size: 16px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                                          <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                                             {`Você está no ano ${(L13_it?.n) ?? ''} de um ciclo de 9`}
                                           </span>
                                           <div style={css("display: flex; gap: 6px")}>
                                             {(L13_it?.dots || []).map((L14_d, I14) => (
                                               <React.Fragment key={I14}>
-                                                <span style={css(`flex-grow: 1; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; ${(L14_d?.style) ?? ''}`)}>
+                                                <span style={css(`flex-grow: 1; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; ${(L14_d?.style) ?? ''}`)}>
                                                   {L14_d?.n}
                                                 </span>
                                               </React.Fragment>
@@ -1318,18 +1318,18 @@ Component.prototype.render = function render() {
                                       </>
                                     ) : null}
                                     <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                      <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
+                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
                                         {"Favorece"}
                                       </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                         {L13_it?.fazer}
                                       </p>
                                     </div>
                                     <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                      <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
+                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
                                         {"Evite"}
                                       </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                         {L13_it?.evitar}
                                       </p>
                                     </div>
@@ -1337,13 +1337,13 @@ Component.prototype.render = function render() {
                                 </>
                               ) : null}
                               <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 14px")}>
+                                <span className="kicker" style={css("font-size: 15px")}>
                                   {"Como calculamos"}
                                 </span>
-                                <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
+                                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
                                   {L13_it?.how}
                                 </span>
-                                <span style={css("font-size: 16px; font-weight: 400; color: #f3d98b")}>
+                                <span style={css("font-size: 17px; font-weight: 400; color: #f3d98b")}>
                                   {L13_it?.calc}
                                 </span>
                               </div>
@@ -1365,10 +1365,10 @@ Component.prototype.render = function render() {
                           {L15_it?.n}
                         </span>
                         <span style={css("flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px")}>
-                          <span style={css("font-size: 16.5px; font-weight: 400")}>
+                          <span style={css("font-size: 17.5px; font-weight: 400")}>
                             {L15_it?.label}
                           </span>
-                          <span style={css("font-size: 16px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.6)")}>
+                          <span style={css("font-size: 17px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.6)")}>
                             {`${(L15_it?.title) ?? ''} · ${(L15_it?.short) ?? ''}`}
                           </span>
                         </span>
@@ -1381,15 +1381,15 @@ Component.prototype.render = function render() {
                           <div style={css("padding: 0 16px 18px")}>
                             <div className="fade" style={css("display: flex; flex-direction: column; gap: 14px; text-align: left")}>
                               <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 14px")}>
+                                <span className="kicker" style={css("font-size: 15px")}>
                                   {"O que é"}
                                 </span>
-                                <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.8)")}>
+                                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.8)")}>
                                   {L15_it?.what}
                                 </span>
                               </div>
                               <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 14px; color: #f3d98b")}>
+                                <span className="kicker" style={css("font-size: 15px; color: #f3d98b")}>
                                   {`Seu número: ${(L15_it?.n) ?? ''} · ${(L15_it?.title) ?? ''}`}
                                 </span>
                                 <span style={css("font-size: 17px; font-weight: 300; line-height: 1.6")}>
@@ -1400,26 +1400,26 @@ Component.prototype.render = function render() {
                                 <>
                                   <div style={css("display: flex; flex-direction: column; gap: 8px")}>
                                     <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                      <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
+                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
                                         {"Sua luz"}
                                       </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                         {L15_it?.luz}
                                       </p>
                                     </div>
                                     <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                      <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
+                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
                                         {"Seu desafio"}
                                       </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                         {L15_it?.sombra}
                                       </p>
                                     </div>
                                     <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.28)")}>
-                                      <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>
+                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>
                                         {"Convite"}
                                       </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 400; line-height: 1.55")}>
+                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55")}>
                                         {L15_it?.convite}
                                       </p>
                                     </div>
@@ -1432,13 +1432,13 @@ Component.prototype.render = function render() {
                                     {L15_it?.isPY ? (
                                       <>
                                         <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                                          <span style={css("font-size: 16px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                                          <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                                             {`Você está no ano ${(L15_it?.n) ?? ''} de um ciclo de 9`}
                                           </span>
                                           <div style={css("display: flex; gap: 6px")}>
                                             {(L15_it?.dots || []).map((L16_d, I16) => (
                                               <React.Fragment key={I16}>
-                                                <span style={css(`flex-grow: 1; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; ${(L16_d?.style) ?? ''}`)}>
+                                                <span style={css(`flex-grow: 1; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; ${(L16_d?.style) ?? ''}`)}>
                                                   {L16_d?.n}
                                                 </span>
                                               </React.Fragment>
@@ -1448,18 +1448,18 @@ Component.prototype.render = function render() {
                                       </>
                                     ) : null}
                                     <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                      <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
+                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
                                         {"Favorece"}
                                       </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                         {L15_it?.fazer}
                                       </p>
                                     </div>
                                     <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                      <div style={css("font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
+                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
                                         {"Evite"}
                                       </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                                         {L15_it?.evitar}
                                       </p>
                                     </div>
@@ -1467,13 +1467,13 @@ Component.prototype.render = function render() {
                                 </>
                               ) : null}
                               <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 14px")}>
+                                <span className="kicker" style={css("font-size: 15px")}>
                                   {"Como calculamos"}
                                 </span>
-                                <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
+                                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
                                   {L15_it?.how}
                                 </span>
-                                <span style={css("font-size: 16px; font-weight: 400; color: #f3d98b")}>
+                                <span style={css("font-size: 17px; font-weight: 400; color: #f3d98b")}>
                                   {L15_it?.calc}
                                 </span>
                               </div>
@@ -1484,7 +1484,7 @@ Component.prototype.render = function render() {
                     </div>
                   </React.Fragment>
                 ))}
-                <p style={css("margin: 4px 0 0; font-size: 15px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.45)")}>
+                <p style={css("margin: 4px 0 0; font-size: 16px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.45)")}>
                   {"Os números são símbolos para autoconhecimento. Use o que fizer sentido e deixe o resto."}
                 </p>
               </div>
@@ -1502,7 +1502,7 @@ Component.prototype.render = function render() {
                   <h1 style={css("margin: 8px 0 0; font-size: 28px; line-height: 1.2; font-weight: 300")}>
                     {"Como você quer jogar?"}
                   </h1>
-                  <p style={css("margin: 8px 0 0; font-size: 16.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
+                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
                     {"Arcanos maiores, os 22 grandes símbolos do tarô. A Alma guia cada gesto e lê as cartas com você."}
                   </p>
                 </div>
@@ -1512,7 +1512,7 @@ Component.prototype.render = function render() {
                     <span style={css("font-size: 18px; font-weight: 300")}>
                       {"Uma carta"}
                     </span>
-                    <span style={css("font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                    <span style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                       {"Conselho do dia. Rápido e direto."}
                     </span>
                   </span>
@@ -1527,12 +1527,12 @@ Component.prototype.render = function render() {
                     <span style={css("font-size: 18px; font-weight: 300")}>
                       {"Três cartas"}
                     </span>
-                    <span style={css("font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                    <span style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                       {"Raiz, presente e caminho."}
                     </span>
                   </span>
                 </button>
-                <div style={css("border-radius: 20px; padding: 14px 16px; background: rgba(255,255,255,.04); font-size: 16px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.6)")}>
+                <div style={css("border-radius: 20px; padding: 14px 16px; background: rgba(255,255,255,.04); font-size: 17px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.6)")}>
                   {"Em breve: Cruz Celta com 10 cartas e os 56 arcanos menores."}
                 </div>
               </div>
@@ -1553,12 +1553,12 @@ Component.prototype.render = function render() {
               <div style={css("position: absolute; left: 20px; right: 20px; top: 320px; display: flex; flex-direction: column; gap: 16px")}>
                 <div className="glass" style={css("border-radius: 20px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start")}>
                   <span style={css("width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 12px #f3d98b")}></span>
-                  <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                  <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                     {"A vela está acesa. Respire fundo e pense no que você quer compreender. Pode escrever, ou apenas sentir."}
                   </span>
                 </div>
                 <label style={css("display: flex; flex-direction: column; gap: 6px")}>
-                  <span className="kicker" style={css("font-size: 14px")}>
+                  <span className="kicker" style={css("font-size: 15px")}>
                     {"Sua pergunta (opcional)"}
                   </span>
                   <input value={R.tq} onChange={R.onTq} placeholder="O que preciso compreender agora?" style={css("height: 52px; padding: 0 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); font-size: 17px; font-weight: 300; outline: none")} />
@@ -1566,7 +1566,7 @@ Component.prototype.render = function render() {
                 <div style={css("display: flex; flex-wrap: wrap; gap: 8px")}>
                   {(R.tqChips || []).map((L17_c, I17) => (
                     <React.Fragment key={I17}>
-                      <button className="pill" onClick={L17_c?.pick} style={css("height: 40px; padding: 0 14px; border-radius: 999px; font-size: 16.5px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12)")}>
+                      <button className="pill" onClick={L17_c?.pick} style={css("height: 40px; padding: 0 14px; border-radius: 999px; font-size: 17.5px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12)")}>
                         {L17_c?.t}
                       </button>
                     </React.Fragment>
@@ -1584,7 +1584,7 @@ Component.prototype.render = function render() {
             <div className="screen">
               <div className="glass" style={css("position: absolute; left: 20px; right: 20px; top: 100px; border-radius: 20px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start")}>
                 <span style={css("width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 12px #f3d98b")}></span>
-                <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                   {R.shufGuide}
                 </span>
               </div>
@@ -1601,12 +1601,12 @@ Component.prototype.render = function render() {
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f3d98b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M4 7h3.5c4 0 5 10 9 10H20M17 14l3 3-3 3M4 17h3.5c1.4 0 2.4-1.2 3.3-2.8M13.2 9.8C14.1 8.2 15.1 7 16.5 7H20M17 4l3 3-3 3" />
                     </svg>
-                    <span style={css("font-size: 16px; color: rgba(244,241,234,.85)")}>
+                    <span style={css("font-size: 17px; color: rgba(244,241,234,.85)")}>
                       {R.shufPct}
                     </span>
                   </span>
                 </button>
-                <span style={css("font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                <span style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
                   {"Segure para embaralhar"}
                 </span>
               </div>
@@ -1618,7 +1618,7 @@ Component.prototype.render = function render() {
             <div className="screen">
               <div className="glass" style={css("position: absolute; left: 20px; right: 20px; top: 100px; border-radius: 20px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start")}>
                 <span style={css("width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 12px #f3d98b")}></span>
-                <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                   {"Agora corte o baralho. Três montes estão à sua frente: toque no que chamar você."}
                 </span>
               </div>
@@ -1641,11 +1641,11 @@ Component.prototype.render = function render() {
             <div className="screen">
               <div className="glass" style={css("position: absolute; left: 20px; right: 20px; top: 100px; border-radius: 20px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start")}>
                 <span style={css("width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 12px #f3d98b")}></span>
-                <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                   {R.fanGuide}
                 </span>
               </div>
-              <div style={css("position: absolute; left: 0; right: 0; top: 250px; text-align: center; font-size: 16.5px; letter-spacing: .16em; text-transform: uppercase; color: #f3d98b")}>
+              <div style={css("position: absolute; left: 0; right: 0; top: 250px; text-align: center; font-size: 17.5px; letter-spacing: .16em; text-transform: uppercase; color: #f3d98b")}>
                 {R.fanCount}
               </div>
               <div style={css("position: absolute; left: 0; top: 320px; width: 390px; height: 400px")}>
@@ -1673,13 +1673,13 @@ Component.prototype.render = function render() {
               <div style={css("box-sizing: border-box; padding: 100px 14px 48px; display: flex; flex-direction: column; gap: 16px")}>
                 <div className="glass" style={css("border-radius: 20px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start")}>
                   <span style={css("width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 12px #f3d98b")}></span>
-                  <span style={css("font-size: 16.5px; font-weight: 300; line-height: 1.55")}>
+                  <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
                     {R.revealGuide}
                   </span>
                 </div>
                 {R.hasTq ? (
                   <>
-                    <p style={css("margin: 0; text-align: center; font-size: 16.5px; font-weight: 300; color: rgba(244,241,234,.7)")}>
+                    <p style={css("margin: 0; text-align: center; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.7)")}>
                       {`“${(R.tq) ?? ''}”`}
                     </p>
                   </>
@@ -1708,7 +1708,7 @@ Component.prototype.render = function render() {
                             </span>
                           </span>
                         </button>
-                        <span className="kicker" style={css("font-size: 14px")}>
+                        <span className="kicker" style={css("font-size: 15px")}>
                           {L21_s?.pos}
                         </span>
                       </div>
@@ -1718,10 +1718,10 @@ Component.prototype.render = function render() {
                 {(R.readings || []).map((L22_r, I22) => (
                   <React.Fragment key={I22}>
                     <div className="glass fade" style={css("border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px")}>
-                      <span className="kicker" style={css("font-size: 14px; color: #f3d98b")}>
+                      <span className="kicker" style={css("font-size: 15px; color: #f3d98b")}>
                         {`${(L22_r?.pos) ?? ''} · ${(L22_r?.name) ?? ''}`}
                       </span>
-                      <span style={css("font-size: 16px; font-weight: 300; color: rgba(244,241,234,.55)")}>
+                      <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.55)")}>
                         {L22_r?.kw}
                       </span>
                       <span style={css("font-size: 17px; font-weight: 300; line-height: 1.55")}>
@@ -1739,20 +1739,20 @@ Component.prototype.render = function render() {
                 {R.allFlipped ? (
                   <>
                     <div className="glass fade" style={css("border-radius: 26px; padding: 22px 20px; display: flex; flex-direction: column; gap: 10px; border-color: rgba(243,217,139,.4); animation-delay: 1.2s")}>
-                      <div className="goldtext" style={css("font-size: 15px; letter-spacing: .26em; text-transform: uppercase")}>
+                      <div className="goldtext" style={css("font-size: 16px; letter-spacing: .26em; text-transform: uppercase")}>
                         {"A leitura da Alma"}
                       </div>
                       <p style={css("margin: 0; font-size: 17px; font-weight: 300; line-height: 1.6")}>
                         {R.synth?.p1}
                       </p>
-                      <p style={css("margin: 0; font-size: 16.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.75)")}>
+                      <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.75)")}>
                         {R.synth?.p2}
                       </p>
                       <div style={css("margin-top: 4px; padding: 12px 14px; border-radius: 16px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.22)")}>
-                        <div style={css("font-size: 14px; letter-spacing: .2em; text-transform: uppercase; color: #f3d98b")}>
+                        <div style={css("font-size: 15px; letter-spacing: .2em; text-transform: uppercase; color: #f3d98b")}>
                           {"Convite"}
                         </div>
-                        <p style={css("margin: 6px 0 0; font-size: 16.5px; line-height: 1.5")}>
+                        <p style={css("margin: 6px 0 0; font-size: 17.5px; line-height: 1.5")}>
                           {R.synth?.adv}
                         </p>
                       </div>
@@ -1760,10 +1760,10 @@ Component.prototype.render = function render() {
                     <a href="Main.dc.html" onClick={R.handoff} className="glass pill fade" style={css("border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; border-color: rgba(185,166,255,.45); animation-delay: 1.6s")}>
                       <span style={css("width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 35% 30%, #fff, #c9b8ff 45%, rgba(201,184,255,.2) 75%); box-shadow: 0 0 20px rgba(201,184,255,.5)")}></span>
                       <span style={css("flex-grow: 1; display: flex; flex-direction: column; gap: 4px")}>
-                        <span style={css("font-size: 16.5px; font-weight: 400")}>
+                        <span style={css("font-size: 17.5px; font-weight: 400")}>
                           {"Perguntar ao Conselho da Alma"}
                         </span>
-                        <span style={css("font-size: 16px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.62)")}>
+                        <span style={css("font-size: 17px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.62)")}>
                           {"Sua pergunta e suas cartas vão para as 14 sabedorias, que refletem com você e ajudam a criar um plano."}
                         </span>
                       </span>
@@ -1771,10 +1771,10 @@ Component.prototype.render = function render() {
                         <path d="M9 5l7 7-7 7" />
                       </svg>
                     </a>
-                    <button className="glass pill fade" onClick={R.newReading} style={css("height: 50px; border-radius: 18px; font-size: 16.5px; animation-delay: 1.7s")}>
+                    <button className="glass pill fade" onClick={R.newReading} style={css("height: 50px; border-radius: 18px; font-size: 17.5px; animation-delay: 1.7s")}>
                       {"Fazer nova tiragem"}
                     </button>
-                    <p className="fade" style={css("margin: 0; text-align: center; font-size: 15px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.45); animation-delay: 1.8s")}>
+                    <p className="fade" style={css("margin: 0; text-align: center; font-size: 16px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.45); animation-delay: 1.8s")}>
                       {"O tarô é um espelho, não uma sentença. Fique com o que ressoar."}
                     </p>
                   </>

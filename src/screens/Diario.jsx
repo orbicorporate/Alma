@@ -340,7 +340,7 @@ export default function Diario() {
         <button className="dz-scrim" aria-label="Fechar" onClick={() => setReading(null)} />
         <div className="dz-sheet dz-reading" role="dialog" aria-modal="true" aria-label="Leitura do sonho">
           <div className="dz-handle" />
-          <span className="kicker" style={{ fontSize: 14, color: '#c9a8ff' }}>O que o sonho pode dizer</span>
+          <span className="kicker" style={{ fontSize: 15, color: '#c9a8ff' }}>O que o sonho pode dizer</span>
           <span className="dz-read-title">{r.title || 'Seu sonho'}</span>
           {L.symbols.length ? (
             <div className="dz-chips">{L.symbols.map((x) => <span key={x.k} className="dz-chip dz-chip-sm" style={{ borderColor: '#c9a8ff88', color: '#e4d6ff' }}>{x.name}</span>)}{L.more > 0 ? <span className="dz-chip dz-chip-sm dz-chip-mute">+{L.more}</span> : null}</div>
@@ -348,7 +348,7 @@ export default function Diario() {
           {askNow ? (
             <div className="dz-deep" key={qi}>
               <div className="dz-deep-top">
-                <span className="kicker" style={{ fontSize: 14, color: '#f3d98b' }}>Aprofundar a leitura · {qi + 1} de {DEEP.length}</span>
+                <span className="kicker" style={{ fontSize: 15, color: '#f3d98b' }}>Aprofundar a leitura · {qi + 1} de {DEEP.length}</span>
                 <button className="dz-deep-skip" onClick={() => setDeepSkip(true)}>Pular</button>
               </div>
               <span className="dz-deep-q">{DEEP[qi].q}</span>
@@ -386,7 +386,7 @@ export default function Diario() {
             <p className="dz-read-p">{P.close}</p>
           </div>
           <div className="dz-question">
-            <span className="kicker" style={{ fontSize: 14, color: '#f3d98b' }}>Pergunta para levar com você</span>
+            <span className="kicker" style={{ fontSize: 15, color: '#f3d98b' }}>Pergunta para levar com você</span>
             <p>{L.question}</p>
           </div>
           <p className="dz-foot">Leituras simbólicas, não diagnóstico nem previsão. O sentido final é seu: só você sabe o que cada imagem desperta.</p>
@@ -493,13 +493,13 @@ export default function Diario() {
           {e.type === 'sonho' ? <span className="dz-hint">Ao guardar, a Alma lê o seu sonho pela psicanálise e pela espiritualidade.</span> : null}
           {e.type === 'sonho' ? (
             <div className="dz-sub">
-              <span className="kicker" style={{ fontSize: 14 }}>Como você acordou?</span>
+              <span className="kicker" style={{ fontSize: 15 }}>Como você acordou?</span>
               <div className="dz-chips">{WAKE.map((w) => <button key={w} className="dz-chip" onClick={() => setEditor(Object.assign({}, e, { wake: e.wake === w ? '' : w }))} style={{ borderColor: t.color, background: e.wake === w ? t.color : 'transparent', color: e.wake === w ? '#1a1408' : '#f4f1ea' }}>{w}</button>)}</div>
             </div>
           ) : null}
           {e.type === 'decisao' ? (
             <div className="dz-sub">
-              <span className="kicker" style={{ fontSize: 14, color: '#c9a8ff' }}>Dias favoráveis para decidir</span>
+              <span className="kicker" style={{ fontSize: 15, color: '#c9a8ff' }}>Dias favoráveis para decidir</span>
               <div className="dz-chips">
                 {sugg.map((s, i) => {
                   const di = iso(s.date);
