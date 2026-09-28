@@ -1603,6 +1603,7 @@ Component.prototype.render = function render() {
                   </p>
                 </div>
                 {this.renderLogin()}
+                <a href="#/estilo" style={css("align-self: flex-start; height: 36px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.75); text-decoration: none")}>✦ Personalizar minha Alma ›</a>
                 <a href="#/ajustes" style={css("align-self: flex-start; height: 36px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.75); text-decoration: none")}>⚙︎ Ajustes e conta ›</a>
                 {R.hasPlans ? (
                   <div style={css("display: flex; flex-direction: column; gap: 10px")}>

@@ -84,12 +84,12 @@
 
 /* Esfera principal no mesmo modelo da esfera do Perguntar: degradê girando e brilho de vidro */
 .sc-main .blob{display:none}
-.sc-main .core{inset:5%;background:#6f5ae6;box-shadow:0 0 50px rgba(201,184,255,.55),0 0 110px rgba(143,123,255,.3);animation:coreGlow 5s ease-in-out infinite}
-.sc-main .core i{inset:-30%;background:conic-gradient(from 0deg,#b9a6ff,#f5a8c8,#ffd3a8,#a8d8ff,#7a5cff,#c9a8ff,#b9a6ff);filter:blur(14px);animation:coreSpin 6s linear infinite}
+.sc-main .core{inset:5%;background:var(--o-base,#6f5ae6);box-shadow:0 0 50px var(--o-glow,rgba(201,184,255,.55)),0 0 110px var(--o-glow2,rgba(143,123,255,.3));animation:coreGlow 5s ease-in-out infinite}
+.sc-main .core i{inset:-30%;background:conic-gradient(from 0deg, var(--oa,#b9a6ff), var(--ob,#f5a8c8), var(--oc,#ffd3a8), var(--od,#a8d8ff), var(--oe,#7a5cff), var(--oa,#b9a6ff));filter:blur(14px);animation:coreSpin var(--o-spd,6s) linear infinite}
 .sc-main .core::after{background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.95),rgba(255,255,255,.35) 22%,transparent 48%),radial-gradient(circle at 70% 80%,rgba(40,20,110,.45),transparent 60%)}
 @keyframes coreGlow{50%{box-shadow:0 0 70px rgba(245,168,200,.6),0 0 130px rgba(168,216,255,.35)}}
 .sc-main .shell{inset:5%;background:none;box-shadow:inset 0 0 20px rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
-.sc-main .halo{background:radial-gradient(circle,#c9b8ff 0%,transparent 62%)}
+.sc-main .halo{background:radial-gradient(circle,var(--oa,#c9b8ff) 0%,transparent 62%)}
 
 /* Edição do plano */
 .sc-main .pl-input{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#f4f1ea;font:inherit;font-size:17px;font-weight:300;padding:12px 14px;outline:none;resize:none;color-scheme:dark}

@@ -31,7 +31,7 @@ export function Moon({ f, size = 14 }) {
   const MARIA = [[-0.3, -0.34, 0.24, 0.18, -20], [0.1, -0.36, 0.16, 0.13, 10], [0.26, -0.1, 0.2, 0.15, 30], [0.6, -0.18, 0.11, 0.09, 0], [-0.52, 0.08, 0.2, 0.34, -10], [0.24, 0.26, 0.12, 0.1, 0], [-0.22, 0.34, 0.1, 0.08, 0]];
   const CRAT = [[-0.08, 0.66, 0.08], [0.46, -0.52, 0.05], [-0.55, -0.5, 0.05], [0.58, 0.2, 0.04], [0.05, -0.7, 0.04]];
   return (
-    <svg width={size} height={size} viewBox={`${-size / 2} ${-size / 2} ${size} ${size}`} aria-hidden="true" style={{ flexShrink: 0, overflow: 'visible' }}>
+    <svg className="moon-real" width={size} height={size} viewBox={`${-size / 2} ${-size / 2} ${size} ${size}`} aria-hidden="true" style={{ flexShrink: 0, overflow: 'visible' }}>
       <defs>
         <radialGradient id={id + 'g'} cx="60%" cy="62%" r="70%">
           <stop offset="0" stopColor="#fbf7ec" /><stop offset=".6" stopColor="#e9e3d2" /><stop offset="1" stopColor="#b9b2a0" />

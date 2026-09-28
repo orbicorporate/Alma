@@ -99,6 +99,7 @@ export default function Ajustes() {
         <section className="aj-sec">
           <span className="aj-k">Preferências</span>
           <div className="aj-card aj-list">
+            <Row ic="✦" t="Personalizar minha Alma" sub="Cores da esfera, fundo claro ou escuro, brilho e ritmo" onClick={() => { window.location.hash = '#/estilo'; }} />
             <Row ic="≈" t="Animações mais calmas" sub="Menos movimento nas estrelas, esferas e bordas" onClick={() => { const v = !calm; setCalm(v); setPref('calm', v); applyPrefs(); }} right={<span className={'aj-toggle' + (calm ? ' on' : '')}><i /></span>} />
             <Row ic="?" t="Como a Alma funciona" sub="Rever o tour de apresentação" onClick={() => { window.location.hash = '#/inicio'; setTimeout(() => window.dispatchEvent(new Event('alma:tour')), 300); }} />
             <Row ic="❝" t="Frase de abertura" sub="Ver de novo a tela de abertura com uma citação nova" onClick={() => { window.location.hash = '#/'; window.dispatchEvent(new CustomEvent('alma:go', { detail: { screen: 'intro' } })); }} />

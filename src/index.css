@@ -19,7 +19,7 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .sc-sym .screen, .sc-main .screen { overflow-x: hidden; }
 
 /* As telas ocupam a altura real do aparelho */
-.app-frame .sc-main > .alma, .app-frame .sc-sym > div:first-child, .app-frame .dz, .app-frame .cz, .app-frame .hm, .app-frame .bh, .app-frame .aj { height: var(--fh, 844px) !important; }
+.app-frame .sc-main > .alma, .app-frame .sc-sym > div:first-child, .app-frame .dz, .app-frame .cz, .app-frame .hm, .app-frame .bh, .app-frame .aj, .app-frame .es { height: var(--fh, 844px) !important; }
 .app-frame > div { height: 100%; }
 
 /* Celular: a coluna do app fica centralizada e o fundo, as auroras e as partículas se estendem até as bordas */
@@ -45,8 +45,8 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .app-fill .sc-sym > div:first-child, .app-fill .sc-main > .alma { box-shadow: 0 calc(-1 * var(--sat, 0px)) 0 0 var(--topc, #0a0918); }
 
 /* Esferas vivas: degradê girando por dentro e brilho de vidro */
-.orb-live { position: relative; overflow: hidden; isolation: isolate; background: #6f5ae6; }
-.orb-live::before { content: ''; position: absolute; inset: -35%; border-radius: 50%; background: conic-gradient(from 0deg, var(--o1, #b9a6ff), #f5a8c8, #ffd3a8, var(--o2, #a8d8ff), #7a5cff, var(--o1, #b9a6ff)); filter: blur(6px); animation: orbLiveSpin 6s linear infinite; z-index: -1; }
+.orb-live { position: relative; overflow: hidden; isolation: isolate; background: var(--o-base, #6f5ae6); }
+.orb-live::before { content: ''; position: absolute; inset: -35%; border-radius: 50%; background: conic-gradient(from 0deg, var(--oa,#b9a6ff), var(--ob,#f5a8c8), var(--oc,#ffd3a8), var(--od,#a8d8ff), var(--oe,#7a5cff), var(--oa,#b9a6ff)); filter: blur(6px); animation: orbLiveSpin var(--o-spd, 6s) linear infinite; z-index: -1; }
 .orb-live::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.95), rgba(255,255,255,.3) 24%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(30,15,90,.35), transparent 60%); }
 @keyframes orbLiveSpin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .orb-live::before { animation: none; } }
@@ -56,9 +56,9 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 :where(:is(.hm-card, .hm-ask, .hm-tile, .bh-card, .bh-moon, .bh-word, .dz-rec, .dz-plancard, .dz .glass, .sc-main .glass, .sc-sym .glass):not(.sky-tile):not([style*="position: absolute"]):not([style*="position:absolute"])) { position: relative; }
 :is(.hm-card, .hm-ask, .hm-tile, .bh-card, .bh-moon, .bh-word, .dz-rec, .dz-plancard, .dz .glass, .sc-main .glass, .sc-sym .glass):not(.sky-tile)::before {
   content: ''; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none; z-index: 1;
-  background: conic-gradient(from var(--ga), transparent 0 55%, rgba(201,184,255,.6) 72%, rgba(255,255,255,1) 80%, rgba(245,168,200,.75) 87%, transparent 97%);
+  background: conic-gradient(from var(--ga), transparent 0 55%, var(--g1, rgba(201,184,255,.6)) 72%, var(--g0, #fff) 80%, var(--g2, rgba(245,168,200,.75)) 87%, transparent 97%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
-  animation: glowRun 8s linear infinite; opacity: .95; filter: drop-shadow(0 0 3px rgba(201,184,255,.8));
+  animation: glowRun 8s linear infinite; opacity: .95; filter: drop-shadow(0 0 3px var(--g1, rgba(201,184,255,.8)));
 }
 :is(.hm-card, .hm-tile, .bh-card, .dz-rec, .dz .glass, .sc-main .glass, .sc-sym .glass):nth-child(3n+2)::before { animation-delay: -2.7s; animation-duration: 9s; }
 :is(.hm-card, .hm-tile, .bh-card, .dz-rec, .dz .glass, .sc-main .glass, .sc-sym .glass):nth-child(3n)::before { animation-delay: -5.3s; animation-duration: 10s; }
@@ -75,3 +75,11 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .app-fill .dz-body { padding-left: 14px !important; padding-right: 14px !important; }
 .app-fill .dz-top { left: 14px !important; }
 .app-fill .dz-tabs { left: 14px !important; right: 14px !important; }
+
+/* Tema pessoal: o fundo muda de tom (ou fica claro) e as esferas mantêm as cores escolhidas */
+.theme-filter .app-bg { filter: var(--bg-f); }
+.theme-filter :is(.orb-live, .tb-orb, .hm-ask-orb, .hm-core-l, .sc-main .core, .sc-main .halo, .th-keep) { filter: var(--bg-fix); }
+.theme-light :is(img, video, .mv-cover, .moon-real) { filter: var(--bg-fix); }
+html.theme-light, html.theme-light body { background: #ece8f6; }
+html[data-bg="areia"], html[data-bg="areia"] body { background: #f4ecdf; }
+html[data-bg="ceu"], html[data-bg="ceu"] body { background: #e3f0fc; }

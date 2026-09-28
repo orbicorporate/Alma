@@ -67,7 +67,7 @@
 .hm .hm-why-cta { font-size: 17px; color: #f3d98b; min-height: 36px; }
 .hm-from { color: rgba(244,241,234,.55); -webkit-text-fill-color: rgba(244,241,234,.55); font-size: 16.5px; }
 .hm-ask-orb { position: relative; overflow: hidden; isolation: isolate; background: #6f5ae6; }
-.hm-ask-orb::before { content: ''; position: absolute; inset: -30%; border-radius: 50%; background: conic-gradient(from 0deg, #b9a6ff, #f5a8c8, #ffd3a8, #a8d8ff, #7a5cff, #c9a8ff, #b9a6ff); filter: blur(6px); animation: hmSpin 7s linear infinite; z-index: -1; }
+.hm-ask-orb::before { content: ''; position: absolute; inset: -30%; border-radius: 50%; background: conic-gradient(from 0deg, var(--oa,#b9a6ff), var(--ob,#f5a8c8), var(--oc,#ffd3a8), var(--od,#a8d8ff), var(--oe,#7a5cff), var(--oa,#b9a6ff)); filter: blur(6px); animation: hmSpin var(--o-spd, 7s) linear infinite; z-index: -1; }
 .hm-ask-orb::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.95), rgba(255,255,255,.3) 24%, transparent 50%); }
 @keyframes hmSpin { to { transform: rotate(360deg); } }
 .hm-head-r { display: flex; align-items: center; gap: var(--s2); }
@@ -91,7 +91,7 @@
 .hm-pl-n { font-size: 20px; color: #0c1f15; background: #8fe3b0; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .hm-pl-dot { position: absolute; top: 2px; right: 2px; width: 11px; height: 11px; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 10px #f3d98b; }
 .hm .hm-core { position: absolute; left: 50%; top: 50%; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.hm .hm-core-orb { position: absolute; inset: 0; width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 0 60px rgba(201,184,255,.6), 0 0 120px rgba(143,123,255,.3); animation: hmPulse 4s ease-in-out infinite; }
+.hm .hm-core-orb { position: absolute; inset: 0; width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 0 60px var(--o-glow, rgba(201,184,255,.6)), 0 0 120px var(--o-glow2, rgba(143,123,255,.3)); animation: hmPulse 4s ease-in-out infinite; }
 .hm-core-l { position: relative; z-index: 2; font-size: 17px; font-weight: 500; letter-spacing: .04em; color: #1a1030; text-shadow: 0 0 12px rgba(255,255,255,.7); }
 .hm-hint { margin: 4px 0 0; text-align: center; font-size: 15px; color: rgba(244,241,234,.6); }
 .hm-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
