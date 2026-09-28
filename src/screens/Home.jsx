@@ -65,51 +65,81 @@ export default function Home() {
   const rel = next ? (next.due < 0 ? 'atrasado' : next.due === 0 ? 'hoje' : next.due === 1 ? 'amanhã' : `em ${next.due} dias`) : '';
   const counts = { q: entries.length, j: (data.journal || []).filter((x) => !x.linkOf).length };
 
+  const [sheet, setSheet] = useState(null);
+  useEffect(() => { window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'inicio', hide: !!sheet } })); }, [sheet]);
+  useEffect(() => () => window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'inicio', hide: false } })), []);
+  const sym = (d) => { window.dispatchEvent(new CustomEvent('sym:go', { detail: d })); go('#/simbolos'); };
+  // planetas em órbita ao redor da esfera: cada um abre um cartão ou leva a uma área
+  const planets = [
+    { k: 'lua', label: 'Dica do dia', c: '#f3d98b', ic: <Moon f={adv.phase.frac} size={30} />, open: () => setSheet('lua') },
+    next ? { k: 'passo', label: 'Próximo passo', c: '#8fe3b0', ic: <span className="hm-pl-n">{next.n}</span>, dot: next.due <= 0, open: () => setSheet('passo') } : null,
+    { k: 'semana', label: 'Semana', c: '#c9b8ff', ic: '✧', open: () => setSheet('semana') },
+    { k: 'frase', label: 'Sabedoria', c: '#ffd3a8', ic: '❝', open: () => setSheet('frase') },
+    { k: 'sonhos', label: 'Sonhos', c: '#c9a8ff', ic: '☁︎', open: () => toDiary('sonhos') },
+    { k: 'banhos', label: 'Banhos', c: '#8fe3b0', ic: '❀', open: () => go('#/banhos') },
+    { k: 'taro', label: 'Tarô', c: '#f5a8c8', ic: '✦', open: () => sym('tarot') }
+  ].filter(Boolean);
+  const R = 148;
+
   return (
     <div className="hm">
       <div className="hm-aurora" />
       <Starfield />
-      <div className="hm-scroll">
+      <div className="hm-scroll hm-scroll2">
         <header className="hm-head">
           <span className="hm-word">alma</span>
           <span className="hm-head-r">
-            <span className="hm-date">{WD_FULL[t.getDay()]}, {t.getDate()} de {MO_FULL[t.getMonth()]}</span>
+            <span className="hm-date">{WD_FULL[t.getDay()].split('-')[0]}, {t.getDate()} de {MO_FULL[t.getMonth()]}</span>
             <button className="hm-gear" aria-label="Ajustes" onClick={() => go('#/ajustes')}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" /></svg>
             </button>
           </span>
         </header>
 
-        <section className="hm-hello">
+        <section className="hm-hello hm-hello2">
           <h1>{hello}{name ? `, ${name}` : ''}.</h1>
-          <p>O que você quer fazer hoje?</p>
         </section>
 
-        <button className="hm-ask" onClick={() => go('#/', { screen: 'breath', count: 0, inhale: true, medit: false })}>
-          <span className="hm-ask-orb" />
-          <span className="hm-ask-text">
-            <b>Fazer uma pergunta</b>
-            <span>Uma dúvida, um medo, uma alegria. A Alma e 14 sabedorias refletem com você.</span>
-          </span>
-          <span className="hm-chev" aria-hidden="true">›</span>
-        </button>
+        <div className="hm-orbit">
+          <div className="hm-ring" />
+          <div className="hm-ring hm-ring2" />
+          <div className="hm-spin">
+            {planets.map((p, i) => {
+              const a = (-90 + i * 360 / planets.length) * Math.PI / 180;
+              return (
+                <button key={p.k} className="hm-pl" onClick={p.open} aria-label={p.label}
+                  style={{ left: 170 + R * Math.cos(a), top: 170 + R * Math.sin(a), '--c': p.c, animationDelay: `${0.2 + i * 0.1}s` }}>
+                  <span className="hm-pl-in">
+                    <span className="hm-pl-ic">{p.ic}{p.dot ? <i className="hm-pl-dot" /> : null}</span>
+                    <span className="hm-pl-l">{p.label}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <button className="hm-core" onClick={() => go('#/', { screen: 'breath', count: 0, inhale: true, medit: false })} aria-label="Fazer uma pergunta">
+            <span className="hm-core-orb orb-live" />
+            <span className="hm-core-l">Perguntar</span>
+          </button>
+        </div>
 
-        {next ? (
-          <section className="hm-card hm-next">
-            <div className="hm-k" style={{ color: '#8fe3b0' }}>Seu próximo passo · {rel}</div>
-            <div className="hm-step">
-              <span className="hm-num">{next.n}</span>
-              <span className="hm-step-t">{next.t}</span>
-            </div>
-            <p className="hm-sub">Plano: {next.q}</p>
-            <div className="hm-row">
-              <button className="hm-btn hm-btn-green" onClick={doneStep}>Concluí</button>
-              <button className="hm-btn" onClick={() => go('#/', { screen: 'plan', planIdx: next.i, planPrev: 'journal' })}>Ver plano</button>
-            </div>
-            <button className="hm-why" onClick={() => go('#/', { screen: 'journal', prev: 'ask' })}>Ver todos os seus planos ›</button>
-          </section>
-        ) : null}
+        <p className="hm-hint">Toque na esfera para perguntar, ou em um planeta para abrir.</p>
 
+        <div className="hm-quick">
+          <button onClick={() => toDiary('dia')}><span style={{ color: '#a8d8ff' }}>✎</span>Registrar</button>
+          <button onClick={() => sym('horo')}><span style={{ color: '#c9b8ff' }}>☾</span>Horóscopo</button>
+          <button onClick={() => go('#/constelacao')}><span style={{ color: '#f5a8c8' }}>✧</span>Meu céu</button>
+          <button onClick={() => window.dispatchEvent(new Event('alma:tour'))}><span style={{ color: '#f3d98b' }}>?</span>Ajuda</button>
+        </div>
+      </div>
+
+      {sheet ? (
+        <>
+          <button className="hm-scrim" aria-label="Fechar" onClick={() => setSheet(null)} />
+          <div className="hm-sheet" role="dialog" aria-modal="true">
+            <div className="hm-handle" />
+            <div className="hm-sheet-body">
+              {sheet === 'lua' ? (<>
         <section className="hm-card hm-tip">
           <div className="hm-tip-top">
             <span className="hm-k" style={{ color: '#f3d98b' }}>Dica do dia</span>
@@ -131,7 +161,8 @@ export default function Home() {
             </div>
           ) : null}
         </section>
-
+              </>) : null}
+              {sheet === 'semana' ? (<>
         <section className="hm-card hm-tip hm-tip-w">
           <span className="hm-k" style={{ color: '#c9b8ff' }}>Dica da semana</span>
           <div className="hm-tip-t">{tipW.title}</div>
@@ -148,49 +179,36 @@ export default function Home() {
             </div>
           ) : null}
         </section>
-
+              </>) : null}
+              {sheet === 'frase' ? (<>
         <section className="hm-card hm-phrase">
           <div className="hm-k">Sabedoria desta hora</div>
           <p className="hm-quote">“{ph.lines.join(' ')}”</p>
           <p className="hm-gold">{ph.by} <span className="hm-from">· {ph.from}</span></p>
         </section>
-
-        <div className="hm-k hm-sec">Atalhos</div>
-        <div className="hm-grid">
-          <button className="hm-tile" onClick={() => toDiary('dia')}>
-            <span className="hm-tile-ic" style={{ color: '#a8d8ff' }}>✎</span>
-            <b>Registrar o dia</b>
-            <span>Gratidão, intenção, decisão</span>
-          </button>
-          <button className="hm-tile" onClick={() => toDiary('sonhos')}>
-            <span className="hm-tile-ic" style={{ color: '#c9a8ff' }}>☁︎</span>
-            <b>Sonhos</b>
-            <span>Anote e veja o significado</span>
-          </button>
-          <button className="hm-tile" onClick={() => go('#/banhos')}>
-            <span className="hm-tile-ic" style={{ color: '#8fe3b0' }}>❀</span>
-            <b>Banhos da Lua</b>
-            <span>Limpeza, amor, prosperidade</span>
-          </button>
-          <button className="hm-tile" onClick={() => { window.dispatchEvent(new CustomEvent('sym:go', { detail: 'tarot' })); go('#/simbolos'); }}>
-            <span className="hm-tile-ic" style={{ color: '#f3d98b' }}>✦</span>
-            <b>Carta do dia</b>
-            <span>Tarô guiado</span>
-          </button>
-          <button className="hm-tile" onClick={() => { window.dispatchEvent(new CustomEvent('sym:go', { detail: 'horo' })); go('#/simbolos'); }}>
-            <span className="hm-tile-ic" style={{ color: '#c9b8ff' }}>☾</span>
-            <b>Horóscopo</b>
-            <span>Pelo seu mapa</span>
-          </button>
-          <button className="hm-tile" onClick={() => go('#/constelacao')}>
-            <span className="hm-tile-ic" style={{ color: '#f5a8c8' }}>✧</span>
-            <b>Ver meu céu</b>
-            <span>{counts.q} {counts.q === 1 ? 'pergunta' : 'perguntas'} · {counts.j} {counts.j === 1 ? 'registro' : 'registros'}</span>
-          </button>
-        </div>
-
-        <button className="hm-tour" onClick={() => window.dispatchEvent(new Event('alma:tour'))}>Como a Alma funciona</button>
-      </div>
+              </>) : null}
+              {sheet === 'passo' ? (<>
+        {next ? (
+          <section className="hm-card hm-next">
+            <div className="hm-k" style={{ color: '#8fe3b0' }}>Seu próximo passo · {rel}</div>
+            <div className="hm-step">
+              <span className="hm-num">{next.n}</span>
+              <span className="hm-step-t">{next.t}</span>
+            </div>
+            <p className="hm-sub">Plano: {next.q}</p>
+            <div className="hm-row">
+              <button className="hm-btn hm-btn-green" onClick={doneStep}>Concluí</button>
+              <button className="hm-btn" onClick={() => go('#/', { screen: 'plan', planIdx: next.i, planPrev: 'journal' })}>Ver plano</button>
+            </div>
+            <button className="hm-why" onClick={() => go('#/', { screen: 'journal', prev: 'ask' })}>Ver todos os seus planos ›</button>
+          </section>
+        ) : null}
+              </>) : null}
+            </div>
+            <button className="hm-close" onClick={() => setSheet(null)}>Fechar</button>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }

@@ -785,12 +785,13 @@ class Component extends DCLogic {
 Object.assign(Component.prototype, {
   componentDidUpdate(pp, ps) {
     if (ps.entries !== this.state.entries) save({ entries: this.state.entries });
-    if (ps.screen !== this.state.screen || ps.sheet !== this.state.sheet) this.emitChrome();
+      if (ps.screen !== this.state.screen && this.state.ansSheet) this.setState({ ansSheet: null });
+    if (ps.screen !== this.state.screen || ps.sheet !== this.state.sheet || ps.ansSheet !== this.state.ansSheet) this.emitChrome();
   },
   // Avisa o app em que tela a Alma está, para mostrar ou esconder a barra de navegação.
   emitChrome() {
     const ritual = ['intro', 'welcome', 'breath', 'releasing', 'deepen', 'council'].includes(this.state.screen);
-    window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'alma', screen: this.state.screen, hide: ritual || this.state.sheet >= 0 } }));
+    window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'alma', screen: this.state.screen, hide: ritual || this.state.sheet >= 0 || !!this.state.ansSheet } }));
   },
   checkHandoff() {
     try {
@@ -1324,46 +1325,6 @@ Component.prototype.render = function render() {
                     </p>
                   </div>
                 </div>
-                <MovieTip text={this.state.text} kind={this.state.kind} />
-                <div className="glass cardin" style={css("border-radius: 26px; padding: 22px 14px 20px; border-color: rgba(143,227,176,.4); box-shadow: 0 0 40px rgba(143,227,176,.08), inset 0 1px 0 rgba(255,255,255,.12); animation-delay: 300ms")}>
-                  <div style={css("display: flex; align-items: center; gap: 10px")}>
-                    <span style={css("width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(143,227,176,.14); color: #8fe3b0")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
-                        <path d="M3.5 10h17M8 3v4M16 3v4" />
-                      </svg>
-                    </span>
-                    <span className="kicker" style={css("color: #8fe3b0")}>
-                      {"Da reflexão para a ação"}
-                    </span>
-                  </div>
-                  <h2 style={css("margin: 14px 0 0; font-size: 22px; line-height: 1.3; font-weight: 300")}>
-                    {"Transforme estas respostas em um plano"}
-                  </h2>
-                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.75)")}>
-                    {"A Alma cria um passo a passo com datas e lembretes, e acompanha você até resolver."}
-                  </p>
-                  <div style={css("margin-top: 16px; display: flex; flex-direction: column; gap: 10px")}>
-                    {(R.previewSteps || []).map((L14_pv, I14) => (
-                      <React.Fragment key={I14}>
-                        <div style={css("display: flex; align-items: center; gap: 12px")}>
-                          <span style={css("width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #8fe3b0; border: 1px solid rgba(143,227,176,.55)")}>
-                            {L14_pv?.n}
-                          </span>
-                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.4; color: rgba(244,241,234,.88)")}>
-                            {L14_pv?.t}
-                          </span>
-                        </div>
-                      </React.Fragment>
-                    ))}
-                    <span style={css("padding-left: 38px; font-size: 17px; color: rgba(244,241,234,.5)")}>
-                      {R.previewMore}
-                    </span>
-                  </div>
-                  <button className="cta" onClick={R.createPlan} style={css("margin-top: 18px; width: 100%; height: 54px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
-                    {R.planCta}
-                  </button>
-                </div>
                 {R.voicesClosed ? (
                   <>
                     <div className="glass cardin" style={css("margin-top: 8px; border-radius: 26px; padding: 20px 18px; display: flex; flex-direction: column; gap: 16px; border-color: rgba(201,184,255,.4); animation-delay: 450ms")}>
@@ -1527,6 +1488,18 @@ Component.prototype.render = function render() {
                     </div>
                   </>
                 ) : null}
+                <div style={css("display: grid; grid-template-columns: 1fr 1fr; gap: 10px")}>
+                  <button className="glass pill ans-tile" onClick={() => this.setState({ ansSheet: 'plan' })} style={css("border-radius: 22px; padding: 16px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; border-color: rgba(143,227,176,.4)")}>
+                    <span style={css("width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #0c1f15; background: linear-gradient(135deg, #8fe3b0, #d4f7e0); box-shadow: 0 0 20px rgba(143,227,176,.45)")}>✓</span>
+                    <span style={css("font-size: 18px")}>Plano de ação</span>
+                    <span style={css("font-size: 15px; color: rgba(244,241,234,.6)")}>Passo a passo com datas</span>
+                  </button>
+                  <button className="glass pill ans-tile" onClick={() => this.setState({ ansSheet: 'movie' })} style={css("border-radius: 22px; padding: 16px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; border-color: rgba(201,184,255,.4)")}>
+                    <span style={css("width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #1a1030; background: linear-gradient(135deg, #e4d6ff, #b9a6ff); box-shadow: 0 0 20px rgba(201,184,255,.45)")}>▶</span>
+                    <span style={css("font-size: 18px")}>Dica de filme</span>
+                    <span style={css("font-size: 15px; color: rgba(244,241,234,.6)")}>Para ver e refletir</span>
+                  </button>
+                </div>
                 <button className="cta" onClick={R.saveEntry} style={css(`margin-top: 8px; width: 100%; height: 58px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a); ${(R.saveStyle) ?? ''}`)}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="#1a1408" aria-hidden="true">
                     <path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" />
@@ -1558,6 +1531,59 @@ Component.prototype.render = function render() {
                   {"Se o peso estiver grande demais, você não precisa carregar sozinho. CVV, ligue 188, 24 horas, gratuito."}
                 </p>
               </div>
+            </div>
+          </>
+        ) : null}
+        {R.isAnswers && this.state.ansSheet ? (
+          <>
+            <button aria-label="Fechar" onClick={() => this.setState({ ansSheet: null })} style={css("position: absolute; inset: 0; z-index: 30; background: rgba(5,4,12,.6); border: 0")}></button>
+            <div style={css("position: absolute; left: 0; right: 0; bottom: 0; z-index: 31; max-height: 86%; overflow-y: auto; box-sizing: border-box; padding: 12px 14px 28px; border-radius: 30px 30px 0 0; background: linear-gradient(180deg, #1d1840, #141128); border-top: 1px solid rgba(255,255,255,.14); display: flex; flex-direction: column; gap: 12px; animation: sheetUp .55s cubic-bezier(.2,.8,.2,1) both")}>
+              <div style={css("width: 40px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.25); align-self: center")}></div>
+              {this.state.ansSheet === 'movie' ? <MovieTip text={this.state.text} kind={this.state.kind} /> : null}
+              {this.state.ansSheet === 'plan' ? (
+                <>
+                <div className="glass cardin" style={css("border-radius: 26px; padding: 22px 14px 20px; border-color: rgba(143,227,176,.4); box-shadow: 0 0 40px rgba(143,227,176,.08), inset 0 1px 0 rgba(255,255,255,.12); animation-delay: 300ms")}>
+                  <div style={css("display: flex; align-items: center; gap: 10px")}>
+                    <span style={css("width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(143,227,176,.14); color: #8fe3b0")}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
+                        <path d="M3.5 10h17M8 3v4M16 3v4" />
+                      </svg>
+                    </span>
+                    <span className="kicker" style={css("color: #8fe3b0")}>
+                      {"Da reflexão para a ação"}
+                    </span>
+                  </div>
+                  <h2 style={css("margin: 14px 0 0; font-size: 22px; line-height: 1.3; font-weight: 300")}>
+                    {"Transforme estas respostas em um plano"}
+                  </h2>
+                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.75)")}>
+                    {"A Alma cria um passo a passo com datas e lembretes, e acompanha você até resolver."}
+                  </p>
+                  <div style={css("margin-top: 16px; display: flex; flex-direction: column; gap: 10px")}>
+                    {(R.previewSteps || []).map((L14_pv, I14) => (
+                      <React.Fragment key={I14}>
+                        <div style={css("display: flex; align-items: center; gap: 12px")}>
+                          <span style={css("width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #8fe3b0; border: 1px solid rgba(143,227,176,.55)")}>
+                            {L14_pv?.n}
+                          </span>
+                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.4; color: rgba(244,241,234,.88)")}>
+                            {L14_pv?.t}
+                          </span>
+                        </div>
+                      </React.Fragment>
+                    ))}
+                    <span style={css("padding-left: 38px; font-size: 17px; color: rgba(244,241,234,.5)")}>
+                      {R.previewMore}
+                    </span>
+                  </div>
+                  <button className="cta" onClick={R.createPlan} style={css("margin-top: 18px; width: 100%; height: 54px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
+                    {R.planCta}
+                  </button>
+                </div>
+                </>
+              ) : null}
+              <button onClick={() => this.setState({ ansSheet: null })} style={css("height: 48px; flex-shrink: 0; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); font-size: 16px; text-align: center")}>Fechar</button>
             </div>
           </>
         ) : null}

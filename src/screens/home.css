@@ -72,3 +72,37 @@
 @keyframes hmSpin { to { transform: rotate(360deg); } }
 .hm-head-r { display: flex; align-items: center; gap: var(--s2); }
 .hm .hm-gear { width: 40px; height: 40px; margin-right: -8px; display: flex; align-items: center; justify-content: center; color: rgba(244,241,234,.75); border-radius: 50%; }
+
+/* Início em órbita */
+.hm-scroll2 { gap: var(--s3); align-items: stretch; }
+.hm-hello2 h1 { font-size: 28px; }
+.hm-orbit { position: relative; width: 340px; height: 340px; align-self: center; margin-top: 8px; }
+.hm-ring { position: absolute; inset: 22px; border-radius: 50%; border: 1px solid rgba(201,184,255,.18); box-shadow: 0 0 40px rgba(122,92,255,.12) inset; }
+.hm-ring2 { inset: 72px; border-style: dashed; border-color: rgba(255,255,255,.08); animation: hmSpin 90s linear infinite reverse; }
+.hm-spin { position: absolute; inset: 0; animation: hmSpin 140s linear infinite; }
+.hm .hm-pl { position: absolute; width: 76px; height: 84px; margin: -30px 0 0 -38px; animation: hmPop .8s cubic-bezier(.2,1.5,.4,1) both; }
+@keyframes hmPop { from { opacity: 0; transform: scale(0); } }
+.hm-pl-in { position: absolute; left: 0; top: 0; width: 76px; display: flex; flex-direction: column; align-items: center; gap: 5px; animation: hmSpin 140s linear infinite reverse; }
+.hm-pl-ic { position: relative; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--c); background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.22), rgba(20,16,44,.8) 70%); border: 1px solid color-mix(in srgb, var(--c) 60%, transparent); box-shadow: 0 0 22px color-mix(in srgb, var(--c) 40%, transparent); font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; transition: transform .3s ease; animation: hmFloat 5s ease-in-out infinite; }
+.hm .hm-pl:nth-child(2n) .hm-pl-ic { animation-delay: -2.5s; }
+.hm .hm-pl:active .hm-pl-ic { transform: scale(.92); }
+@keyframes hmFloat { 50% { box-shadow: 0 0 34px color-mix(in srgb, var(--c) 65%, transparent); } }
+.hm-pl-l { font-size: 13.5px; color: rgba(244,241,234,.85); text-shadow: 0 1px 8px rgba(0,0,0,.8); white-space: nowrap; }
+.hm-pl-n { font-size: 20px; color: #0c1f15; background: #8fe3b0; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.hm-pl-dot { position: absolute; top: 2px; right: 2px; width: 11px; height: 11px; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 10px #f3d98b; }
+.hm .hm-core { position: absolute; left: 50%; top: 50%; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.hm .hm-core-orb { position: absolute; inset: 0; width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 0 60px rgba(201,184,255,.6), 0 0 120px rgba(143,123,255,.3); animation: hmPulse 4s ease-in-out infinite; }
+.hm-core-l { position: relative; z-index: 2; font-size: 17px; font-weight: 500; letter-spacing: .04em; color: #1a1030; text-shadow: 0 0 12px rgba(255,255,255,.7); }
+.hm-hint { margin: 4px 0 0; text-align: center; font-size: 15px; color: rgba(244,241,234,.6); }
+.hm-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
+.hm .hm-quick button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 0; border-radius: 18px; font-size: 14px; text-align: center; color: rgba(244,241,234,.85); background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); }
+.hm-quick span { font-size: 22px; font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; }
+@keyframes hmSpin { to { transform: rotate(360deg); } }
+.hm-scrim { position: absolute; inset: 0; z-index: 20; background: rgba(5,4,12,.6); animation: hmIn .4s ease both; border: 0; }
+.hm-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 21; max-height: 82%; display: flex; flex-direction: column; gap: 12px; padding: 12px 14px 28px; box-sizing: border-box; border-radius: 30px 30px 0 0; background: linear-gradient(180deg, #1d1840, #141128); border-top: 1px solid rgba(255,255,255,.14); animation: hmUp .55s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes hmUp { from { transform: translateY(100%); } }
+.hm-handle { width: 40px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.25); align-self: center; }
+.hm-sheet-body { overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 12px; }
+.hm-sheet-body > * { animation: none !important; }
+.hm .hm-close { height: 48px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); text-align: center; font-size: 16px; flex-shrink: 0; }
+@media (prefers-reduced-motion: reduce) { .hm-spin, .hm-pl-in, .hm-ring2 { animation: none; } }
