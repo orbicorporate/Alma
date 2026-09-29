@@ -123,7 +123,6 @@ export default function Home() {
           </button>
         </div>
 
-        <p className="hm-hint">Toque na esfera para perguntar, ou em um planeta para abrir.</p>
 
         <div className="hm-quick">
           <button onClick={() => toDiary('dia')}><span style={{ color: '#a8d8ff' }}>✎</span>Registrar</button>
