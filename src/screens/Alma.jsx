@@ -274,6 +274,7 @@ class Component extends DCLogic {
         this.setState({ planEdit: { j: e.plan.length, t: '', iso: nIso }, nameEdit: null });
       },
       q: `“${e.q}”`, doneN, total, allDone: doneN === total,
+      open14: () => this.setState({ c14: { q: e.q, list: this.councilOf(e) } }),
       headline: doneN === total ? 'Plano concluído' : doneN === 0 ? 'Vamos começar pelo passo 1' : `Você está no passo ${cur + 1}`,
       sub: doneN === total ? 'Todos os passos feitos. Que caminho bonito.' : `Próximo: ${plan[cur].date.replace('Hoje · ', 'hoje, ')}`,
       ringStyle: `background: conic-gradient(#8fe3b0 0% ${pct}%, rgba(255,255,255,.1) ${pct}% 100%); transition: background 1s ease`,
@@ -322,14 +323,38 @@ class Component extends DCLogic {
     };
   }
   // Voz de uma tradição no contexto da pergunta atual (sentimento + assunto).
-  voice(i) {
+  voice(i, text, kind) {
     const a = this.AG[i], s = this.state;
-    const cx = contextOf(s.text);
-    const v = voiceFor(a.name, s.kind, cx ? cx.obj : null);
+    const cx = contextOf(text != null ? text : s.text);
+    const v = voiceFor(a.name, kind || s.kind, cx ? cx.obj : null);
     if (!v) return a;
     const SC = { 'Hebraico': ['hebrew', 'rtl'], 'Árabe': ['arabic', 'rtl'], 'Persa': ['arabic', 'rtl'], 'Sânscrito': ['deva', 'ltr'], 'Chinês clássico': ['han', 'ltr'], 'Gurmukhi': ['gurmukhi', 'ltr'] };
     const sc = SC[v.lang] || ['latin', 'ltr'];
     return Object.assign({}, a, v, { script: sc[0], dir: sc[1] });
+  }
+  // As 14 respostas do Conselho, para guardar junto com a pergunta e poder reabrir depois.
+  councilSnap() {
+    const s = this.state;
+    return this.AG.map((a, i) => { const v = this.voice(i); const r = s.aiCouncil && s.aiCouncil.reflections[i]; return { name: v.name, color: v.color, ref: v.ref || '', lang: v.lang || '', orig: v.orig || '', tr: v.tr || '', reflection: r || v.reflection || '' }; });
+  }
+  councilOf(e) {
+    if (e.council && e.council.length) return e.council;
+    return this.AG.map((a, i) => { const v = this.voice(i, e.q, e.kind); return { name: v.name, color: v.color, ref: v.ref || '', lang: v.lang || '', orig: v.orig || '', tr: v.tr || '', reflection: v.reflection || '' }; });
+  }
+  secsView(sec, tradColor) {
+    return (
+      <div className="al-secs">
+        <section className="al-sec"><span className="al-h">O que está em jogo</span><p className="al-lead">{sec.tensao}</p></section>
+        <section className="al-sec"><span className="al-h">Minha leitura</span><p>{sec.leitura}</p>{sec.mudaria ? <p className="al-cond">{sec.mudaria}</p> : null}</section>
+        {(sec.tradicoes || []).length ? (
+          <section className="al-sec"><span className="al-h">O que as tradições dizem</span>
+            <ul className="al-list">{sec.tradicoes.map((t, i) => <li key={i} style={{ '--c': tradColor(t.nome) }}><b>{t.nome}</b><span>{t.ideia}</span></li>)}</ul>
+          </section>
+        ) : null}
+        {sec.ponto_cego ? <section className="al-sec al-blind"><span className="al-h">O que merece sua atenção</span><p>{sec.ponto_cego}</p></section> : null}
+        {sec.pergunta ? <section className="al-sec"><span className="al-h">Uma pergunta para levar</span><p className="al-q">{sec.pergunta}</p></section> : null}
+      </div>
+    );
   }
   KP(k) {
     return { 'Pensamento': 'um pensamento', 'Dúvida': 'uma dúvida', 'Aflição': 'uma aflição', 'Medo': 'um medo', 'Alegria': 'uma alegria', 'Sugestão': 'um pedido de sugestão' }[k] || 'algo seu';
@@ -602,7 +627,8 @@ class Component extends DCLogic {
       this.setState({ entries: list });
     };
     const sheet = se ? {
-      meta: `${se.date} · ${se.kind}${se.resolved ? ' · Resolvida' : ''}`, q: se.q, alma: se.alma, step: se.step,
+      meta: `${se.date} · ${se.kind}${se.resolved ? ' · Resolvida' : ''}`, q: se.q, alma: se.alma, step: se.step, sec: se.sec || null,
+      open14: () => this.setState({ c14: { q: se.q, list: this.councilOf(se) } }),
       tags: se.tags.map((x) => ({ t: x })), n: se.stars.length, none: se.stars.length === 0,
       hasPlan: !!se.plan, noPlan: !se.plan,
       nextText: se.plan ? ((se.plan.find((x) => !x.done) || {}).t ? 'Próximo: ' + se.plan.find((x) => !x.done).t : 'Todos os passos concluídos') : '',
@@ -681,7 +707,7 @@ class Component extends DCLogic {
           const a = this.composeAlma();
           list.push({
             date: dayMonth(today()), at: Date.now(), kind: st.kind, q: st.text, tags: st.ans.filter(Boolean), resolved: false, plan: null,
-            alma: a.p1 + ' ' + a.p2, step: a.step,
+            alma: a.p1 + ' ' + a.p2, step: a.step, sec: a.sec || undefined, council: this.councilSnap(),
             stars: st.stars.map((i) => { const v = this.voice(i); return { name: v.name, ref: v.ref, color: v.color, tr: v.tr }; })
           });
           idx = list.length - 1;
@@ -775,7 +801,7 @@ class Component extends DCLogic {
         const a = this.composeAlma();
         const entry = {
           date: dayMonth(today()), at: Date.now(), kind: st.kind, q: st.text, tags: st.ans.filter(Boolean), resolved: false, plan: null,
-          alma: a.p1 + ' ' + a.p2, step: a.step,
+          alma: a.p1 + ' ' + a.p2, step: a.step, sec: a.sec || undefined, council: this.councilSnap(),
           stars: st.stars.map((i) => { const v = this.voice(i); return { name: v.name, ref: v.ref, color: v.color, tr: v.tr }; })
         };
         this.setState({ entries: st.entries.concat([entry]), savedNow: true, savedIdx: st.entries.length });
@@ -799,13 +825,13 @@ class Component extends DCLogic {
 Object.assign(Component.prototype, {
   componentDidUpdate(pp, ps) {
     if (ps.entries !== this.state.entries) save({ entries: this.state.entries });
-      if (ps.screen !== this.state.screen && this.state.ansSheet) this.setState({ ansSheet: null });
-    if (ps.screen !== this.state.screen || ps.sheet !== this.state.sheet || ps.ansSheet !== this.state.ansSheet) this.emitChrome();
+      if (ps.screen !== this.state.screen && (this.state.ansSheet || this.state.c14)) this.setState({ ansSheet: null, c14: null });
+    if (ps.screen !== this.state.screen || ps.sheet !== this.state.sheet || ps.ansSheet !== this.state.ansSheet || ps.c14 !== this.state.c14) this.emitChrome();
   },
   // Avisa o app em que tela a Alma está, para mostrar ou esconder a barra de navegação.
   emitChrome() {
     const ritual = ['intro', 'welcome', 'breath', 'releasing', 'deepen', 'council'].includes(this.state.screen);
-    window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'alma', screen: this.state.screen, hide: ritual || this.state.sheet >= 0 || !!this.state.ansSheet } }));
+    window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'alma', screen: this.state.screen, hide: ritual || this.state.sheet >= 0 || !!this.state.ansSheet || !!this.state.c14 } }));
   },
   checkHandoff() {
     try {
@@ -1330,39 +1356,7 @@ Component.prototype.render = function render() {
                     {"A resposta da Alma"}
                   </div>
                   {R.almaSec ? (
-                    <div className="al-secs">
-                      <section className="al-sec">
-                        <span className="al-h">O que está em jogo</span>
-                        <p className="al-lead">{R.almaSec.tensao}</p>
-                      </section>
-                      <section className="al-sec">
-                        <span className="al-h">Minha leitura</span>
-                        <p>{R.almaSec.leitura}</p>
-                        {R.almaSec.mudaria ? <p className="al-cond">{R.almaSec.mudaria}</p> : null}
-                      </section>
-                      {(R.almaSec.tradicoes || []).length ? (
-                        <section className="al-sec">
-                          <span className="al-h">O que as tradições dizem</span>
-                          <ul className="al-list">
-                            {R.almaSec.tradicoes.map((t, i) => (
-                              <li key={i} style={{ '--c': R.tradColor(t.nome) }}><b>{t.nome}</b><span>{t.ideia}</span></li>
-                            ))}
-                          </ul>
-                        </section>
-                      ) : null}
-                      {R.almaSec.ponto_cego ? (
-                        <section className="al-sec al-blind">
-                          <span className="al-h">Seu ponto cego</span>
-                          <p>{R.almaSec.ponto_cego}</p>
-                        </section>
-                      ) : null}
-                      {R.almaSec.pergunta ? (
-                        <section className="al-sec">
-                          <span className="al-h">Uma pergunta para levar</span>
-                          <p className="al-q">{R.almaSec.pergunta}</p>
-                        </section>
-                      ) : null}
-                    </div>
+                    this.secsView(R.almaSec, R.tradColor)
                   ) : (
                     <>
                       <p style={css("position: relative; margin: 14px 0 0; font-size: 18px; font-weight: 300; line-height: 1.55")}>
@@ -1591,6 +1585,27 @@ Component.prototype.render = function render() {
             </div>
           </>
         ) : null}
+        {this.state.c14 ? (
+          <>
+            <button aria-label="Fechar" onClick={() => this.setState({ c14: null })} style={css("position: absolute; inset: 0; z-index: 40; background: rgba(5,4,12,.65); border: 0")}></button>
+            <div className="c14-sheet">
+              <div className="c14-handle"></div>
+              <div className="c14-head">
+                <span className="kicker" style={css("color: #c9b8ff")}>O Conselho</span>
+                <span className="c14-title">As 14 respostas</span>
+                <span className="c14-q">“{this.state.c14.q}”</span>
+              </div>
+              {this.state.c14.list.map((v, k) => (
+                <div key={k} className="c14-item" style={{ '--c': v.color }}>
+                  <span className="c14-name"><i />{v.name}</span>
+                  {v.reflection ? <p className="c14-r">{v.reflection}</p> : null}
+                  {v.tr ? <p className="c14-tr">“{v.tr}”{v.ref ? <small> · {v.ref}</small> : null}</p> : null}
+                </div>
+              ))}
+              <button className="c14-close" onClick={() => this.setState({ c14: null })}>Fechar</button>
+            </div>
+          </>
+        ) : null}
         {R.isAnswers && this.state.ansSheet ? (
           <>
             <button aria-label="Fechar" onClick={() => this.setState({ ansSheet: null })} style={css("position: absolute; inset: 0; z-index: 30; background: rgba(5,4,12,.6); border: 0")}></button>
@@ -1768,6 +1783,7 @@ Component.prototype.render = function render() {
                   <p style={css("margin: 8px 0 0; font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
                     {`Da pergunta ${R.pl?.q ?? ''}`}
                   </p>
+                  <button className="c14-link" onClick={R.pl?.open14}>Ver as 14 respostas do Conselho ›</button>
                 </div>
                 <div className="glass" style={css("border-radius: 24px; padding: 18px 20px; display: flex; align-items: center; gap: 18px")}>
                   <div style={css(`position: relative; width: 68px; height: 68px; flex-shrink: 0; border-radius: 50%; ${(R.pl?.ringStyle) ?? ''}`)}>
@@ -1999,13 +2015,20 @@ Component.prototype.render = function render() {
                   <div className="goldtext" style={css("font-size: 16px; letter-spacing: .26em; text-transform: uppercase")}>
                     {"A resposta da Alma"}
                   </div>
-                  <p style={css("margin: 10px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6")}>
-                    {R.sheet?.alma}
-                  </p>
+                  {R.sheet?.sec ? this.secsView(R.sheet.sec, R.tradColor) : (
+                    <p style={css("margin: 10px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6")}>
+                      {R.sheet?.alma}
+                    </p>
+                  )}
                   <p style={css("margin: 10px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55; color: #f3d98b")}>
                     {R.sheet?.step}
                   </p>
                 </div>
+                <button className="c14-open" onClick={R.sheet?.open14}>
+                  <span className="c14-dots" aria-hidden="true">{[0,1,2,3,4,5,6].map((k) => <i key={k} />)}</span>
+                  <span className="c14-txt"><span>As 14 respostas do Conselho</span><small>Reabrir o que cada tradição disse</small></span>
+                  <span aria-hidden="true">›</span>
+                </button>
                 {R.sheet?.hasPlan ? (
                   <>
                     <button className="glass pill" onClick={R.openPlanFromSheet} style={css("width: 100%; border-radius: 22px; padding: 16px 18px; text-align: left; display: flex; flex-direction: column; gap: 10px; border-color: rgba(143,227,176,.4)")}>
