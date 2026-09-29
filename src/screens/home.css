@@ -76,7 +76,7 @@
 /* Início em órbita */
 .hm-scroll2 { gap: var(--s3); align-items: stretch; }
 .hm-hello2 h1 { font-size: 28px; }
-.hm-orbit { position: relative; width: 340px; height: 340px; align-self: center; margin-top: 8px; }
+.hm-orbit { position: relative; width: 340px; height: 340px; align-self: center; margin: 8px 0 34px; }
 .hm-ring { position: absolute; inset: 22px; border-radius: 50%; border: 1px solid rgba(201,184,255,.18); box-shadow: 0 0 40px rgba(122,92,255,.12) inset; }
 .hm-ring2 { inset: 72px; border-style: dashed; border-color: rgba(255,255,255,.08); animation: hmSpin 90s linear infinite reverse; }
 .hm-spin { position: absolute; inset: 0; animation: hmSpin 140s linear infinite; }
@@ -93,7 +93,7 @@
 .hm .hm-core { position: absolute; left: 50%; top: 50%; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .hm .hm-core-orb { position: absolute; inset: 0; width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 0 60px var(--o-glow, rgba(201,184,255,.6)), 0 0 120px var(--o-glow2, rgba(143,123,255,.3)); animation: hmPulse 4s ease-in-out infinite; }
 .hm-core-l { position: relative; z-index: 2; font-size: 17px; font-weight: 500; letter-spacing: .04em; color: #1a1030; text-shadow: 0 0 12px rgba(255,255,255,.7); }
-.hm-hint { margin: 4px 0 0; text-align: center; font-size: 15px; color: rgba(244,241,234,.6); }
+.hm-hint { margin: 0; text-align: center; font-size: 15px; color: rgba(244,241,234,.6); }
 .hm-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
 .hm .hm-quick button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 0; border-radius: 18px; font-size: 14px; text-align: center; color: rgba(244,241,234,.85); background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); }
 .hm-quick span { font-size: 22px; font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; }

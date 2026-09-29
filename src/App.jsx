@@ -19,6 +19,7 @@ export default function App() {
   const [fw, setFw] = useState(390);
   const [fill, setFill] = useState(false);
   const [sat, setSat] = useState(0);
+  const [sab, setSab] = useState(0);
   const frame = useRef(null);
   // Cada área avisa se a barra deve sumir (rituais, painéis abertos) e em que tela está.
   const [chrome, setChrome] = useState({});
@@ -48,20 +49,28 @@ export default function App() {
   useEffect(() => { applyPrefs(); applyTheme(); }, []);
   useLayoutEffect(() => {
     const fit = () => {
-      const w = window.innerWidth, h = window.innerHeight;
+      const w = window.innerWidth;
+      // No app instalado no iPhone, innerHeight às vezes vem menor que a tela real e sobra uma faixa vazia embaixo.
+      const standalone = window.navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+      const bgH = document.querySelector('.app-bg') ? document.querySelector('.app-bg').getBoundingClientRect().height : 0;
+      const h = Math.max(window.innerHeight, bgH, standalone && w < 700 ? (window.screen.height > window.screen.width ? window.screen.height : window.screen.width) : 0);
       // Em qualquer tela (celular ou navegador), a coluna do app fica no centro
       // e os fundos, auroras e estrelas preenchem as laterais.
       const probe = document.createElement('div');
       probe.style.cssText = 'position:fixed;top:0;left:0;height:0;padding-top:env(safe-area-inset-top);visibility:hidden';
       document.body.appendChild(probe);
-      const top = probe.offsetHeight; probe.remove();
+      const top = probe.offsetHeight;
+      probe.style.paddingTop = 'env(safe-area-inset-bottom)';
+      const bottom = probe.offsetHeight; probe.remove();
       const sc = w < 700 ? Math.min(w / 390, (h - top) / 844) : Math.min((h - top) / 844, 1.15);
-      setSat(Math.ceil(top / sc));
+      setSat(Math.ceil(top / sc)); setSab(Math.ceil(bottom / sc));
       setScale(sc); setFw(w / sc); setFh(h / sc); setFill(true);
     };
     fit();
+    const t1 = setTimeout(fit, 300), t2 = setTimeout(fit, 1200);
     window.addEventListener('resize', fit);
-    return () => window.removeEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+    return () => { clearTimeout(t1); clearTimeout(t2); window.removeEventListener('resize', fit); window.removeEventListener('orientationchange', fit); };
   }, []);
 
   useEffect(() => {
@@ -92,7 +101,7 @@ export default function App() {
 
   return (
     <div className="app-bg" onClickCapture={onClickCapture}>
-      <div ref={frame} className={'app-frame' + (fill ? ' app-fill' : '') + (visible ? ' tabs-on' : '')} style={{ transform: `scale(${scale})`, width: fw, height: fh, '--fh': (fh - sat) + 'px', '--sat': sat + 'px' }}>
+      <div ref={frame} className={'app-frame' + (fill ? ' app-fill' : '') + (visible ? ' tabs-on' : '')} style={{ transform: `scale(${scale})`, width: fw, height: fh, '--fh': (fh - sat) + 'px', '--sat': sat + 'px', '--sab': sab + 'px' }}>
         <div className="route" style={{ display: route === 'alma' ? 'block' : 'none', background: '#0b0a16' }}><Alma /></div>
         <div className="route" style={{ display: route === 'simbolos' ? 'block' : 'none', background: '#0a0918' }}><Simbolos /></div>
         {route === 'diario' ? <div className="route" style={{ background: '#0b0a16' }}><Diario /></div> : null}

@@ -1,4 +1,4 @@
-.tb { position: absolute; left: 0; right: 0; bottom: 0; z-index: 40; padding: 0 0 14px; pointer-events: none;
+.tb { position: absolute; left: 0; right: 0; bottom: 0; z-index: 40; padding: 0 0 max(12px, calc(var(--sab, 0px) - 8px)); pointer-events: none;
   background: linear-gradient(180deg, rgba(8,7,20,0), rgba(8,7,20,.55) 45%, rgba(8,7,20,.78)); transition: transform .5s cubic-bezier(.2,.8,.2,1), opacity .4s ease; font-family: 'Manrope', 'Noto Sans', system-ui, sans-serif; }
 .tb-hidden { transform: translateY(110%); opacity: 0; }
 .tb-inner { pointer-events: auto; width: 390px; margin: 0 auto; box-sizing: border-box; padding: 18px 8px 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: end; }
