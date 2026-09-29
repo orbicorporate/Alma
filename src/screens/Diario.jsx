@@ -67,7 +67,7 @@ export function Moon({ f, size = 14 }) {
 
 function planStepsOn(entries, dayIso) {
   const out = [];
-  (entries || []).forEach((e, ei) => (e.plan || []).forEach((s, j) => { if (s.iso === dayIso) out.push({ q: e.q, name: planNameOf(e), t: s.t, n: j + 1, total: e.plan.length, done: s.done, ei, j }); }));
+  (entries || []).forEach((e, ei) => (e.plan || []).forEach((s, j) => { if (s.iso === dayIso) out.push({ q: e.q, name: planNameOf(e), note: s.note || '', t: s.t, n: j + 1, total: e.plan.length, done: s.done, ei, j }); }));
   return out;
 }
 const ICON = { sonho: '☾', intencao: '✦', gratidao: '♡', decisao: '◇', nota: '✎' };
@@ -79,6 +79,8 @@ export default function Diario() {
   const [entries, setEntries] = useState(data0.entries || []);
   const [profile, setProfile] = useState(data0.profile || null);
   const [view, setView] = useState('dia');
+  const [planOpen, setPlanOpen] = useState(-1);
+  const [noteDraft, setNoteDraft] = useState(null);
   const [sel, setSel] = useState(iso(today()));
   const [month, setMonth] = useState(() => { const t = today(); return { y: t.getFullYear(), m: t.getMonth() }; });
   const [editor, setEditor] = useState(null);
@@ -205,6 +207,12 @@ export default function Diario() {
     list[st.ei] = e; setEntries(list); save({ entries: list });
     if (!st.done) flash('Passo concluído. Que bom!');
   };
+  const saveStepNote = (st, v, finish) => {
+    const list = entries.slice(); const e = Object.assign({}, list[st.ei]);
+    e.plan = e.plan.map((x, k) => (k === st.j ? Object.assign({}, x, { note: v.trim() || undefined }, finish ? { done: true } : {}) : x));
+    list[st.ei] = e; setEntries(list); save({ entries: list }); setNoteDraft(null);
+    flash(finish ? 'Resposta guardada e passo concluído' : 'Resposta guardada');
+  };
   const renderDayCard = () => {
     const recs = byDay[sel] || [];
     const steps = planStepsOn(entries, sel);
@@ -242,19 +250,44 @@ export default function Diario() {
         {steps.length ? (
           <div className="dz-group">
             <span className="dz-group-h" style={{ color: '#8fe3b0' }}><i style={{ background: '#8fe3b0' }} />Passo de plano para este dia</span>
-            {steps.map((st, i) => (
-              <div key={i} className={'glass dz-plancard' + (st.done ? ' dz-plan-done' : '')}>
-                <span className="dz-plan-from">Plano: {st.name}</span>
-                <button className="dz-plan" onClick={() => toggleStep(st)} aria-pressed={st.done ? 'true' : 'false'}>
-                  <span className="dz-check">{st.done ? '✓' : ''}</span>
-                  <span className="dz-plan-txt">
-                    <span className="dz-plan-t">{st.t}</span>
-                    <span className="dz-plan-q">Passo {st.n} de {st.total} · {st.done ? 'feito' : 'toque para marcar como feito'}</span>
-                  </span>
-                </button>
-                <button className="dz-plan-link" onClick={() => { window.dispatchEvent(new CustomEvent('alma:go', { detail: { screen: 'plan', planIdx: st.ei, planPrev: 'journal' } })); window.location.hash = '#/'; }}>Ver o plano completo ›</button>
-              </div>
-            ))}
+            {steps.map((st, i) => {
+              const open = planOpen === i;
+              return (
+                <div key={i} className={'glass dz-plancard' + (st.done ? ' dz-plan-done' : '') + (open ? ' open' : '')}>
+                  <button className="dz-pc-head" onClick={() => { setPlanOpen(open ? -1 : i); setNoteDraft(null); }} aria-expanded={open ? 'true' : 'false'}>
+                    <span className="dz-pc-ring" style={{ '--p': (st.done ? st.n : st.n - 1) / st.total }}><b>{st.done ? '✓' : st.n}</b></span>
+                    <span className="dz-pc-txt">
+                      <small>Passo {st.n} de {st.total}{st.done ? ' · feito' : ''}</small>
+                      <span className="dz-pc-t">{st.t}</span>
+                    </span>
+                    <span className="dz-pc-chev" aria-hidden="true">›</span>
+                  </button>
+                  {open ? (
+                    <div className="dz-pc-body">
+                      <span className="dz-plan-from">Do plano: {st.name}</span>
+                      {noteDraft != null ? (
+                        <div className="dz-pc-note-ed">
+                          <textarea className="dz-pc-input" rows={4} autoFocus value={noteDraft} onChange={(e) => setNoteDraft(e.target.value)} placeholder="Escreva aqui o que este passo pede de você" />
+                          <div className="dz-pc-btns">
+                            {!st.done ? <button className="dz-pc-done" onClick={() => saveStepNote(st, noteDraft, true)}>Guardar e concluir</button> : null}
+                            <button className="dz-pc-all" onClick={() => saveStepNote(st, noteDraft, false)}>Guardar</button>
+                            <button className="dz-pc-all dz-pc-ghost" onClick={() => setNoteDraft(null)}>Cancelar</button>
+                          </div>
+                        </div>
+                      ) : st.note ? (
+                        <button className="dz-pc-note" onClick={() => setNoteDraft(st.note)}><small>Sua resposta · ✎ editar</small><span>{st.note}</span></button>
+                      ) : (
+                        <button className="dz-pc-noteadd" onClick={() => setNoteDraft('')}>✎ Responder dentro deste passo</button>
+                      )}
+                      {noteDraft == null ? <div className="dz-pc-btns">
+                        <button className={'dz-pc-done' + (st.done ? ' on' : '')} onClick={() => toggleStep(st)} aria-pressed={st.done ? 'true' : 'false'}>{st.done ? '✓ Feito' : 'Marcar como feito'}</button>
+                        <button className="dz-pc-all" onClick={() => { window.dispatchEvent(new CustomEvent('alma:go', { detail: { screen: 'plan', planIdx: st.ei, planPrev: 'journal' } })); window.location.hash = '#/'; }}>Plano completo ›</button>
+                      </div> : null}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         ) : null}
         {groups.map(([k, list]) => (

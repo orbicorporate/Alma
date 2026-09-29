@@ -20,5 +20,5 @@ export async function aiQuestions(text, kind) {
 export async function aiCouncil(payload) {
   const r = await call(Object.assign({ mode: 'council' }, payload), 55000);
   if (!r || !Array.isArray(r.reflections) || !r.alma) return null;
-  return { reflections: r.reflections.map(String), alma: { p1: String(r.alma.p1 || ''), p2: String(r.alma.p2 || ''), step: String(r.alma.step || '') }, plan: Array.isArray(r.plan) ? r.plan.map(String).filter(Boolean).slice(0, 6) : null };
+  return { reflections: r.reflections.map(String), alma: { p1: String(r.alma.p1 || ''), p2: String(r.alma.p2 || ''), step: String(r.alma.step || ''), sec: r.alma.sec && r.alma.sec.leitura ? r.alma.sec : null }, plan: Array.isArray(r.plan) ? r.plan.map(String).filter(Boolean).slice(0, 6) : null };
 }

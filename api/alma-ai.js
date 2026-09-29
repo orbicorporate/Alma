@@ -66,10 +66,14 @@ const Q_TOOL = {
   } }
 };
 const A_TOOL = {
-  name: 'resposta', description: 'Resposta da Alma e plano de ação',
-  input_schema: { type: 'object', required: ['p1', 'p2', 'step', 'plan'], properties: {
-    p1: { type: 'string', description: 'Tensão real + mostrar que entendeu, 2 frases' },
-    p2: { type: 'string', description: 'Sua leitura firme: o que recomenda e por quê, citando 2 ou 3 tradições pelo nome, o ponto cego e em que condição mudaria de ideia. Termine com uma pergunta que incomoda. 4 a 6 frases.' },
+  name: 'resposta', description: 'Resposta da Alma em seções curtas e o plano de ação',
+  input_schema: { type: 'object', required: ['tensao', 'leitura', 'tradicoes', 'ponto_cego', 'mudaria', 'pergunta', 'step', 'plan'], properties: {
+    tensao: { type: 'string', description: 'O que está em jogo de verdade, usando as palavras dela. 1 ou 2 frases curtas.' },
+    leitura: { type: 'string', description: 'Sua recomendação firme e o porquê. 2 ou 3 frases curtas, sem citar tradições aqui.' },
+    tradicoes: { type: 'array', minItems: 2, maxItems: 3, description: 'As tradições que mais iluminam o caso', items: { type: 'object', required: ['nome', 'ideia'], properties: { nome: { type: 'string', description: 'Nome exato de uma das 14 tradições' }, ideia: { type: 'string', description: 'Uma frase: o que essa tradição diz sobre ESSA situação, aplicado ao caso.' } } } },
+    ponto_cego: { type: 'string', description: 'O ponto cego dela, com gentileza e honestidade. 1 frase.' },
+    mudaria: { type: 'string', description: 'Em que condição você mudaria a recomendação. 1 frase curta, começando com "Se".' },
+    pergunta: { type: 'string', description: 'Uma pergunta que incomoda, para ela levar. 1 frase.' },
     step: { type: 'string', description: 'Uma ação concreta para as próximas 24 horas' },
     plan: { type: 'array', minItems: 4, maxItems: 5, items: { type: 'string' }, description: 'Passos curtos: verbo + algo específico + resultado. O primeiro cabe em 24h; o último é um ponto de decisão.' }
   } }
@@ -116,13 +120,16 @@ ${list.map((v, i) => `${i + 1}. ${v.name} [${LENS[v.name] || ''}] (${v.ref}): "$
 Devolva exatamente ${list.length} reflexões, na mesma ordem.`, V_TOOL, 2500).then((o) => ({ offset, list: o.reflections || [] }));
       const half = Math.ceil(voices.length / 2);
       const [alma, v1, v2] = await Promise.all([
-        claude(MODEL_C, `${ctx}\n\nAs 14 tradições do Conselho: ${voices.map((v) => v.name).join(', ')}.\nEscreva a resposta da Alma seguindo as regras de ouro: firme, profunda, direcional, usando os detalhes dela. Depois, o plano de ação específico para essa situação.`, A_TOOL, 1800),
+        claude(MODEL_C, `${ctx}\n\nAs 14 tradições do Conselho: ${voices.map((v) => v.name).join(', ')}.\nEscreva a resposta da Alma seguindo as regras de ouro: firme, profunda, direcional, usando os detalhes dela. Ela será lida no celular em seções curtas com subtítulos, então cada campo precisa ser enxuto e se sustentar sozinho, sem repetir o que outro campo já disse. Depois, o plano de ação específico para essa situação.`, A_TOOL, 1800),
         voiceBatch(voices.slice(0, half), 0),
         voiceBatch(voices.slice(half), half)
       ]);
       const reflections = new Array(voices.length).fill('');
       [v1, v2].forEach((b) => b.list.forEach((r, i) => { if (b.offset + i < reflections.length) reflections[b.offset + i] = String(r); }));
-      return json({ reflections, alma: { p1: alma.p1, p2: alma.p2, step: alma.step }, plan: alma.plan });
+      const trad = (alma.tradicoes || []).slice(0, 3).map((t) => ({ nome: String(t.nome || ''), ideia: String(t.ideia || '') }));
+      const sec = { tensao: alma.tensao, leitura: alma.leitura, tradicoes: trad, ponto_cego: alma.ponto_cego, mudaria: alma.mudaria, pergunta: alma.pergunta };
+      const p2 = [alma.leitura, trad.map((t) => `${t.nome}: ${t.ideia}`).join(' '), alma.ponto_cego, alma.pergunta].filter(Boolean).join(' ');
+      return json({ reflections, alma: { p1: alma.tensao, p2, step: alma.step, sec }, plan: alma.plan });
     }
     return json({ error: 'mode' }, 400);
   } catch (e) {

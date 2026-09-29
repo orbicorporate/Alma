@@ -144,9 +144,12 @@ class Component extends DCLogic {
     clearTimeout(this.ts);
     this.ts = setTimeout(() => this.setState({ toast: '' }), 2800);
   }
+  councilKey() { const s = this.state; return JSON.stringify([s.text, s.kind, s.ans]); }
   startCouncil() {
-    clearInterval(this.ci);
-    this.setState({ screen: 'council', lit: 0, focus: -1, aiCouncil: null, aiState: 'c', councilT0: Date.now() });
+    clearInterval(this.ci); clearTimeout(this.tq);
+    // Se nada mudou desde a última vez, volta direto para as respostas sem refazer.
+    if (this.state.councilKey === this.councilKey() && this.state.aiState !== 'c') { this.setState({ screen: 'answers', lit: this.AG.length }); return; }
+    this.setState({ screen: 'council', lit: 0, focus: -1, aiCouncil: null, aiState: 'c', councilT0: Date.now(), councilKey: this.councilKey(), savedNow: false });
     const s0 = this.state, text = s0.text;
     const qs = (s0.aiQs || contextQS(s0.text, s0.kind, this.QS)).map((q) => q.q);
     const voices = this.AG.map((a, i) => { const v = this.voice(i); return { name: v.name, ref: v.ref, tr: v.tr }; });
@@ -306,6 +309,13 @@ class Component extends DCLogic {
           bellFill: x.remind && !done ? '#f3d98b' : 'none', bellStroke: x.remind && !done ? '#f3d98b' : 'currentColor',
           complete: () => { setStep(j, { done: true }); this.flash(j === total - 1 ? 'Último passo concluído' : `Passo ${j + 1} concluído`); },
           undo: () => setStep(j, { done: false }),
+          note: e.plan[j].note || '', hasNote: !!e.plan[j].note,
+          noteOpen: !!(s.noteEdit && s.noteEdit.j === j),
+          noteDraft: s.noteEdit && s.noteEdit.j === j ? s.noteEdit.v : '',
+          openNote: () => this.setState({ noteEdit: { j, v: e.plan[j].note || '' }, planEdit: null }),
+          onNote: (ev) => this.setState({ noteEdit: { j, v: ev.target.value } }),
+          saveNote: (finish) => { const v = (this.state.noteEdit.v || '').trim(); setStep(j, finish ? { note: v || undefined, done: true } : { note: v || undefined }); this.setState({ noteEdit: null }); this.flash(finish ? `Resposta guardada e passo ${j + 1} concluído` : 'Resposta guardada'); },
+          cancelNote: () => this.setState({ noteEdit: null }),
           bell: () => { setStep(j, { remind: !x.remind }); if (!x.remind) this.flash(`Lembrete ligado para ${x.date.replace('Hoje · ', '')}`); }
         };
       })
@@ -650,7 +660,11 @@ class Component extends DCLogic {
       })),
       openVoices: () => this.setState({ voicesOpen: true, filter: 'all' }),
       closeVoices: () => this.setState({ voicesOpen: false, open: -1 }),
-      almaP1: almaT.p1, almaP2: almaT.p2, almaStep: almaT.step,
+      almaP1: almaT.p1, almaP2: almaT.p2, almaStep: almaT.step, almaSec: almaT.sec || null,
+      tradColor: (nm) => { const a = AG.find((x) => x.name === nm); return a ? a.color : '#c9b8ff'; },
+      hasCouncil: !!s.councilKey && s.councilKey.indexOf(JSON.stringify(s.text)) === 1,
+      councilSame: s.councilKey === this.councilKey(),
+      toAnswers: () => this.startCouncil(),
       givenTags: s.ans.filter(Boolean).map((x) => ({ t: x })),
       starHint: s.stars.length ? `${s.stars.length} com estrela` : 'Marque as melhores com estrela',
       kindPhrase: ({ 'Pensamento': 'o seu pensamento', 'Dúvida': 'a sua dúvida', 'Aflição': 'a sua aflição', 'Medo': 'o seu medo', 'Alegria': 'a sua alegria', 'Sugestão': 'o seu pedido' })[s.kind],
@@ -720,7 +734,7 @@ class Component extends DCLogic {
       isCouncil: scr === 'council', isAnswers: scr === 'answers', isJournal: scr === 'journal',
       compactHeader: scr === 'answers' || scr === 'journal' || scr === 'plan',
       showBack: ['plan', 'answers', 'journal', 'deepen'].includes(scr), showWord: !['plan', 'answers', 'journal', 'deepen'].includes(scr),
-      backLabel: scr === 'plan' ? (s.planPrev === 'answers' ? 'Respostas' : 'Minha Alma') : scr === 'answers' ? 'Pergunta' : scr === 'deepen' ? (s.step > 0 ? 'Anterior' : 'Pergunta') : 'Voltar', showJournal: scr === 'ask' || scr === 'answers',
+      backLabel: scr === 'plan' ? (s.planPrev === 'answers' ? 'Respostas' : 'Minha Alma') : scr === 'answers' ? 'Suas escolhas' : scr === 'deepen' ? (s.step > 0 ? 'Anterior' : 'Pergunta') : 'Voltar', showJournal: scr === 'ask' || scr === 'answers',
       breathWord: s.inhale ? 'Inspire' : 'Solte',
       breathWordStyle: s.inhale ? 'letter-spacing: .14em; color: #f4f1ea' : 'letter-spacing: .02em; color: rgba(244,241,234,.8)',
       breathSub: s.medit ? 'Com o que depende de você, inspire. Com o que não depende, solte. Fique o tempo que precisar.' : 'Três respirações antes de perguntar. A Alma escuta melhor no silêncio.',
@@ -739,7 +753,7 @@ class Component extends DCLogic {
         // se a pessoa não escolheu o tipo, a Alma lê o sentimento do próprio texto
         const m = moodOf(this.state.text);
         const kind = !this.state.kindPicked && m ? m : this.state.kind;
-        this.setState({ screen: 'releasing', step: 0, ans: [null, null, null], kind, aiQs: null, aiCouncil: null, aiState: 'q' });
+        this.setState({ screen: 'releasing', step: 0, ans: [null, null, null], kind, aiQs: null, aiCouncil: null, aiState: 'q', councilKey: null });
         clearTimeout(this.t1);
         const text = this.state.text, t0 = Date.now();
         let done = false;
@@ -771,13 +785,13 @@ class Component extends DCLogic {
       back: () => {
         const st = this.state;
         if (st.screen === 'plan') this.setState({ screen: st.planPrev || 'journal', planEdit: null, nameEdit: null });
-        else if (st.screen === 'answers') this.setState({ screen: 'ask', open: -1 });
+        else if (st.screen === 'answers') this.setState({ screen: 'deepen', step: 2, open: -1 });
         else if (st.screen === 'deepen') { clearTimeout(this.tq); this.setState(st.step > 0 ? { step: st.step - 1 } : { screen: 'ask' }); }
         else if (st.screen === 'journal') { window.location.hash = '#/inicio'; }
         else this.setState({ screen: st.prev || 'ask', sheet: -1 });
       },
       closeSheet: () => this.setState({ sheet: -1, confirmDel: false }),
-      restart: () => this.setState({ screen: 'ask', open: -1, lit: 0, stars: [], filter: 'all', savedNow: false, ans: [null, null, null], step: 0, text: '', fromWhere: '', kindPicked: false, kind: 'Dúvida' })
+      restart: () => this.setState({ councilKey: null, screen: 'ask', open: -1, lit: 0, stars: [], filter: 'all', savedNow: false, ans: [null, null, null], step: 0, text: '', fromWhere: '', kindPicked: false, kind: 'Dúvida' })
     };
   }
 }
@@ -1155,6 +1169,11 @@ Component.prototype.render = function render() {
                     ))}
                   </div>
                 </div>
+                {R.hasCouncil ? (
+                  <button className="pill al-return" onClick={R.toAnswers}>
+                    {R.councilSame ? 'Ver as respostas' : 'Refazer as respostas com as novas escolhas'} <span aria-hidden="true">›</span>
+                  </button>
+                ) : null}
                 <div style={css(`display: flex; flex-direction: column; gap: 22px; ${(R.qAnim) ?? ''}`)}>
                   <h2 style={css("margin: 0; text-align: center; font-size: 26px; line-height: 1.25; font-weight: 300")}>
                     {R.dq}
@@ -1310,12 +1329,50 @@ Component.prototype.render = function render() {
                   <div className="goldtext" style={css("position: relative; font-size: 16px; letter-spacing: .26em; text-transform: uppercase")}>
                     {"A resposta da Alma"}
                   </div>
-                  <p style={css("position: relative; margin: 12px 0 0; font-size: 17px; font-weight: 300; line-height: 1.55")}>
-                    {R.almaP1}
-                  </p>
-                  <p style={css("position: relative; margin: 10px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.82)")}>
-                    {R.almaP2}
-                  </p>
+                  {R.almaSec ? (
+                    <div className="al-secs">
+                      <section className="al-sec">
+                        <span className="al-h">O que está em jogo</span>
+                        <p className="al-lead">{R.almaSec.tensao}</p>
+                      </section>
+                      <section className="al-sec">
+                        <span className="al-h">Minha leitura</span>
+                        <p>{R.almaSec.leitura}</p>
+                        {R.almaSec.mudaria ? <p className="al-cond">{R.almaSec.mudaria}</p> : null}
+                      </section>
+                      {(R.almaSec.tradicoes || []).length ? (
+                        <section className="al-sec">
+                          <span className="al-h">O que as tradições dizem</span>
+                          <ul className="al-list">
+                            {R.almaSec.tradicoes.map((t, i) => (
+                              <li key={i} style={{ '--c': R.tradColor(t.nome) }}><b>{t.nome}</b><span>{t.ideia}</span></li>
+                            ))}
+                          </ul>
+                        </section>
+                      ) : null}
+                      {R.almaSec.ponto_cego ? (
+                        <section className="al-sec al-blind">
+                          <span className="al-h">Seu ponto cego</span>
+                          <p>{R.almaSec.ponto_cego}</p>
+                        </section>
+                      ) : null}
+                      {R.almaSec.pergunta ? (
+                        <section className="al-sec">
+                          <span className="al-h">Uma pergunta para levar</span>
+                          <p className="al-q">{R.almaSec.pergunta}</p>
+                        </section>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <>
+                      <p style={css("position: relative; margin: 14px 0 0; font-size: 18px; font-weight: 300; line-height: 1.55")}>
+                        {R.almaP1}
+                      </p>
+                      <p style={css("position: relative; margin: 16px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.82)")}>
+                        {R.almaP2}
+                      </p>
+                    </>
+                  )}
                   <div style={css("position: relative; margin-top: 16px; padding: 14px 16px; border-radius: 18px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.2)")}>
                     <div style={css("font-size: 15px; letter-spacing: .2em; text-transform: uppercase; color: #f3d98b")}>
                       {"Um passo possível"}
@@ -1828,7 +1885,28 @@ Component.prototype.render = function render() {
                       </div>
                       </>
                       ) : null}
-                      {L23_st?.isCurrent ? (
+                      {L23_st?.notEditing ? (
+                        L23_st.noteOpen ? (
+                          <div className="pl-note-ed">
+                            <label className="pl-field"><span>Sua resposta</span>
+                              <textarea className="pl-input" rows={4} autoFocus value={L23_st.noteDraft} onChange={L23_st.onNote} placeholder="Escreva aqui o que este passo pede de você" />
+                            </label>
+                            <div style={css("display: flex; gap: 8px; flex-wrap: wrap")}>
+                              {L23_st.todo ? <button className="pl-btn pl-btn-main" onClick={() => L23_st.saveNote(true)}>Guardar e concluir</button> : null}
+                              <button className={'pl-btn' + (L23_st.todo ? '' : ' pl-btn-main')} onClick={() => L23_st.saveNote(false)}>Guardar</button>
+                              <button className="pl-btn" onClick={L23_st.cancelNote}>Cancelar</button>
+                            </div>
+                          </div>
+                        ) : L23_st.hasNote ? (
+                          <button className="pl-note" onClick={L23_st.openNote}>
+                            <span className="pl-note-k">Sua resposta <em>✎ editar</em></span>
+                            <span className="pl-note-t">{L23_st.note}</span>
+                          </button>
+                        ) : (
+                          <button className="pl-note-add" onClick={L23_st.openNote}>✎ Responder dentro deste passo</button>
+                        )
+                      ) : null}
+                      {L23_st?.isCurrent && !L23_st.noteOpen ? (
                         <>
                           <button className="cta" onClick={L23_st?.complete} style={css("height: 50px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17.5px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0c1f15" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1838,7 +1916,7 @@ Component.prototype.render = function render() {
                           </button>
                         </>
                       ) : null}
-                      {L23_st?.isFuture ? (
+                      {L23_st?.isFuture && !L23_st.noteOpen ? (
                         <>
                           <button onClick={L23_st?.complete} style={css("height: 44px; border-radius: 999px; font-size: 17.5px; color: rgba(244,241,234,.7); border: 1px solid rgba(255,255,255,.14)")}>
                             {"Já fiz este passo"}
