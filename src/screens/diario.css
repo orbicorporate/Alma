@@ -215,3 +215,29 @@
 .dz-pc-input { width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(143,227,176,.35); background: rgba(255,255,255,.05); color: #f4f1ea; font: inherit; font-size: 17px; line-height: 1.5; resize: none; outline: none; }
 .dz .dz-pc-ghost { border-color: rgba(255,255,255,.15); color: rgba(244,241,234,.65); }
 .dz-pc-body { padding-left: 16px; }
+
+/* Leitura do sonho: limpa, em blocos curtos que abrem ao toque */
+.dz-rl-lead { margin: 2px 0 4px; font-size: 21px; font-weight: 300; line-height: 1.4; color: #f4f1ea; }
+.dz-rl-body { display: flex; flex-direction: column; gap: 22px; animation: dzPcIn .4s ease both; }
+.dz-rl-block { display: flex; flex-direction: column; gap: 10px; }
+.dz-rl-h { font-size: 14.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--c); }
+.dz .dz-rl-sym { display: flex; flex-direction: column; gap: 8px; width: 100%; padding: 14px 16px; border-radius: 16px; text-align: left; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.1); transition: background .3s ease, border-color .3s ease; }
+.dz .dz-rl-sym.open { background: rgba(255,255,255,.08); border-color: color-mix(in srgb, var(--c) 45%, transparent); }
+.dz-rl-sym-top { display: flex; align-items: center; gap: 10px; font-size: 17.5px; color: #f4f1ea; }
+.dz-rl-sym-top i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); flex-shrink: 0; }
+.dz-rl-sym-top em { margin-left: auto; font-style: normal; font-size: 22px; font-weight: 200; color: rgba(244,241,234,.5); transition: transform .3s ease; }
+.dz-rl-sym.open .dz-rl-sym-top em { transform: rotate(90deg); }
+.dz-rl-sym-t { font-size: 17px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.88); padding-left: 19px; animation: dzPcIn .35s ease both; }
+.dz-rl-item { display: flex; gap: 14px; align-items: flex-start; }
+.dz-rl-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); }
+.dz-rl-k { display: block; font-size: 16px; color: var(--c); margin: 2px 0 4px; }
+.dz-rl-item p { margin: 0; font-size: 17px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.9); }
+.dz .dz-rl-more { align-self: flex-start; min-height: 40px; font-size: 16.5px; color: #c9a8ff; }
+.dz-rl-load { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 26px 0 18px; text-align: center; }
+.dz-rl-orb { width: 86px; height: 86px; border-radius: 50%; margin-bottom: 10px; box-shadow: 0 0 40px var(--o-glow, rgba(201,184,255,.6)); animation: bhPulse 2.4s ease-in-out infinite; }
+@keyframes bhPulse { 50% { transform: scale(1.08); } }
+.dz-rl-lt { font-size: 19px; font-weight: 300; }
+.dz-rl-ls { font-size: 15.5px; color: rgba(244,241,234,.55); }
+.dz-rl-load > i { display: block; width: 80%; height: 10px; border-radius: 6px; margin-top: 8px; background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(201,168,255,.22), rgba(255,255,255,.05)); background-size: 200% 100%; animation: dzShim 1.6s linear infinite; }
+.dz-rl-load > i:nth-of-type(2) { width: 64%; } .dz-rl-load > i:nth-of-type(3) { width: 72%; }
+@keyframes dzShim { to { background-position: -200% 0; } }

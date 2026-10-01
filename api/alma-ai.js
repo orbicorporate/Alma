@@ -83,6 +83,25 @@ const V_TOOL = {
   input_schema: { type: 'object', required: ['reflections'], properties: { reflections: { type: 'array', items: { type: 'string' } } } }
 };
 
+const D_TOOL = {
+  name: 'leitura_sonho', description: 'Leitura profissional e profunda de um sonho, em blocos curtos',
+  input_schema: { type: 'object', required: ['essencia', 'simbolos', 'psi', 'esp', 'pergunta'], properties: {
+    essencia: { type: 'string', description: 'Uma frase que nomeia o tema central do sonho, específica para ESTE sonho (ex.: "Um sonho sobre perder o controle do que você construiu"). Sem "pode significar".' },
+    simbolos: { type: 'array', minItems: 2, maxItems: 4, description: 'As imagens mais carregadas do relato, na ordem de importância', items: { type: 'object', required: ['imagem', 'psi', 'esp'], properties: {
+      imagem: { type: 'string', description: 'A imagem como aparece no sonho, 1 a 4 palavras' },
+      psi: { type: 'string', description: 'Leitura psicanalítica dessa imagem NESTE sonho: o que ela condensa ou desloca, que parte da pessoa representa. 1 ou 2 frases.' },
+      esp: { type: 'string', description: 'Sentido simbólico e espiritual dessa imagem, citando a tradição de onde vem quando fizer sentido. 1 ou 2 frases.' } } } },
+    psi: { type: 'object', required: ['elabora', 'compensa', 'ponte'], properties: {
+      elabora: { type: 'string', description: 'O desejo ou o conflito que o sonho está elaborando (Freud: realização de desejo, condensação, deslocamento). 2 frases.' },
+      compensa: { type: 'string', description: 'Que atitude da vida desperta o sonho compensa ou equilibra (Jung: compensação, sombra, anima/animus, Self). 1 ou 2 frases.' },
+      ponte: { type: 'string', description: 'A ponte concreta com a vida desperta: que situação atual provavelmente acionou esse sonho (restos diurnos), usando o que a pessoa contou. 1 ou 2 frases.' } } },
+    esp: { type: 'object', required: ['mensagem', 'pratica'], properties: {
+      mensagem: { type: 'string', description: 'A mensagem do sonho para a alma, com a tradição que sustenta essa leitura (bíblica, sufi, budista tibetana, indígena, espírita, etc.). 2 frases.' },
+      pratica: { type: 'string', description: 'Uma prática concreta para hoje ou para antes de dormir, ligada ao sonho. 1 frase com verbo de ação.' } } },
+    pergunta: { type: 'string', description: 'Uma pergunta afiada para a pessoa levar, ligada à imagem central. 1 frase.' }
+  } }
+};
+
 export const config = { maxDuration: 60 };
 
 export default async function handler(req, res) {
@@ -130,6 +149,31 @@ Devolva exatamente ${list.length} reflexões, na mesma ordem.`, V_TOOL, 2500).th
       const sec = { tensao: alma.tensao, leitura: alma.leitura, tradicoes: trad, ponto_cego: alma.ponto_cego, mudaria: alma.mudaria, pergunta: alma.pergunta };
       const p2 = [alma.leitura, trad.map((t) => `${t.nome}: ${t.ideia}`).join(' '), alma.ponto_cego, alma.pergunta].filter(Boolean).join(' ');
       return json({ reflections, alma: { p1: alma.tensao, p2, step: alma.step, sec }, plan: alma.plan });
+    }
+    if (body.mode === 'dream') {
+      const d = body.dream || {};
+      const deep = d.deep || {};
+      const facts = [
+        d.title ? `Título: ${String(d.title).slice(0, 120)}` : '',
+        d.wake ? `Ao acordar se sentiu: ${String(d.wake).slice(0, 40)}` : '',
+        deep.emo ? `Emoção principal no sonho: ${deep.emo}` : '', deep.who ? `Quem estava: ${deep.who}` : '',
+        deep.act ? `O que fazia: ${deep.act}` : '', deep.place ? `Lugar: ${deep.place}` : '',
+        deep.extra ? `Detalhe a mais: ${String(deep.extra).slice(0, 200)}` : '',
+        d.recent ? `Imagens que se repetem em outros sonhos: ${String(d.recent).slice(0, 200)}` : ''
+      ].filter(Boolean).join('\n');
+      const out = await claude(MODEL_Q, `Você agora lê sonhos como um analista experiente, com formação em psicanálise (Freud e Jung) e profundo conhecimento das tradições espirituais sobre sonhos.
+
+Relato do sonho: "${text}"
+${facts}
+
+Como ler:
+- Trabalhe com as imagens exatas do relato, nunca com um dicionário genérico de símbolos. Se a mesma imagem aparecesse em outro sonho, a leitura seria outra.
+- Use os conceitos com precisão (condensação, deslocamento, restos diurnos, realização de desejo, compensação, sombra, anima ou animus, Self, amplificação), explicando em linguagem simples, sem jargão solto.
+- Assuma uma hipótese interpretativa clara, como um bom analista faria, sem prometer certeza. Evite "pode significar muitas coisas".
+- Ligue o sonho à vida desperta usando a emoção e os detalhes que a pessoa contou.
+- Nada de previsão do futuro, presságio ou diagnóstico. Se o sonho trouxer sofrimento intenso ou repetido, sugira com delicadeza conversar com um terapeuta.
+- Cada campo é lido no celular em blocos curtos: frases curtas, sem repetir o que outro campo já disse.`, D_TOOL, 1800);
+      return json(out);
     }
     return json({ error: 'mode' }, 400);
   } catch (e) {

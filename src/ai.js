@@ -22,3 +22,10 @@ export async function aiCouncil(payload) {
   if (!r || !Array.isArray(r.reflections) || !r.alma) return null;
   return { reflections: r.reflections.map(String), alma: { p1: String(r.alma.p1 || ''), p2: String(r.alma.p2 || ''), step: String(r.alma.step || ''), sec: r.alma.sec && r.alma.sec.leitura ? r.alma.sec : null }, plan: Array.isArray(r.plan) ? r.plan.map(String).filter(Boolean).slice(0, 6) : null };
 }
+
+// Leitura do sonho escrita pela IA; volta null se não estiver disponível.
+export async function aiDream(dream, recent) {
+  const r = await call({ mode: 'dream', text: String(dream.text || dream.title || ''), dream: { title: dream.title, wake: dream.wake, deep: dream.deep || {}, recent } }, 40000);
+  if (!r || !r.essencia || !Array.isArray(r.simbolos) || !r.psi || !r.esp) return null;
+  return r;
+}
