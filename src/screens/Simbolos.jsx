@@ -355,7 +355,7 @@ class Component extends DCLogic {
     const periods = PER.map((x, i) => ({
       label: x.label, pressed: s.period === i ? 'true' : 'false',
       style: s.period === i ? 'background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.5)' : 'background: rgba(255,255,255,.04); color: rgba(244,241,234,.75)',
-      pick: () => this.setState({ period: i })
+      pick: () => this.setState({ period: i, horoMore: false })
     }));
 
     /* numerology */
@@ -1018,35 +1018,33 @@ Component.prototype.render = function render() {
                   <p style={css("margin: 0; font-size: 17px; font-weight: 300; line-height: 1.65")}>
                     {R.horo?.p1}
                   </p>
-                  <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.82)")}>
-                    {R.horo?.p2}
-                  </p>
-                  {R.horo?.hasExtra ? (
+                  {this.state.horoMore ? (
                     <>
-                      <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.72)")}>
-                        {R.horo?.extra}
-                      </p>
+                      {R.horo?.p2 ? <p className="hz-more-p">{R.horo.p2}</p> : null}
+                      {R.horo?.hasExtra ? <p className="hz-more-p">{R.horo.extra}</p> : null}
                     </>
                   ) : null}
+                  {R.horo?.p2 || R.horo?.hasExtra ? (
+                    <button className="hz-more" onClick={() => this.setState({ horoMore: !this.state.horoMore })} aria-expanded={this.state.horoMore ? 'true' : 'false'}>
+                      {this.state.horoMore ? 'Ler menos' : 'Ler a leitura completa'} <span aria-hidden="true" style={{ display: 'inline-block', transform: `rotate(${this.state.horoMore ? -90 : 90}deg)` }}>›</span>
+                    </button>
+                  ) : null}
                 </div>
-                <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                  {(R.horo?.areas || []).map((L10_a, I10) => (
-                    <React.Fragment key={I10}>
-                      <div className="glass" style={css("border-radius: 20px; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start")}>
-                        <span style={css(`width: 34px; height: 34px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.06); color: ${(L10_a?.color) ?? ''}; font-size: 17px; font-weight: 500`)}>
-                          {L10_a?.ic}
-                        </span>
-                        <span style={css("display: flex; flex-direction: column; gap: 4px")}>
-                          <span className="kicker" style={css(`font-size: 15px; color: ${(L10_a?.color) ?? ''}`)}>
-                            {L10_a?.label}
-                          </span>
-                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                            {L10_a?.text}
-                          </span>
-                        </span>
-                      </div>
-                    </React.Fragment>
-                  ))}
+                <div className="hz-areas">
+                  <div className="hz-tabs">
+                    {(R.horo?.areas || []).map((a, i) => {
+                      const on = (this.state.horoArea || 0) === i;
+                      return (
+                        <button key={i} className={'hz-tab' + (on ? ' on' : '')} style={{ '--c': a.color }} onClick={() => this.setState({ horoArea: i })} aria-pressed={on ? 'true' : 'false'}>
+                          <span className="hz-tab-ic">{a.ic}</span>
+                          <span className="hz-tab-l">{a.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {(R.horo?.areas || [])[this.state.horoArea || 0] ? (
+                    <p className="hz-area-t" key={this.state.horoArea || 0} style={{ '--c': R.horo.areas[this.state.horoArea || 0].color }}>{R.horo.areas[this.state.horoArea || 0].text}</p>
+                  ) : null}
                 </div>
                 <div style={css("border-radius: 22px; padding: 16px 18px; background: rgba(243,217,139,.07); border: 1px solid rgba(243,217,139,.28)")}>
                   <div className="goldtext" style={css("font-size: 16px; letter-spacing: .24em; text-transform: uppercase")}>
