@@ -200,3 +200,22 @@
 .sc-main .al-notthis:focus-visible { outline: 2px solid #f4f1ea; outline-offset: 2px; border-radius: 6px; }
 .sc-main .al-got p { color: rgba(244,241,234,.78); }
 @media (prefers-reduced-motion: reduce) { .sc-main .al-qwrap { transition: none; } .sc-main .al-qwrap.al-thinking { filter: none; } }
+
+/* Cartões recolhidos de cara: só o essencial à mostra, o resto a um toque.
+   Motion: a altura muda sem animação (não animamos layout); o conteúdo revelado entra em 260ms
+   com opacidade, 4px e um leve desfoque, e a seta gira em 200ms. Nada disso roda com movimento reduzido. */
+.sc-main .al-more { animation: alReveal .26s cubic-bezier(.22,.8,.24,1) both; }
+@keyframes alReveal { from { opacity: 0; transform: translateY(-4px); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+.sc-main .al-toggle { margin-top: 2px; min-height: 44px; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-size: 16px; color: #f3d98b; }
+.sc-main .al-toggle svg, .sc-main .al-brought-head svg { transition: transform .2s cubic-bezier(.22,.8,.24,1); flex-shrink: 0; }
+.sc-main .al-toggle.on svg, .sc-main .al-brought.on .al-brought-head svg { transform: rotate(180deg); }
+.sc-main .al-secs > .al-more { display: flex; flex-direction: column; gap: inherit; }
+.sc-main .al-brought-head { width: 100%; min-height: 52px; display: flex; align-items: center; gap: 10px; text-align: left; color: rgba(244,241,234,.7); }
+.sc-main .al-brought-t { flex: 1 1 auto; min-width: 0; font-size: 16.5px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sc-main .al-brought.on .al-brought-t { white-space: normal; padding: 10px 0; }
+.sc-main .al-login-head { width: 100%; min-height: 60px; display: flex; align-items: center; gap: 10px; text-align: left; }
+.sc-main .al-login-t { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; font-size: 15.5px; font-weight: 300; color: rgba(244,241,234,.65); }
+.sc-main .al-login-go { flex-shrink: 0; height: 40px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 15.5px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #c9b8ff, #efe8ff); }
+.sc-main .al-login.on .al-login-go { color: #f4f1ea; background: rgba(255,255,255,.08); }
+.sc-main :is(.al-toggle, .al-brought-head, .al-login-head):focus-visible { outline: 2px solid #f4f1ea; outline-offset: 2px; border-radius: 12px; }
+@media (prefers-reduced-motion: reduce) { .sc-main .al-more { animation: none; } .sc-main .al-toggle svg, .sc-main .al-brought-head svg { transition: none; } }

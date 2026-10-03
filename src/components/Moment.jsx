@@ -15,6 +15,7 @@ export default function Moment({ data, onData, onWhy }) {
   const [tick, setTick] = useState(0);
   const [stage, setStage] = useState(null); // confirmação ou segundo passo dentro do mesmo cartão
   const [leaving, setLeaving] = useState(false);
+  const [open, setOpen] = useState(false);
   const timer = useRef(null);
   useEffect(() => () => clearTimeout(timer.current), []);
   const live = useMemo(() => moment(data), [data, tick]);
@@ -39,10 +40,10 @@ export default function Moment({ data, onData, onWhy }) {
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       setLeaving(true);
-      timer.current = setTimeout(() => { setLeaving(false); setStage(null); setTick((t) => t + 1); }, 200);
+      timer.current = setTimeout(() => { setLeaving(false); setStage(null); setOpen(false); setTick((t) => t + 1); }, 200);
     }, ms);
   };
-  const later = () => { dismiss(card.k); setLeaving(true); timer.current = setTimeout(() => { setLeaving(false); setStage(null); setTick((t) => t + 1); }, 200); };
+  const later = () => { dismiss(card.k); setLeaving(true); timer.current = setTimeout(() => { setLeaving(false); setStage(null); setOpen(false); setTick((t) => t + 1); }, 200); };
   const confirm = (msg) => { buzz(); track(); setStage({ done: msg, card }); next(); };
 
   let body;
@@ -67,17 +68,14 @@ export default function Moment({ data, onData, onWhy }) {
     );
   } else {
     const t = card.type;
-    let actions = null;
+    // Fechado: uma linha com o título e a ação principal. Aberto: contexto, outras ações e o porquê.
+    let quick = null, actions = null;
     if (t === 'passo') {
-      actions = (
-        <div className="mm-actions">
-          <button className="mm-btn mm-primary" style={{ '--c': card.color }} onClick={() => { setEntries((e) => { e.plan = e.plan.map((x, k) => (k === card.ref.j ? Object.assign({}, x, { done: true }) : x)); return e; }); confirm(`Passo ${card.ref.j + 1} concluído. Um a menos.`); }}>Concluí</button>
-          <button className="mm-btn" onClick={() => go('#/', { screen: 'plan', planIdx: card.ref.i, planPrev: 'journal' })}>Ver plano</button>
-        </div>
-      );
+      quick = { label: 'Concluí', run: () => { setEntries((e) => { e.plan = e.plan.map((x, k) => (k === card.ref.j ? Object.assign({}, x, { done: true }) : x)); return e; }); confirm(`Passo ${card.ref.j + 1} concluído. Um a menos.`); } };
+      actions = <div className="mm-actions"><button className="mm-btn" onClick={() => go('#/', { screen: 'plan', planIdx: card.ref.i, planPrev: 'journal' })}>Ver plano</button></div>;
     } else if (t === 'check') {
       actions = (
-        <div className="mm-actions">
+        <div className="mm-actions mm-actions-2">
           <button className="mm-btn mm-primary" style={{ '--c': '#8fe3b0' }} onClick={() => { setEntries((e) => { e.resolved = true; e.checkin = iso(today()); return e; }); confirm('Que bom. Essa estrela agora brilha em paz.'); }}>Resolvi</button>
           <button className="mm-btn" onClick={() => { setEntries((e) => { e.checkin = iso(today()); return e; }); track(); setStage({ heavy: true, card }); }}>Ainda pesa</button>
         </div>
@@ -96,7 +94,7 @@ export default function Moment({ data, onData, onWhy }) {
       );
     } else {
       actions = (
-        <div className="mm-actions">
+        <div className="mm-actions mm-actions-2">
           <button className="mm-btn mm-primary" style={{ '--c': '#c9b8ff' }} onClick={() => go('#/', { screen: 'breath', count: 0, inhale: true, medit: false })}>Perguntar à Alma</button>
           <button className="mm-btn" onClick={onWhy}>Por que essa dica</button>
         </div>
@@ -104,24 +102,39 @@ export default function Moment({ data, onData, onWhy }) {
     }
     body = (
       <div className="mm-body" key={card.k}>
-        <span className="mm-k" style={{ color: card.color }}>{card.kicker}</span>
-        <p className="mm-title">{card.title}</p>
-        {card.line ? <p className="mm-line">{card.line}</p> : null}
-        {card.sky ? (
-          <p className="mm-sky">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19.5 14.5A7.5 7.5 0 1 1 9.5 4.5a6 6 0 0 0 10 10z" /></svg>
-            {card.sky}
-          </p>
+        <div className="mm-row">
+          <button className="mm-head" onClick={() => setOpen(!open)} aria-expanded={open ? 'true' : 'false'} aria-controls="mm-more">
+            <span className="mm-k" style={{ color: card.color }}>{card.kicker}</span>
+            <span className="mm-title">{card.title}</span>
+          </button>
+          {quick ? <button className="mm-quick" style={{ '--c': card.color }} onClick={quick.run}>{quick.label}</button> : null}
+          <button className="mm-chev" onClick={() => setOpen(!open)} aria-label={open ? 'Recolher' : 'Ver mais'} aria-expanded={open ? 'true' : 'false'}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+          </button>
+        </div>
+        {open ? (
+          <div className="mm-more" id="mm-more">
+            {card.line ? <p className="mm-line">{card.line}</p> : null}
+            {card.sky ? (
+              <p className="mm-sky">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19.5 14.5A7.5 7.5 0 1 1 9.5 4.5a6 6 0 0 0 10 10z" /></svg>
+                {card.sky}
+              </p>
+            ) : null}
+            {actions}
+            <div className="mm-foot">
+              <span className="mm-why">{card.why}</span>
+              <button className="mm-later" onClick={later}>Agora não</button>
+            </div>
+          </div>
         ) : null}
-        {actions}
-        <p className="mm-why">{card.why}</p>
       </div>
     );
   }
 
   return (
-    <section className={'hm-card mm' + (leaving ? ' mm-out' : '')} style={{ '--c': card.color }} aria-label="Para agora" key={card.k}>
-      {!stage || stage.heavy ? <button className="mm-later" onClick={later}>Agora não</button> : null}
+    <section className={'hm-card mm' + (open ? ' mm-open' : '') + (leaving ? ' mm-out' : '')} style={{ '--c': card.color }} aria-label="Para agora" key={card.k}>
+      {stage && stage.heavy ? <button className="mm-later mm-later-top" onClick={later}>Agora não</button> : null}
       {body}
     </section>
   );

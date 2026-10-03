@@ -374,20 +374,35 @@ class Component extends DCLogic {
     if (e.council && e.council.length) return e.council;
     return this.AG.map((a, i) => { const v = this.voice(i, e.q, e.kind); return { name: v.name, color: v.color, ref: v.ref || '', lang: v.lang || '', orig: v.orig || '', tr: v.tr || '', reflection: v.reflection || '' }; });
   }
+  // A resposta abre mostrando só o essencial (a resposta direta); a leitura completa fica a um toque.
   secsView(sec, tradColor) {
+    const open = !!this.state.secOpen;
+    const lead = sec.resposta || sec.tensao;
+    const has = (x) => x && x.length;
+    const extra = [sec.resposta ? sec.tensao : null, sec.leitura, sec.ponto_cego, sec.pergunta].filter(Boolean).length + (has(sec.tradicoes) ? 1 : 0);
     return (
       <div className="al-secs">
-        {sec.entendi ? <section className="al-sec al-got"><span className="al-h">O que você está perguntando</span><p>{sec.entendi}</p></section> : null}
-        {sec.resposta ? <section className="al-sec"><span className="al-h">Minha resposta</span><p className="al-lead">{sec.resposta}</p></section> : null}
-        <section className="al-sec"><span className="al-h">O que está em jogo</span><p className={sec.resposta ? '' : 'al-lead'}>{sec.tensao}</p></section>
-        <section className="al-sec"><span className="al-h">{sec.resposta ? 'Por quê' : 'Minha leitura'}</span><p>{sec.leitura}</p>{sec.mudaria ? <p className="al-cond">{sec.mudaria}</p> : null}</section>
-        {(sec.tradicoes || []).length ? (
-          <section className="al-sec"><span className="al-h">O que as tradições dizem</span>
-            <ul className="al-list">{sec.tradicoes.map((t, i) => <li key={i} style={{ '--c': tradColor(t.nome) }}><b>{t.nome}</b><span>{t.ideia}</span></li>)}</ul>
-          </section>
+        <section className="al-sec"><span className="al-h">{sec.resposta ? 'Minha resposta' : 'O que está em jogo'}</span><p className="al-lead">{lead}</p></section>
+        {open ? (
+          <div className="al-more">
+            {sec.entendi ? <section className="al-sec al-got"><span className="al-h">O que você perguntou</span><p>{sec.entendi}</p></section> : null}
+            {sec.resposta ? <section className="al-sec"><span className="al-h">O que está em jogo</span><p>{sec.tensao}</p></section> : null}
+            <section className="al-sec"><span className="al-h">{sec.resposta ? 'Por quê' : 'Minha leitura'}</span><p>{sec.leitura}</p>{sec.mudaria ? <p className="al-cond">{sec.mudaria}</p> : null}</section>
+            {has(sec.tradicoes) ? (
+              <section className="al-sec"><span className="al-h">O que as tradições dizem</span>
+                <ul className="al-list">{sec.tradicoes.map((t, i) => <li key={i} style={{ '--c': tradColor(t.nome) }}><b>{t.nome}</b><span>{t.ideia}</span></li>)}</ul>
+              </section>
+            ) : null}
+            {sec.ponto_cego ? <section className="al-sec al-blind"><span className="al-h">O que merece sua atenção</span><p>{sec.ponto_cego}</p></section> : null}
+            {sec.pergunta ? <section className="al-sec"><span className="al-h">Uma pergunta para levar</span><p className="al-q">{sec.pergunta}</p></section> : null}
+          </div>
         ) : null}
-        {sec.ponto_cego ? <section className="al-sec al-blind"><span className="al-h">O que merece sua atenção</span><p>{sec.ponto_cego}</p></section> : null}
-        {sec.pergunta ? <section className="al-sec"><span className="al-h">Uma pergunta para levar</span><p className="al-q">{sec.pergunta}</p></section> : null}
+        {extra ? (
+          <button className={'al-toggle' + (open ? ' on' : '')} onClick={() => this.setState({ secOpen: !open })} aria-expanded={open ? 'true' : 'false'}>
+            {open ? 'Recolher a leitura' : 'Ver a leitura completa'}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+          </button>
+        ) : null}
       </div>
     );
   }
@@ -923,6 +938,7 @@ Object.assign(Component.prototype, {
   componentDidUpdate(pp, ps) {
     if (ps.entries !== this.state.entries) save({ entries: this.state.entries });
       if (ps.screen !== this.state.screen && (this.state.ansSheet || this.state.c14)) this.setState({ ansSheet: null, c14: null });
+    if ((ps.screen !== this.state.screen || ps.sheet !== this.state.sheet) && this.state.secOpen) this.setState({ secOpen: false });
     if (ps.screen !== this.state.screen || ps.sheet !== this.state.sheet || ps.ansSheet !== this.state.ansSheet || ps.c14 !== this.state.c14) this.emitChrome();
   },
   // Avisa o app em que tela a Alma está, para mostrar ou esconder a barra de navegação.
@@ -995,10 +1011,18 @@ Object.assign(Component.prototype, {
         </div>
       );
     }
+    const lo = !!this.state.loginOpen;
     return (
-      <div className="glass" style={css('border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px')}>
-        <span className="kicker" style={css('color: #c9b8ff')}>Guarde sua constelação</span>
-        <span style={css('font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)')}>Entre com seu e-mail para ver suas perguntas, estrelas e planos em qualquer aparelho. Sem senha: enviamos um link de acesso.</span>
+      <div className={'glass al-login' + (lo ? ' on' : '')} style={css('border-radius: 22px; padding: 4px 6px 4px 18px; display: flex; flex-direction: column; gap: 10px')}>
+        <button className="al-login-head" onClick={() => this.setState({ loginOpen: !lo })} aria-expanded={lo ? 'true' : 'false'}>
+          <span className="al-login-t">
+            <span className="kicker" style={css('color: #c9b8ff; font-size: 13px')}>Guarde sua constelação</span>
+            <span>Hoje tudo fica só neste aparelho</span>
+          </span>
+          <span className="al-login-go">{lo ? 'Fechar' : 'Entrar'}</span>
+        </button>
+        {lo ? (<div className="al-more" style={css('display: flex; flex-direction: column; gap: 10px; padding: 0 12px 14px 0')}>
+        <span style={css('font-size: 16.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.75)')}>Entre para ver suas perguntas, estrelas e planos em qualquer aparelho. Sem senha: enviamos um link de acesso.</span>
         {a.enabled ? (
           <>
             <button className="cta" onClick={async () => { const r = await signInWithGoogle(); if (r.error) this.setState({ loginMsg: r.error }); }} style={css('height: 46px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17.5px; font-weight: 500; color: #1f1f1f; background: #ffffff')}>
@@ -1010,9 +1034,10 @@ Object.assign(Component.prototype, {
             <button className="cta" onClick={() => this.sendLink()} style={css('height: 46px; border-radius: 999px; font-size: 17.5px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #c9b8ff, #efe8ff 50%, #b8d8ff)')}>Enviar link de acesso</button>
           </>
         ) : (
-          <span style={css('font-size: 17px; color: rgba(244,241,234,.5)')}>Por enquanto, tudo fica salvo neste aparelho.</span>
+          <span style={css('font-size: 16px; color: rgba(244,241,234,.5)')}>O login ainda não está ativo neste ambiente.</span>
         )}
         {this.state.loginMsg ? <span style={css('font-size: 17px; line-height: 1.5; color: #f3d98b')}>{this.state.loginMsg}</span> : null}
+        </div>) : null}
       </div>
     );
   }
@@ -1460,14 +1485,14 @@ Component.prototype.render = function render() {
                     {`Catorze vozes para ${(R.kindPhrase) ?? ''}`}
                   </h1>
                 </div>
-                <div className="glass" style={css("border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px")}>
-                  <div className="kicker" style={css("font-size: 15px")}>
-                    {"Você trouxe"}
-                  </div>
-                  <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.88)")}>
-                    {R.text}
-                  </p>
-                  <div style={css("display: flex; flex-wrap: wrap; gap: 6px")}>
+                <div className={'glass al-brought' + (this.state.broughtOpen ? ' on' : '')} style={css("border-radius: 22px; padding: 4px 6px 4px 18px; display: flex; flex-direction: column; gap: 10px")}>
+                  <button className="al-brought-head" onClick={() => this.setState({ broughtOpen: !this.state.broughtOpen })} aria-expanded={this.state.broughtOpen ? 'true' : 'false'}>
+                    <span className="kicker" style={css("font-size: 13px; flex-shrink: 0")}>{"Você trouxe"}</span>
+                    <span className="al-brought-t">{R.text}</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                  </button>
+                  {this.state.broughtOpen ? (
+                  <div className="al-more" style={css("display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 12px 0")}>
                     {(R.givenTags || []).map((L13_g, I13) => (
                       <React.Fragment key={I13}>
                         <span style={css("min-height: 26px; padding: 3px 12px; border-radius: 14px; display: inline-flex; align-items: center; line-height: 1.35; font-size: 16px; background: rgba(255,255,255,.08); color: rgba(244,241,234,.8)")}>
@@ -1476,6 +1501,7 @@ Component.prototype.render = function render() {
                       </React.Fragment>
                     ))}
                   </div>
+                  ) : null}
                 </div>
                 <div className="glass cardin" style={css("border-radius: 26px; padding: 22px 20px; position: relative; overflow: hidden; border-color: rgba(243,217,139,.36)")}>
                   <div className="goldglow"></div>

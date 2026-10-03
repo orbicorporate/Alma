@@ -140,7 +140,7 @@ export function moment(data, now = new Date()) {
   if (step) {
     out.push({
       k: `passo:${step.e.at || step.i}:${step.j}`, type: 'passo', color: '#8fe3b0',
-      kicker: step.due === 0 ? `Hoje · passo ${step.n} de ${step.total}` : `Ficou de ${step.due === -1 ? 'ontem' : `${-step.due} dias atrás`} · passo ${step.n} de ${step.total}`,
+      kicker: step.due === 0 ? `Passo ${step.n} de ${step.total} · hoje` : `Passo ${step.n} de ${step.total} · atrasado`,
       title: step.t, line: `Plano: ${planNameOf(step.e)}`, sky,
       why: step.due === 0 ? 'Este passo estava marcado para hoje.' : 'Este passo ainda está esperando por você.',
       ref: { i: step.i, j: step.j }
@@ -172,7 +172,7 @@ export function moment(data, now = new Date()) {
     const tip = dayTip(today(), profile);
     out.push({
       k: `int:${tIso}`, type: 'intencao', color: '#f3d98b',
-      kicker: 'Manhã', title: 'Qual é a sua intenção para hoje?', line: 'Escolha uma e ela vai para o seu diário.', sky,
+      kicker: 'Intenção da manhã', title: 'Qual é a sua intenção para hoje?', line: 'Escolha uma e ela vai para o seu diário.', sky,
       options: [tip.title, 'Fazer uma coisa de cada vez', 'Ter paciência comigo'],
       why: 'Toda manhã a Alma sugere uma intenção a partir do céu do dia.'
     });
