@@ -8,7 +8,15 @@
   --s6 24  : entre seções de uma tela
   Texto: rótulo 11.5px maiúsculo, corpo 15 a 17px com entrelinha 1.5, apoio 13.5px com entrelinha 1.5.
 */
-:root { --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; }
+:root { --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px;
+  /* Sistema visual (ver DESIGN.md) */
+  --night: #120E2C; --surface: rgba(255,255,255,.07); --surface-2: rgba(255,255,255,.11); --line: rgba(255,255,255,.14);
+  --ink: #F6F3FF; --ink-2: #CFC8EE; --ink-3: #A49CD0;
+  --gold: #F3D98B; --gold-ink: #1A1408; --lilac: #C9B8FF; --sky: #8EC8FF; --mint: #8FE3B0; --rose: #F5A8C8; --peach: #FFB38A;
+  --r-card: 22px; --r-sm: 16px; --r-pill: 999px;
+  --ease-out: cubic-bezier(.22,.8,.24,1); --ease-in: cubic-bezier(.45,0,.9,.4);
+  --t-screen: 28px; --t-section: 19px; --t-card: 17px; --t-body: 16.5px; --t-caption: 14.5px;
+}
 html, body, #root { margin: 0; height: 100%; background: #0b0a16; }
 body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .app-bg { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 30%, #17142e, #07060f 70%); }
