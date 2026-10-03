@@ -106,3 +106,28 @@
 .hm-sheet-body > * { animation: none !important; }
 .hm .hm-close { height: 48px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); text-align: center; font-size: 16px; flex-shrink: 0; }
 @media (prefers-reduced-motion: reduce) { .hm-spin, .hm-pl-in, .hm-ring2 { animation: none; } }
+
+/* Topo e atalhos compactos: saudação e data numa linha com os ajustes; atalhos numa fileira baixa. */
+.hm .hm-scroll2 { padding-top: 14px; gap: var(--s3); }
+.hm-top { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); animation: hmIn .6s cubic-bezier(.22,.8,.24,1) both; }
+.hm-top-l { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.hm-hi { margin: 0; font-size: 26px; font-weight: 300; line-height: 1.2; color: #f4f1ea; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-top .hm-date { font-size: 15px; color: rgba(244,241,234,.6); }
+.hm .hm-top .hm-gear { flex-shrink: 0; width: 44px; height: 44px; margin-right: -6px; }
+.hm .hm-orbit { margin: 0 0 18px; }
+.hm .hm-quick2 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 0; }
+.hm .hm-quick2 button { flex-direction: row; justify-content: center; gap: 6px; min-height: 44px; padding: 0 4px; border-radius: 999px; font-size: 14px; white-space: nowrap;
+  transition: transform .12s cubic-bezier(.22,.8,.24,1), background-color .12s ease-out; }
+.hm .hm-quick2 button:active { transform: scale(.96); background: rgba(255,255,255,.1); }
+.hm .hm-quick2 span { font-size: 16px; }
+.hm .hm-quick2 button:focus-visible, .hm .hm-top .hm-gear:focus-visible { outline: 2px solid #f4f1ea; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .hm-top { animation: none; } .hm .hm-quick2 button { transition: none; } .hm .hm-quick2 button:active { transform: none; } }
+/* A órbita ocupa o espaço livre e os atalhos encostam na barra de navegação. */
+.hm .hm-scroll2 { min-height: 100%; }
+.hm .hm-orbit { margin: auto 0; flex-shrink: 0; }
+.hm .hm-quick2 { display: flex; gap: 6px; margin-top: auto; }
+.hm .hm-quick2 button { flex: 1 1 auto; padding: 0 10px; }
+.hm .hm-quick2 .hm-q-help { flex: 0 0 44px; padding: 0; }
+.hm .hm-quick2 button { min-width: 0; padding: 0 8px; gap: 5px; font-size: 13.5px; }
+.hm .hm-quick2 span { font-size: 14.5px; }
+.tabs-on .hm .hm-scroll2 { padding-bottom: 116px; }
