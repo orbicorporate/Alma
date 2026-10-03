@@ -6,6 +6,8 @@ import { planNameOf } from '../questions.js';
 import { today, addDays, addMonths, WD_FULL } from '../dates.js';
 import NatalSphere from '../components/NatalSphere.jsx';
 import SkyHero from '../components/SkyHero.jsx';
+import Gallery3D, { GalleryArrows } from '../components/Gallery3D.jsx';
+import { TarotFace, TarotBack } from '../components/TarotArt.jsx';
 
 class Component extends DCLogic {
   constructor(props) {
@@ -111,7 +113,7 @@ class Component extends DCLogic {
       profileSaved: !!load().profile,
       dName: '', dDate: '', dTime: '', dCity: 'São Paulo', perr: '',
       period: 0, showTech: false, openPlanet: -1, numSel: 'expr', numOpen: '',
-      spread: 3, tq: '', prog: 0, holding: false, tick: 0, deck: [], cut: -1, picked: [], flipped: 0
+      spread: 3, tq: '', prog: 0, holding: false, tick: 0, deck: [], cut: -1, picked: [], flipped: 0, galIdx: 10, revIdx: 0
     };
   }
   componentDidMount() {
@@ -131,7 +133,7 @@ class Component extends DCLogic {
     window.dispatchEvent(new CustomEvent('alma:chrome', { detail: { src: 'sym', screen: this.state.screen, hide } }));
   }
   componentDidUpdate(pp, ps) { if (this.state.profileSaved && ps.profile !== this.state.profile) save({ profile: this.state.profile }); if (ps.screen !== this.state.screen) this.emitChrome(); }
-  componentWillUnmount() { window.removeEventListener('sym:go', this.onGo); this.offData && this.offData(); clearInterval(this.hi); clearTimeout(this.tc); clearTimeout(this.tcut); }
+  componentWillUnmount() { window.removeEventListener('sym:go', this.onGo); this.offData && this.offData(); clearInterval(this.hi); clearTimeout(this.tc); clearTimeout(this.tcut); clearTimeout(this.tAdv); }
 
   /* ---------- astronomy ---------- */
   norm(x) { return ((x % 360) + 360) % 360; }
@@ -438,7 +440,7 @@ class Component extends DCLogic {
           clearTimeout(this.tcut);
           this.tcut = setTimeout(() => {
             const k = [0, 7, 14][i], d = this.state.deck;
-            this.setState({ deck: d.slice(k).concat(d.slice(0, k)), screen: 'tFan', picked: [], hist: this.state.hist.concat(['tCut']) });
+            this.setState({ deck: d.slice(k).concat(d.slice(0, k)), screen: 'tFan', picked: [], galIdx: 10, hist: this.state.hist.concat(['tCut']) });
           }, 1000);
         }
       };
@@ -609,7 +611,7 @@ class Component extends DCLogic {
       fanGuide: s.picked.length >= need ? 'Suas cartas foram escolhidas. Quando sentir, coloque-as na mesa.' : need === 1 ? 'Deslize os olhos pelo leque e toque na carta que te chamar.' : 'Escolha três cartas, sem pensar demais. Toque de novo para devolver uma carta.',
       fanCount: `${s.picked.length} de ${need} ${need === 1 ? 'carta' : 'cartas'}`,
       fanReady: s.picked.length >= need,
-      toReveal: () => this.setState({ screen: 'tReveal', flipped: 0, hist: ['hub'] }),
+      toReveal: () => this.setState({ screen: 'tReveal', flipped: 0, revIdx: 0, hist: ['hub'] }),
       slots, readings, allFlipped, synth,
       revealGuide: allFlipped ? 'Esta é a sua leitura. Fique com o que ressoar.' : s.flipped === 0 ? 'As cartas estão na mesa. Toque na primeira para revelá-la.' : 'Respire. Quando estiver pronto, toque na próxima carta.',
       newReading: () => this.setState({ screen: 'tSpread', hist: ['hub'], picked: [], flipped: 0, tq: '' }),
@@ -1129,57 +1131,88 @@ Component.prototype.render = function render() {
           </div>
         ) : null}
 
-        {/* ---------------- TARÔ: LEQUE ---------------- */}
-        {R.isTFan ? (
-          <div className="screen">
-            <div className="c-card tr-guide" style={css("position: absolute; left: 16px; right: 16px; top: 96px")}>
-              <p className="c-body">{R.fanGuide}</p>
-            </div>
-            <div className="tr-count" role="status">{R.fanCount}</div>
-            <div style={css("position: absolute; left: 0; top: 320px; width: 390px; height: 400px")}>
-              {(R.fan || []).map((c, i) => (
-                <button key={i} className="fancard cardback" onClick={c.pick} aria-label={c.aria} aria-pressed={c.pressed} style={css(`left: 168px; top: 20px; width: 54px; height: 88px; border-radius: 8px; ${c.style}`)}></button>
-              ))}
-            </div>
-            {R.fanReady ? (
-              <div className="fade" style={css("position: absolute; left: 16px; right: 16px; top: 740px")}>
-                <button className="c-btn c-gold" onClick={R.toReveal}>Colocar na mesa</button>
+        {/* ---------------- TARÔ: GALERIA PARA ESCOLHER ---------------- */}
+        {R.isTFan ? (() => {
+          const st = this.state, need = st.spread, i = st.galIdx, pk = st.picked.includes(i);
+          const toggle = (k) => {
+            const pkd = this.state.picked.slice(), at = pkd.indexOf(k);
+            if (at >= 0) pkd.splice(at, 1); else if (pkd.length < need) { pkd.push(k); try { navigator.vibrate && navigator.vibrate(10); } catch (e) { /* sem vibração */ } }
+            this.setState({ picked: pkd });
+          };
+          const full = st.picked.length >= need;
+          return (
+            <div className="screen tg">
+              <div className="tg-head">
+                <h1 className="tg-title">{need === 1 ? 'Escolha a sua carta' : 'Escolha três cartas'}</h1>
+                <p className="tg-sub">Deslize pelas cartas e toque na do centro quando ela te chamar.</p>
               </div>
-            ) : null}
-          </div>
-        ) : null}
+              <div className="tg-label" aria-live="polite">
+                <span className="tg-label-t">{pk ? `Escolhida, ${st.picked.indexOf(i) + 1}ª carta` : `Carta ${i + 1} de 22`}</span>
+                <span className="tg-label-s">{pk ? 'Toque de novo para devolver' : full ? 'Você já escolheu todas' : 'Toque para escolher'}</span>
+              </div>
+              <div className="tg-gal">
+                <Gallery3D count={22} index={i} onIndex={(k) => this.setState({ galIdx: k })} onActivate={toggle} cardW={196} cardH={314} step={106} label="Cartas do tarô viradas para baixo"
+                  renderCard={(k) => {
+                    const on = st.picked.includes(k);
+                    return (
+                      <span className={'g3d-pick' + (on ? ' on' : '')}>
+                        <span className="g3d-face"><TarotBack /></span>
+                        {on ? <span className="g3d-badge">{st.picked.indexOf(k) + 1}ª escolhida</span> : null}
+                      </span>
+                    );
+                  }} />
+              </div>
+              <GalleryArrows index={i} count={22} onIndex={(k) => this.setState({ galIdx: k })} />
+              <div className="tg-foot">
+                <div className="tg-slots" aria-label={R.fanCount}>
+                  {Array.from({ length: need }, (_, k) => (
+                    <span key={k} className={'tg-slot' + (st.picked[k] != null ? ' on' : '')}>{st.picked[k] != null ? <TarotBack /> : <b>{k + 1}</b>}</span>
+                  ))}
+                  <span className="tg-count">{R.fanCount}</span>
+                </div>
+                <button className="c-btn c-gold tg-cta" onClick={R.toReveal} disabled={!full}>{full ? 'Revelar as cartas' : need === 1 ? 'Escolha uma carta' : `Faltam ${need - st.picked.length}`}</button>
+              </div>
+            </div>
+          );
+        })() : null}
 
         {/* ---------------- TARÔ: LEITURA ---------------- */}
         {R.isTReveal ? (
           <div className="screen scroll">
             <div className="c-page" style={{ gap: 16, paddingBottom: 48 }}>
-              <div className="c-card tr-guide" role="status">
-                <p className="c-body">{R.revealGuide}</p>
-              </div>
-              {R.hasTq ? <p className="c-body2" style={{ textAlign: 'center', fontStyle: 'italic' }}>{`“${R.tq}”`}</p> : null}
-              <div style={css("display: flex; justify-content: center; gap: 10px")}>
-                {(R.slots || []).map((sl, i) => (
-                  <div key={i} style={css("display: flex; flex-direction: column; align-items: center; gap: 8px")}>
-                    <button className="flip" onClick={sl.flipIt} aria-label={sl.aria} style={css(sl.box)}>
-                      <span className="flipin" style={css(`display: block; ${sl.inner}`)}>
-                        <span className="face cardback" style={css(`display: block; ${sl.backStyle}`)}></span>
-                        <span className="face front" style={css(`display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-sizing: border-box; border: 1px solid rgba(243,217,139,.6); background: linear-gradient(170deg, #fbf5e6, #efe3c8); color: #2a1f3d; ${sl.frontPad}`)}>
-                          <span style={css(`font-size: ${sl.numSize}; letter-spacing: .06em; font-weight: 600; color: #6e521c`)}>{sl.num}</span>
-                          <svg viewBox="0 0 60 60" style={css(sl.sigilSize)} aria-hidden="true">
-                            <circle cx="30" cy="30" r="27" fill="none" stroke={sl.hue} strokeWidth="1" />
-                            <circle cx="30" cy="30" r="20" fill={sl.hueSoft} />
-                            <polygon points={sl.poly} fill="none" stroke="#3a2c58" strokeWidth="1.2" strokeLinejoin="round" />
-                            <polygon points={sl.star} fill={sl.hue} opacity=".85" />
-                            <circle cx="30" cy="30" r="2.4" fill="#3a2c58" />
-                          </svg>
-                          <span style={css(`font-size: ${sl.nameSize}; font-weight: 600; text-align: center; line-height: 1.2`)}>{sl.name}</span>
-                        </span>
-                      </span>
-                    </button>
-                    <span className="c-label" style={{ color: 'var(--rose)' }}>{sl.pos}</span>
+              {(() => {
+                const st = this.state, sl = R.slots || [], n = sl.length, j = Math.min(st.revIdx, Math.max(0, n - 1)), cur = sl[j] || {};
+                const shown = j < st.flipped;
+                const activate = (k) => {
+                  if (k !== this.state.flipped) { if (k > this.state.flipped) this.setState({ revIdx: this.state.flipped }); return; }
+                  sl[k].flipIt();
+                  try { navigator.vibrate && navigator.vibrate(12); } catch (e) { /* sem vibração */ }
+                  if (k + 1 < n) { clearTimeout(this.tAdv); this.tAdv = setTimeout(() => this.setState({ revIdx: k + 1 }), 1100); }
+                };
+                return (
+                  <div className="tg tg-rev">
+                    {R.hasTq ? <p className="tg-q">“{R.tq}”</p> : null}
+                    <div className="tg-label" aria-live="polite">
+                      <span className="tg-label-t">{shown ? cur.name : cur.pos}</span>
+                      <span className="tg-label-s">{shown ? `${cur.pos}, arcano ${cur.num}` : j === st.flipped ? 'Toque na carta para revelar' : 'Revele as cartas em ordem'}</span>
+                    </div>
+                    <div className="tg-gal">
+                      <Gallery3D count={n} index={j} onIndex={(k) => this.setState({ revIdx: k })} onActivate={activate} cardW={204} cardH={326} step={118} label="Suas cartas"
+                        renderCard={(k) => {
+                          const c = sl[k], fl = k < st.flipped, n0 = st.deck[st.picked[k]];
+                          return (
+                            <span className={'g3d-flip' + (fl ? ' on' : '')} aria-label={c.aria}>
+                              <span className="g3d-face"><TarotBack /></span>
+                              <span className="g3d-face g3d-front"><TarotFace n={n0} name={c.name} num={c.num} /></span>
+                            </span>
+                          );
+                        }} />
+                    </div>
+                    {n > 1 ? <GalleryArrows index={j} count={n} onIndex={(k) => this.setState({ revIdx: k })} prevLabel="Carta anterior" nextLabel="Próxima carta" /> : null}
+                    {!R.allFlipped ? <p className="tg-sub" style={{ textAlign: 'center' }}>{R.revealGuide}</p> : null}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
               {(R.readings || []).map((r, i) => (
                 <div key={i} className="c-card c-tint tr-read fade c-stack-s">
                   <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

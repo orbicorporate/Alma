@@ -210,3 +210,26 @@
   .sc-sym *, .sc-sym *::before, .sc-sym *::after { animation: none !important; transition-duration: 0.01ms !important; }
   .sc-sym .mote { opacity: .5; }
 }
+
+/* Tarô em galeria 3D: escolher e revelar. */
+.sc-sym .tg { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+.sc-sym .screen.tg { box-sizing: border-box; padding: 92px 0 24px; overflow: hidden; }
+.sc-sym .tg-head { padding: 0 20px; display: flex; flex-direction: column; gap: 4px; }
+.sc-sym .tg-title { margin: 0; font-size: var(--t-screen); font-weight: 300; line-height: 1.15; letter-spacing: -.01em; color: var(--ink); }
+.sc-sym .tg-sub { margin: 0; font-size: var(--t-caption); line-height: 1.45; color: var(--ink-2); }
+.sc-sym .tg-label { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; min-height: 48px; margin-top: 6px; }
+.sc-sym .tg-label-t { font-size: 22px; font-weight: 500; line-height: 1.2; color: var(--ink); animation: tgSwap .28s var(--ease-out) both; }
+.sc-sym .tg-label-s { font-size: var(--t-caption); color: var(--rose); }
+@keyframes tgSwap { from { opacity: 0; transform: translateY(4px); } }
+.sc-sym .tg-gal { position: relative; margin-top: -10px; }
+.sc-sym .tg-rev .tg-gal { margin: -10px -16px 0; }
+.sc-sym .tg-foot { margin-top: auto; padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+.sc-sym .tg-slots { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.sc-sym .tg-slot { width: 30px; height: 48px; border-radius: 7px; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; color: var(--ink-3); border: 1px dashed rgba(243,217,139,.45); }
+.sc-sym .tg-slot.on { border: 1px solid var(--gold); box-shadow: 0 0 14px rgba(243,217,139,.35); animation: tgSlot .32s var(--ease-out) both; }
+.sc-sym .tg-slot .ta-svg { width: 100%; height: 100%; }
+@keyframes tgSlot { from { transform: translateY(-10px) scale(.8); opacity: 0; } }
+.sc-sym .tg-count { margin-left: 6px; font-size: var(--t-caption); color: var(--ink-2); }
+.sc-sym .tg-cta:disabled { opacity: .45; box-shadow: none; }
+.sc-sym .tg-q { margin: 0; text-align: center; font-size: var(--t-body); font-weight: 300; font-style: italic; color: var(--ink-2); }
+@media (prefers-reduced-motion: reduce) { .sc-sym .tg-label-t, .sc-sym .tg-slot.on { animation: none; } }

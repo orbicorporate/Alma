@@ -1,0 +1,43 @@
+/* Galeria 3D (coverflow) do tarô.
+   Motion: é um momento raro e emocional, então pode ter presença (peso Jhey e Jakub):
+   as cartas abrem do centro em leque ao entrar (520ms, atraso pela distância), o arraste segue o dedo
+   e o encaixe desacelera sem quique. A virada da carta é 3D (720ms). Com movimento reduzido:
+   sem inclinação, sem abertura e troca instantânea. */
+.g3d { position: relative; width: 100%; height: calc(var(--ch) + 40px); perspective: 1100px; perspective-origin: 50% 45%; touch-action: pan-y; user-select: none; -webkit-user-select: none; outline: none; }
+.g3d-stage { position: absolute; inset: 0; transform-style: preserve-3d; }
+.g3d-card { position: absolute; left: 50%; top: 20px; width: var(--cw); height: var(--ch); margin-left: calc(var(--cw) / -2); padding: 0; border: 0; background: none; border-radius: 18px;
+  transform-style: preserve-3d; will-change: transform, opacity; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  animation: g3dIn .52s cubic-bezier(.22,.8,.24,1) both; animation-delay: calc(var(--enter, 0) * 45ms); }
+@keyframes g3dIn { from { opacity: 0; translate: 0 18px; filter: blur(6px); } }
+.g3d-card:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.g3d-face { position: absolute; inset: 0; border-radius: 18px; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  box-shadow: 0 24px 50px rgba(5,3,20,.55), 0 0 0 1px rgba(243,217,139,.35); }
+/* As laterais escurecem um pouco para a carta do centro ganhar foco. */
+.g3d-face::after { content: ''; position: absolute; inset: 0; background: rgba(8,6,24,.55); opacity: calc(var(--dim, 0) * 1); pointer-events: none; transition: opacity .2s ease-out; }
+.ta-svg { display: block; width: 100%; height: 100%; }
+
+.g3d-flip { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .72s cubic-bezier(.3,.7,.2,1); }
+.g3d-flip.on { transform: rotateY(180deg); }
+.g3d-flip .g3d-front { transform: rotateY(180deg); }
+
+/* Carta escolhida: sobe um pouco e ganha moldura dourada. */
+.g3d-pick { position: absolute; inset: 0; transition: transform .32s cubic-bezier(.22,.8,.24,1); }
+.g3d-pick.on { transform: translateY(-14px); }
+.g3d-pick.on .g3d-face { box-shadow: 0 30px 60px rgba(5,3,20,.6), 0 0 0 2px var(--gold), 0 0 34px rgba(243,217,139,.45); }
+.g3d-badge { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 2; height: 28px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13.5px; font-weight: 600; color: var(--gold-ink); background: var(--gold); white-space: nowrap; animation: g3dBadge .3s cubic-bezier(.22,.8,.24,1) both; }
+@keyframes g3dBadge { from { opacity: 0; transform: translate(-50%, 6px) scale(.9); } }
+
+.g3d-arrows { display: flex; justify-content: center; gap: 12px; }
+.g3d-arrow { width: 56px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2);
+  background: var(--surface); border: 1px solid var(--line); transition: transform .12s var(--ease-out), opacity .2s ease-out; }
+.g3d-arrow.g3d-next { width: 72px; color: var(--gold-ink); background: var(--gold); border-color: transparent; }
+.g3d-arrow:active { transform: scale(.95); }
+.g3d-arrow:disabled { opacity: .35; }
+.g3d-arrow:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .g3d-card { animation: none; }
+  .g3d-flip, .g3d-pick, .g3d-face::after, .g3d-arrow { transition: none; }
+  .g3d-badge { animation: none; }
+}
