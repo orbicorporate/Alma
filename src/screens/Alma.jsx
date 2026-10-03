@@ -1470,7 +1470,7 @@ Component.prototype.render = function render() {
                   <div style={css("display: flex; flex-wrap: wrap; gap: 6px")}>
                     {(R.givenTags || []).map((L13_g, I13) => (
                       <React.Fragment key={I13}>
-                        <span style={css("height: 26px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 17px; background: rgba(255,255,255,.08); color: rgba(244,241,234,.8)")}>
+                        <span style={css("min-height: 26px; padding: 3px 12px; border-radius: 14px; display: inline-flex; align-items: center; line-height: 1.35; font-size: 16px; background: rgba(255,255,255,.08); color: rgba(244,241,234,.8)")}>
                           {L13_g?.t}
                         </span>
                       </React.Fragment>
