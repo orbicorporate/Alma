@@ -192,3 +192,17 @@ export function moment(data, now = new Date()) {
 
   return out.find((c) => !off.includes(c.k)) || null;
 }
+
+/* ---------- memória para a IA ---------- */
+// As conversas que mais ajudam a Alma a entender esta: a mais parecida e as últimas em aberto.
+export function historyFor(text, entries) {
+  const list = entries || [], picked = [];
+  const sim = similarEntry(text, list);
+  if (sim) picked.push(sim.i);
+  for (let i = list.length - 1; i >= 0 && picked.length < 3; i--) if (list[i] && !list[i].resolved && !picked.includes(i)) picked.push(i);
+  return picked.map((i) => list[i]).filter((e) => e && e.q && e.q !== text).map((e) => ({ q: e.q, kind: e.kind, tags: e.tags || [], date: e.date, resolved: !!e.resolved, step: e.step || '' }));
+}
+// Perguntas de aprofundamento já feitas nas últimas conversas, para não repetir.
+export function recentQuestions(entries) {
+  return (entries || []).slice(-4).reduce((a, e) => a.concat((e && e.qs) || []), []).slice(-10);
+}

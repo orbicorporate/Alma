@@ -188,3 +188,15 @@
   .sc-main :is(.al-sim-go, .al-sim-x, .al-quick button, .al-sugg-all) { transition: none; }
   .sc-main :is(.al-sim-go, .al-sim-x, .al-quick button, .al-sugg-all):active { transform: none; }
 }
+
+/* Leitura e perguntas que se adaptam.
+   Motion: enquanto a próxima pergunta é pensada, o bloco esmaece em 200ms (sem pulsar);
+   a nova pergunta entra com a animação de troca que já existe. */
+.sc-main .al-qwrap { transition: opacity .2s cubic-bezier(.22,.8,.24,1), filter .2s cubic-bezier(.22,.8,.24,1); }
+.sc-main .al-qwrap.al-thinking { opacity: .45; filter: blur(1.5px); pointer-events: none; }
+.sc-main .al-adapt { align-self: center; margin-bottom: -10px; font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: #c9b8ff; }
+.sc-main .al-next { margin: -6px 0 0; text-align: center; font-size: 15.5px; font-weight: 300; line-height: 1.45; color: #c9b8ff; }
+.sc-main .al-notthis { margin-top: 8px; min-height: 44px; padding: 0; font-size: 16px; font-weight: 300; color: #c9b8ff; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(201,184,255,.4); text-align: left; }
+.sc-main .al-notthis:focus-visible { outline: 2px solid #f4f1ea; outline-offset: 2px; border-radius: 6px; }
+.sc-main .al-got p { color: rgba(244,241,234,.78); }
+@media (prefers-reduced-motion: reduce) { .sc-main .al-qwrap { transition: none; } .sc-main .al-qwrap.al-thinking { filter: none; } }
