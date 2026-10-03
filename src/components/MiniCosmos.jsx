@@ -18,9 +18,9 @@ export default function MiniCosmos({ w = 350, h = 240 }) {
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       ctx.clearRect(0, 0, w, h);
       const neb = ctx.createRadialGradient(w * 0.7, h * 0.35, 0, w * 0.7, h * 0.35, w * 0.7);
-      neb.addColorStop(0, `rgba(122,92,255,${0.22 + 0.06 * Math.sin(t * 0.5)})`); neb.addColorStop(0.5, 'rgba(245,168,200,.07)'); neb.addColorStop(1, 'rgba(0,0,0,0)');
+      neb.addColorStop(0, `rgba(140,110,255,${0.3 + 0.06 * Math.sin(t * 0.5)})`); neb.addColorStop(0.5, 'rgba(245,168,200,.1)'); neb.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = neb; ctx.fillRect(0, 0, w, h);
-      stars.forEach((s) => { ctx.globalAlpha = 0.25 + 0.6 * (0.5 + 0.5 * Math.sin(t * 1.4 + s.p)); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill(); });
+      stars.forEach((s) => { ctx.globalAlpha = 0.4 + 0.55 * (0.5 + 0.5 * Math.sin(t * 1.4 + s.p)); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill(); });
       ctx.globalAlpha = 1;
       drawGalaxy(ctx, gal, w * 0.74, h * 0.38, t, Math.min(1, t / 2) * 0.8, 0.85);
       drawGalaxy(ctx, gal2, w * 0.14, h * 0.2, t, Math.min(1, t / 2) * 0.6, 0.8);
@@ -28,8 +28,18 @@ export default function MiniCosmos({ w = 350, h = 240 }) {
       for (let i = comets.length - 1; i >= 0; i--) if (!drawComet(ctx, comets[i], t)) comets.splice(i, 1);
       raf = requestAnimationFrame(draw);
     };
+    // Movimento reduzido: um único quadro parado, já com as galáxias acesas e sem cometas.
+    const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (still) { next = Infinity; draw(t0 + 3000); cancelAnimationFrame(raf); return () => {}; }
+    // Fora da tela, o céu para de desenhar (poupa bateria) e volta quando aparece.
+    let on = true;
+    const io = 'IntersectionObserver' in window ? new IntersectionObserver(([en]) => {
+      if (en.isIntersecting && !on) { on = true; raf = requestAnimationFrame(draw); }
+      else if (!en.isIntersecting && on) { on = false; cancelAnimationFrame(raf); }
+    }) : null;
+    if (io) io.observe(c);
     raf = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(raf);
+    return () => { cancelAnimationFrame(raf); if (io) io.disconnect(); };
   }, [w, h]);
   return <canvas ref={cv} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />;
 }

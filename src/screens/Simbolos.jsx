@@ -237,7 +237,7 @@ class Component extends DCLogic {
     const py = this.red(this.red(q.d) + this.red(q.mo) + this.red(YY));
     const pm = this.red(py + this.red(MM)), pd = this.red(pm + this.red(DDAY));
     return {
-      path: { n: path, calc: `${q.d} → ${rd} · ${q.mo} → ${rm} · ${q.y} → ${ry} · ${rd} + ${rm} + ${ry} = ${rd + rm + ry} → ${path}` },
+      path: { n: path, calc: `${q.d} → ${rd}, ${q.mo} → ${rm}, ${q.y} → ${ry}. ${rd} + ${rm} + ${ry} = ${rd + rm + ry} → ${path}` },
       expr: { n: this.red(all, true), calc: `Todas as letras do nome: ${all} → ${this.red(all, true)}` },
       soul: { n: this.red(vow, true), calc: `Vogais do nome: ${vow} → ${this.red(vow, true)}` },
       pers: { n: this.red(con, true), calc: `Consoantes do nome: ${con} → ${this.red(con, true)}` },
@@ -265,7 +265,7 @@ class Component extends DCLogic {
     const signColor = (i) => this.ELC[i % 4];
     const pf = {
       name: p.name, first: p.name.split(' ')[0],
-      line: `${q.d} de ${this.MONTHS[q.mo - 1]} de ${q.y} · ${p.time} · ${ch.city[0]}, ${ch.city[1]}`
+      line: `${q.d} de ${this.MONTHS[q.mo - 1]} de ${q.y}, às ${p.time}, em ${ch.city[0]} (${ch.city[1]})`
     };
     const bigThree = [
       { label: 'Sol', sign: SIGNS[ch.by.sun.sign], glyph: SG[ch.by.sun.sign], color: signColor(ch.by.sun.sign) },
@@ -355,7 +355,7 @@ class Component extends DCLogic {
     };
     const periods = PER.map((x, i) => ({
       label: x.label, pressed: s.period === i ? 'true' : 'false',
-      style: s.period === i ? 'background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.5)' : 'background: rgba(255,255,255,.04); color: rgba(244,241,234,.75)',
+      
       pick: () => this.setState({ period: i, horoMore: false })
     }));
 
@@ -375,7 +375,7 @@ class Component extends DCLogic {
     ];
     const numTiles = NT.map((t) => ({
       n: N[t[0]].n, label: t[1], title: nm(N[t[0]].n)[0].replace(' · número mestre', ''), pressed: s.numSel === t[0] ? 'true' : 'false',
-      style: s.numSel === t[0] ? 'border-color: rgba(243,217,139,.6); box-shadow: 0 0 24px rgba(243,217,139,.15)' : '',
+      
       pick: () => this.setState({ numSel: t[0] })
     }));
     const DEF = {
@@ -397,10 +397,10 @@ class Component extends DCLogic {
         title: cyc ? C[0].split('.')[0] : nm(n)[0], short: cyc ? '' : nm(n)[1].replace(new RegExp('^' + nm(n)[0].split(' ')[0] + ',\\s*', 'i'), (m) => '').replace(/^./, (c) => c.toUpperCase()),
         ess: !cyc ? X[0] : k === 'py' ? C[0] : `${C[0].split('.')[0]}. Esta vibração colore ${k === 'pm' ? `o seu mês de ${CMN}, dentro do tema do ano` : 'o seu dia de hoje: um bom foco para as próximas horas'}.`, luz: X[1], sombra: X[2], convite: X[3], fazer: C[1], evitar: C[2],
         isPerson: !cyc, isCycle: cyc, isPY: k === 'py',
-        dots: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => ({ n: d, style: d === this.red(n) ? 'background: #f3d98b; color: #1a1408; font-weight: 500; box-shadow: 0 0 12px rgba(243,217,139,.6)' : d < this.red(n) ? 'background: rgba(243,217,139,.18); color: rgba(244,241,234,.7)' : 'background: rgba(255,255,255,.05); color: rgba(244,241,234,.45)' })),
+        dots: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => ({ n: d, style: d === this.red(n) ? 'background: var(--lilac); color: var(--night); font-weight: 600; box-shadow: 0 0 14px color-mix(in srgb, var(--lilac) 60%, transparent)' : d < this.red(n) ? 'background: color-mix(in srgb, var(--lilac) 22%, transparent); color: var(--ink-2)' : 'background: var(--surface); color: var(--ink-3)' })),
         open, expanded: open ? 'true' : 'false', btn: open ? 'Fechar explicação' : 'Entender meu caminho de vida',
-        chev: `transition: transform .4s ease; transform: rotate(${open ? 180 : 0}deg)`,
-        cardStyle: open ? 'border-color: rgba(243,217,139,.45)' : '',
+        
+        
         toggle: () => this.setState({ numOpen: this.state.numOpen === k ? '' : k })
       };
     };
@@ -462,7 +462,7 @@ class Component extends DCLogic {
     const POS = need === 1 ? [['Conselho do dia', 'Como conselho, ']] : [['Raiz', 'Na raiz, '], ['Presente', 'No presente, '], ['Caminho', 'No caminho, ']];
     const cards = s.picked.map((fi) => this.TAROT[s.deck[fi]]);
     const big = need === 1;
-    const W = big ? 170 : 104, H = big ? 280 : 172;
+    const W = big ? 176 : 112, H = big ? 288 : 188;
     const slots = cards.map((c, j) => {
       const n = s.deck[s.picked[j]];
       const hue = `hsl(${(n * 37) % 360} 60% 60%)`, hueSoft = `hsl(${(n * 37) % 360} 70% 88%)`;
@@ -483,9 +483,9 @@ class Component extends DCLogic {
         box: `width: ${W}px; height: ${H}px; ${j === s.flipped ? 'filter: drop-shadow(0 0 16px rgba(243,217,139,.55));' : ''}`,
         inner: `transform: rotateY(${flipped ? 180 : 0}deg)`,
         backStyle: 'border-radius: 12px',
-        frontPad: big ? 'padding: 18px 10px' : 'padding: 10px 6px',
-        numSize: big ? '16px' : '11px', nameSize: big ? '16px' : '11px',
-        sigilSize: big ? 'width: 120px; height: 120px' : 'width: 64px; height: 64px',
+        frontPad: big ? 'padding: 18px 12px' : 'padding: 10px 6px',
+        numSize: big ? '16px' : '14px', nameSize: big ? '17px' : '14px',
+        sigilSize: big ? 'width: 120px; height: 120px' : 'width: 60px; height: 60px',
         flipIt: () => { if (j === this.state.flipped) { this.setState({ flipped: j + 1 }); if (j + 1 === cards.length) save({ readings: (load().readings || []).concat([{ at: Date.now(), q: this.state.tq || '', cards: cards.map((c) => c[0]), spread: cards.length }]) }); } }
       };
     });
@@ -512,7 +512,7 @@ class Component extends DCLogic {
     // A pergunta que a pessoa está vivendo agora vira a primeira sugestão de intenção do tarô.
     const openQ = (load().entries || []).filter((e) => e && !e.resolved && e.q).slice(-1)[0];
     const tqChips = (openQ ? [`Sobre “${planNameOf(openQ)}”: o que preciso ver?`] : []).concat(['O que preciso saber hoje?', 'Como está meu caminho profissional?', 'O que o amor me pede agora?']).map((t) => ({ t, pick: () => this.setState({ tq: t }) }));
-    const CRUMB = { profile: 'Perfil', calc: 'Calculando', map: 'Mapa natal', horo: 'Horóscopo', num: 'Numerologia', tSpread: 'Tarô', tQuestion: 'Tarô · Intenção', tShuffle: 'Tarô · Embaralhar', tCut: 'Tarô · Cortar', tFan: 'Tarô · Escolher', tReveal: 'Tarô · Leitura' };
+    const CRUMB = { profile: 'Perfil de nascimento', calc: 'Calculando', map: 'Mapa natal', horo: 'Horóscopo', num: 'Numerologia', tSpread: 'Tarô', tQuestion: 'Tarô, passo 1 de 4', tShuffle: 'Tarô, passo 2 de 4', tCut: 'Tarô, passo 3 de 4', tFan: 'Tarô, passo 4 de 4', tReveal: 'Tarô, sua leitura' };
     const calcRing = SG.map((g, i) => {
       const t = (-90 + i * 30) * Math.PI / 180;
       return { g, style: `left: ${(120 + 105 * Math.cos(t) - 15).toFixed(1)}px; top: ${(120 + 105 * Math.sin(t) - 15).toFixed(1)}px; color: ${signColor(i)}; animation-delay: ${(i * 0.08).toFixed(2)}s` };
@@ -533,7 +533,7 @@ class Component extends DCLogic {
     return {
       stars, pf, bigThree, num, numTiles, numDetail, calcRing, px, nameItems, dateItems,
       mandala: { lines: mlines, signs: msigns, planets: mplanets }, planetRows,
-      horo, periods, showTech: s.showTech, techExpanded: s.showTech ? 'true' : 'false', techChev: `transition: transform .4s ease; transform: rotate(${s.showTech ? 180 : 0}deg)`,
+      horo, periods, showTech: s.showTech, techExpanded: s.showTech ? 'true' : 'false', 
       isHub: scr === 'hub', notHub: scr !== 'hub', crumb: CRUMB[scr] || '',
       isProfile: scr === 'profile', isCalc: scr === 'calc', isMap: scr === 'map', isHoro: scr === 'horo', isNum: scr === 'num',
       isTSpread: scr === 'tSpread', isTQuestion: scr === 'tQuestion', isTShuffle: scr === 'tShuffle', isTCut: scr === 'tCut', isTFan: scr === 'tFan', isTReveal: scr === 'tReveal',
@@ -585,7 +585,7 @@ class Component extends DCLogic {
       toShuffle: () => this.setState({ screen: 'tShuffle', prog: 0, holding: false, flipped: 0, picked: [], cut: -1, hist: this.state.hist.concat(['tQuestion']) }),
       shufCards, shufPct: pct >= 100 ? 'Pronto' : `${pct}%`,
       shufGuide: pct >= 100 ? 'Pronto. As cartas já conhecem a sua intenção.' : holding ? 'Isso, continue. Pense na sua pergunta enquanto as cartas se misturam.' : 'Segure o botão para embaralhar. Solte quando quiser respirar, e volte a segurar.',
-      shufRing: `background: conic-gradient(#f3d98b 0% ${pct}%, rgba(255,255,255,.12) ${pct}% 100%); box-shadow: 0 0 ${holding ? 40 : 16}px rgba(243,217,139,${holding ? '.5' : '.2'})`,
+      shufRing: `background: conic-gradient(var(--rose) 0% ${pct}%, var(--line) ${pct}% 100%); box-shadow: 0 0 ${holding ? 40 : 16}px color-mix(in srgb, var(--rose) ${holding ? 50 : 22}%, transparent)`,
       holdStart: () => {
         if (this.state.prog >= 100) return;
         this.held = true; this.holdT = Date.now();
@@ -625,1164 +625,598 @@ class Component extends DCLogic {
   }
 }
 
+const Chev = ({ size = 18, dir = 'down', cls = 'c-chev' }) => (
+  <svg className={cls} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={dir === 'right' ? 'M9 5l7 7-7 7' : 'M6 9l6 6 6-6'} />
+  </svg>
+);
+
+// Explicação aberta de um número (caminho de vida, nome ou ciclos).
+const NumBody = ({ it }) => (
+  <div className="fade c-col" style={{ gap: 14, textAlign: 'left' }}>
+    <div className="c-note">
+      <span className="c-label" style={{ color: 'var(--ink-2)' }}>O que é</span>
+      <p className="c-body2">{it.what}</p>
+    </div>
+    <div className="c-note">
+      <span className="c-label">{`Seu número ${it.n}: ${it.title}`}</span>
+      <p className="c-body">{it.ess}</p>
+    </div>
+    {it.isPerson ? (
+      <div className="c-stack-s">
+        <div className="c-tint c-card c-sm c-note" style={{ '--c': 'var(--mint)' }}><span className="c-label">Sua luz</span><p className="c-body">{it.luz}</p></div>
+        <div className="c-tint c-card c-sm c-note" style={{ '--c': 'var(--peach)' }}><span className="c-label">Seu desafio</span><p className="c-body">{it.sombra}</p></div>
+        <div className="c-tint c-card c-sm c-note"><span className="c-label">Convite</span><p className="c-body" style={{ fontWeight: 400 }}>{it.convite}</p></div>
+      </div>
+    ) : null}
+    {it.isCycle ? (
+      <div className="c-stack-s">
+        {it.isPY ? (
+          <div className="c-stack-s">
+            <span className="c-cap">{`Você está no ano ${it.n} de um ciclo de 9`}</span>
+            <div className="nm-dots" aria-hidden="true">
+              {(it.dots || []).map((d, i) => <span key={i} style={css(d.style)}>{d.n}</span>)}
+            </div>
+          </div>
+        ) : null}
+        <div className="c-tint c-card c-sm c-note" style={{ '--c': 'var(--mint)' }}><span className="c-label">Favorece</span><p className="c-body">{it.fazer}</p></div>
+        <div className="c-tint c-card c-sm c-note" style={{ '--c': 'var(--peach)' }}><span className="c-label">Evite</span><p className="c-body">{it.evitar}</p></div>
+      </div>
+    ) : null}
+    <div className="c-card c-sm c-note">
+      <span className="c-label" style={{ color: 'var(--ink-2)' }}>Como calculamos</span>
+      <p className="c-body2">{it.how}</p>
+      <span className="nm-calc">{it.calc}</span>
+    </div>
+  </div>
+);
+
+const numSub = (it) => (it.short ? `${it.title}: ${it.short.charAt(0).toLowerCase()}${it.short.slice(1)}` : it.title);
+
 Component.prototype.render = function render() {
   const R = this.renderVals();
+  const st = this.state;
+  const prof = st.profile || {};
+  const numRow = (it, i) => (
+    <div key={i} className={'nm-item' + (it.open ? ' open' : '')}>
+      <button className="nm-row" onClick={it.toggle} aria-expanded={it.expanded}>
+        <span className="nm-n">{it.n}</span>
+        <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <span className="c-title">{it.label}</span>
+          <span className="c-cap" style={{ color: 'var(--ink-2)' }}>{numSub(it)}</span>
+        </span>
+        <span style={{ color: 'var(--ink-2)', display: 'flex' }}><Chev /></span>
+      </button>
+      {it.open ? <div className="nm-body"><NumBody it={it} /></div> : null}
+    </div>
+  );
   return (
     <div className="sc-sym">
-      <div style={css("width: 390px; height: 844px; position: relative; overflow: hidden; background: #0a0918")}>
-        <div className="aurora" style={css("width: 420px; height: 420px; left: -170px; top: -140px; background: #5b4bc4")}></div>
-        <div className="aurora" style={css("width: 360px; height: 360px; right: -170px; top: 300px; background: #b07bd8; opacity: .28; animation-duration: 26s")}></div>
-        <div className="aurora" style={css("width: 320px; height: 320px; left: -60px; bottom: -150px; background: #d9a85c; opacity: .22; animation-duration: 31s")}></div>
-        {(R.stars || []).map((L1_m, I1) => (
-          <React.Fragment key={I1}>
-            <span className="mote" style={css(L1_m?.style)}></span>
-          </React.Fragment>
-        ))}
-        <div style={css("position: absolute; top: calc(-1 * var(--sat, 0px)); left: -600px; right: -600px; height: calc(104px + var(--sat, 0px)); z-index: 3; pointer-events: none; background: linear-gradient(180deg, #0a0918 55%, rgba(10,9,24,0))")}></div>
-        <div style={css("position: absolute; top: 36px; left: 12px; right: 12px; height: 44px; z-index: 5; display: flex; align-items: center; gap: 4px")}>
-          {R.isHub ? (
-            <span style={css("padding-left: 10px; font-size: 17px; font-weight: 300; letter-spacing: .38em; color: rgba(244,241,234,.85)")}>{"alma"}</span>
-          ) : null}
+      <div className="c-root">
+        <div className="aurora" style={css("width: 420px; height: 420px; left: -170px; top: -140px; background: #6a55dc")}></div>
+        <div className="aurora" style={css("width: 360px; height: 360px; right: -170px; top: 300px; background: #b07bd8; opacity: .32; animation-duration: 26s")}></div>
+        <div className="aurora" style={css("width: 320px; height: 320px; left: -60px; bottom: -150px; background: #d99a7a; opacity: .2; animation-duration: 31s")}></div>
+        <div className="c-motes" aria-hidden="true">{(R.stars || []).map((m, i) => <span key={i} className="mote" style={css(m.style)}></span>)}</div>
+        <div className="c-topfade"></div>
+        <div className="c-bar">
+          {R.isHub ? <span className="c-brand">alma</span> : null}
           {R.notHub ? (
             <>
-              <button onClick={R.back} aria-label="Voltar" style={css("width: 44px; height: 44px; display: flex; align-items: center; justify-content: center")}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M15 5l-7 7 7 7" />
-                </svg>
+              <button className="c-back" onClick={R.back} aria-label="Voltar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
               </button>
-              <span className="kicker" style={css("font-size: 15px")}>
-                {R.crumb}
-              </span>
+              <span className="c-crumb">{R.crumb}</span>
             </>
           ) : null}
         </div>
+
+        {/* ---------------- HUB ---------------- */}
         {R.isHub ? (
-          <>
-            <div className="screen scroll">
-              <div style={css("box-sizing: border-box; padding: 64px 14px 40px; display: flex; flex-direction: column; gap: 16px")}>
-                <SkyHero onOpen={R.goHoro} />
-                <p style={css("margin: -4px 0 4px; text-align: center; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
-                  {"Astrologia, numerologia e tarô como espelhos para se conhecer. Convites à reflexão, não sentenças sobre o futuro."}
-                </p>
-                {!this.state.profileSaved ? (
-                <button className="glass pill" onClick={R.goProfile} style={css("width: 100%; border-radius: 24px; padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 10px; border-color: rgba(243,217,139,.45)")}>
-                  <span style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>Comece por aqui</span>
-                  <span style={css("font-size: 18px; font-weight: 300; line-height: 1.35")}>Crie seu perfil de nascimento</span>
-                  <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.7)")}>Com data, hora e cidade, a Alma calcula seu mapa, seu horóscopo e seus números. Leva menos de um minuto.</span>
-                  <span style={css("align-self: flex-start; margin-top: 4px; height: 40px; padding: 0 18px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 17.5px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #ffc79a)")}>Criar meu perfil</span>
+          <div className="screen scroll">
+            <div className="c-page c-hub">
+              <SkyHero onOpen={R.goHoro} />
+              <div className="hb-grid">
+                <button className="hb-tile hb-wide hb-in" style={{ '--i': 0 }} onClick={R.goHoro}>
+                  <span className="hb-ic sym" style={{ fontSize: 22 }} aria-hidden="true">☉︎</span>
+                  <span className="hb-txt">
+                    <span className="c-title">Horóscopo</span>
+                    <span className="c-cap" style={{ color: 'var(--ink-2)' }}>Do dia ao próximo ano, pelo seu mapa</span>
+                  </span>
+                  <span className="hb-arrow"><Chev dir="right" cls="" /></span>
                 </button>
-              ) : null}
-              {this.state.profileSaved ? (
-                <button className="glass pill" onClick={R.goProfile} style={css("width: 100%; border-radius: 24px; padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 14px")}>
-                  <span style={css("width: 100%; display: flex; align-items: center; justify-content: space-between")}>
-                    <span className="kicker">
-                      {this.state.profileSaved ? 'Seu perfil da alma' : 'Perfil de exemplo'}
-                    </span>
-                    <span style={css("font-size: 17px; color: #f3d98b")}>
-                      {this.state.profileSaved ? 'Editar' : 'Criar'}
-                    </span>
-                  </span>
-                  <span style={css("display: flex; flex-direction: column; gap: 4px")}>
-                    <span style={css("font-size: 18px; font-weight: 400")}>
-                      {R.pf?.name}
-                    </span>
-                    <span style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.65)")}>
-                      {R.pf?.line}
-                    </span>
-                  </span>
-                  <span style={css("display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px")}>
-                    {(R.bigThree || []).map((L2_b, I2) => (
-                      <React.Fragment key={I2}>
-                        <span style={css("border-radius: 16px; padding: 10px 8px; background: rgba(255,255,255,.05); display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center")}>
-                          <span className="sym" style={css(`font-size: 22px; line-height: 1; color: ${(L2_b?.color) ?? ''}`)}>
-                            {L2_b?.glyph}
-                          </span>
-                          <span style={css("font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.5)")}>
-                            {L2_b?.label}
-                          </span>
-                          <span style={css("font-size: 17.5px")}>
-                            {L2_b?.sign}
-                          </span>
-                        </span>
-                      </React.Fragment>
-                    ))}
-                  </span>
-                </button>
-              ) : null}
-                <div style={css("display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px")}>
-                  <button className="glass pill sky-tile" onClick={R.goTarot} style={css("grid-column: span 2; border-radius: 24px; padding: 20px; text-align: left; display: flex; align-items: center; gap: 16px; border-color: rgba(243,217,139,.4)")}>
-                    <span className="sky-float" style={css("position: relative; width: 58px; height: 80px; flex-shrink: 0")}>
-                      <span className="cardback" style={css("position: absolute; left: 0; top: 4px; width: 46px; height: 72px; border-radius: 8px; transform: rotate(-10deg)")}></span>
-                      <span className="cardback" style={css("position: absolute; left: 12px; top: 0; width: 46px; height: 72px; border-radius: 8px; transform: rotate(8deg)")}></span>
-                    </span>
-                    <span style={css("display: flex; flex-direction: column; gap: 6px")}>
-                      <span className="goldtext" style={css("font-size: 16px; letter-spacing: .22em; text-transform: uppercase")}>
-                        {"Tarô guiado"}
-                      </span>
-                      <span style={css("font-size: 18px; font-weight: 300; line-height: 1.3")}>
-                        {"Jogue as cartas com a Alma"}
-                      </span>
-                      <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                        {"Embaralhe, corte e escolha. Ela lê cada carta."}
-                      </span>
-                    </span>
-                  </button>
-                  <button className="glass pill sky-tile" onClick={R.goHoro} style={css("border-radius: 24px; padding: 18px 16px; text-align: left; display: flex; flex-direction: column; gap: 10px; min-height: 150px")}>
-                    <span className="sym sky-spin" style={css("display: inline-block; width: 26px; font-size: 26px; line-height: 1; color: #b9a6ff; text-shadow: 0 0 14px #b9a6ff")}>
-                      {"☉︎"}
-                    </span>
-                    <span style={css("font-size: 17px; font-weight: 400")}>
-                      {"Horóscopo"}
-                    </span>
-                    <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
-                      {"Do dia a um ano, pelo seu mapa completo"}
-                    </span>
-                  </button>
-                  <button className="glass pill sky-tile" onClick={R.goMap} style={css("border-radius: 24px; padding: 18px 16px; text-align: left; display: flex; flex-direction: column; gap: 10px; min-height: 150px")}>
-                    <svg className="sky-spin" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a8d8ff" strokeWidth="1.3" aria-hidden="true" style={{ filter: "drop-shadow(0 0 6px #a8d8ff)" }}>
-                      <circle cx="12" cy="12" r="10" />
-                      <circle cx="12" cy="12" r="5" />
-                      <path d="M2 12h20M12 2v20M4.9 4.9l14.2 14.2M19.1 4.9L4.9 19.1" opacity=".5" />
-                    </svg>
-                    <span style={css("font-size: 17px; font-weight: 400")}>
-                      {"Mapa natal"}
-                    </span>
-                    <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
-                      {"Planetas, signos e casas do seu nascimento"}
-                    </span>
-                  </button>
-                  <button className="glass pill sky-tile" onClick={R.goNum} style={css("grid-column: span 2; border-radius: 24px; padding: 18px; text-align: left; display: flex; align-items: center; gap: 16px")}>
-                    <span className="sky-pulse" style={css("width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 200; color: #f3d98b; border: 1px solid rgba(243,217,139,.5); box-shadow: 0 0 24px rgba(243,217,139,.2)")}>
-                      {this.state.profileSaved ? R.num?.path?.n : '#'}
-                    </span>
-                    <span style={css("display: flex; flex-direction: column; gap: 4px")}>
-                      <span style={css("font-size: 17px; font-weight: 400")}>
-                        {"Numerologia completa"}
-                      </span>
-                      <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
-                        {this.state.profileSaved ? `Caminho de vida ${(R.num?.path?.n) ?? ''}, expressão, alma, ciclos e seu ano pessoal` : 'Caminho de vida, expressão, alma, ciclos e seu ano pessoal'}
-                      </span>
-                    </span>
-                  </button>
-                  <button className="glass pill sky-tile" onClick={() => { window.location.hash = '#/banhos'; }} style={css("grid-column: span 2; border-radius: 24px; padding: 18px; text-align: left; display: flex; align-items: center; gap: 16px; border-color: rgba(143,227,176,.35)")}>
-                    <span className="sky-bubble orb-live" style={css("width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; --o1: #8fe3b0; --o2: #a8e0e0; box-shadow: 0 0 24px rgba(143,227,176,.45)")}></span>
-                    <span style={css("display: flex; flex-direction: column; gap: 4px")}>
-                      <span style={css("font-size: 17px; font-weight: 400")}>Banhos da Lua</span>
-                      <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>Limpeza, amor, prosperidade, calma. Banhos de ervas que combinam com a Lua de hoje</span>
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </>
-        ) : null}
-        {R.isProfile ? (
-          <>
-            <div className="screen scroll">
-              <div style={css("box-sizing: border-box; padding: 100px 14px 40px; display: flex; flex-direction: column; gap: 16px")}>
-                <div>
-                  <div className="kicker">
-                    {"Perfil da alma"}
-                  </div>
-                  <h1 style={css("margin: 8px 0 0; font-size: 28px; line-height: 1.2; font-weight: 300")}>
-                    {"Conte à Alma quando você chegou"}
-                  </h1>
-                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
-                    {"Com data, hora e cidade, a leitura vai muito além do signo: ascendente, Lua, casas e ciclos pessoais."}
-                  </p>
-                </div>
-                <div className="glass" style={css("border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 14px")}>
-                  <label style={css("display: flex; flex-direction: column; gap: 6px")}>
-                    <span className="kicker" style={css("font-size: 15px")}>
-                      {"Nome completo de registro"}
-                    </span>
-                    <input value={R.dName} onChange={R.onName} style={css("height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); font-size: 17px; font-weight: 300; outline: none")} />
-                  </label>
-                  <div style={css("display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px")}>
-                    <label style={css("display: flex; flex-direction: column; gap: 6px")}>
-                      <span className="kicker" style={css("font-size: 15px; letter-spacing: .12em")}>
-                        {"Data de nascimento"}
-                      </span>
-                      <input value={R.dDate} onChange={R.onDate} placeholder="dd/mm/aaaa" inputMode="numeric" maxLength="10" autoComplete="bday" style={css("height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); font-size: 17px; font-weight: 300; outline: none; min-width: 0")} />
-                    </label>
-                    <label style={css("display: flex; flex-direction: column; gap: 6px")}>
-                      <span className="kicker" style={css("font-size: 15px; letter-spacing: .12em")}>
-                        {"Hora em que nasceu"}
-                      </span>
-                      <input value={R.dTime} onChange={R.onTime} placeholder="hh:mm" inputMode="numeric" maxLength="5" style={css("height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); font-size: 17px; font-weight: 300; outline: none; min-width: 0")} />
-                    </label>
-                  </div>
-                  <label style={css("display: flex; flex-direction: column; gap: 6px")}>
-                    <span className="kicker" style={css("font-size: 15px")}>
-                      {"Cidade de nascimento"}
-                    </span>
-                    <select value={R.dCity} onChange={R.onCity} style={css("height: 48px; padding: 0 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: #1a1733; font-size: 17px; font-weight: 300; outline: none")}>
-                      {(R.cityOpts || []).map((L3_c, I3) => (
-                        <React.Fragment key={I3}>
-                          <option value={L3_c?.name}>
-                            {L3_c?.label}
-                          </option>
-                        </React.Fragment>
-                      ))}
-                    </select>
-                  </label>
-                  {R.hasErr ? (
-                    <>
-                      <p style={css("margin: 0; font-size: 17.5px; color: #ffb0a0")}>
-                        {R.perr}
-                      </p>
-                    </>
-                  ) : null}
-                </div>
-                <div style={css("display: flex; gap: 10px; padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,.04)")}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f3d98b" strokeWidth="1.5" strokeLinecap="round" style={css("flex-shrink: 0; margin-top: 2px")} aria-hidden="true">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M12 7v5l3 2" />
+                <button className="hb-tile hb-sq hb-in" style={{ '--i': 1 }} onClick={R.goMap}>
+                  <svg className="hb-vis" width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" aria-hidden="true" style={{ color: 'var(--lilac)' }}>
+                    <circle cx="30" cy="30" r="27" strokeWidth="1.2" />
+                    <circle cx="30" cy="30" r="17" strokeWidth="1" opacity=".6" />
+                    {[0, 30, 60, 90, 120, 150].map((a) => <path key={a} d="M30 3v10M30 47v10" strokeWidth="1" opacity=".5" transform={`rotate(${a} 30 30)`} />)}
+                    <circle cx="30" cy="30" r="4" fill="currentColor" stroke="none" />
+                    <circle cx="44" cy="20" r="2.6" fill="var(--gold)" stroke="none" />
+                    <circle cx="18" cy="40" r="2.2" fill="var(--rose)" stroke="none" />
                   </svg>
-                  <span style={css("font-size: 17px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.7)")}>
-                    {"A hora muda o ascendente e as casas. Sem a hora certa, use 12:00: signos e numerologia continuam válidos, e o ascendente fica aproximado."}
-                  </span>
-                </div>
-                <button className="cta" onClick={R.saveProfile} style={css("height: 58px; border-radius: 999px; font-size: 17px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a); box-shadow: 0 0 30px rgba(243,217,139,.22)")}>
-                  {"Calcular meu céu"}
+                  <span className="c-title">Mapa natal</span>
+                  <span className="c-cap" style={{ color: 'var(--ink-2)' }}>Planetas, signos e casas</span>
                 </button>
-                <p style={css("margin: 0; text-align: center; font-size: 16px; font-weight: 300; color: rgba(244,241,234,.45)")}>
-                  {"Seus dados de nascimento ficam só no seu perfil."}
-                </p>
+                <button className="hb-tile hb-sq hb-in" style={{ '--i': 2 }} onClick={R.goNum}>
+                  <span className="hb-vis hb-num" aria-hidden="true">{st.profileSaved ? R.num?.path?.n : '#'}</span>
+                  <span className="c-title">Numerologia</span>
+                  <span className="c-cap" style={{ color: 'var(--ink-2)' }}>{st.profileSaved ? `Caminho de vida ${R.num?.path?.n}` : 'Seu nome e seus ciclos'}</span>
+                </button>
+                <button className="hb-tile hb-wide hb-tarot hb-in" style={{ '--i': 3 }} onClick={R.goTarot}>
+                  <span className="hb-txt">
+                    <span className="c-label">Tarô guiado</span>
+                    <span className="c-title" style={{ fontSize: 19, fontWeight: 400 }}>Jogue as cartas com a Alma</span>
+                    <span className="c-cap" style={{ color: 'var(--ink-2)' }}>Embaralhe, corte e escolha</span>
+                  </span>
+                  <span className="hb-fan" aria-hidden="true">
+                    <span className="cardback" style={{ transform: 'rotate(-16deg)' }}></span>
+                    <span className="cardback" style={{ transform: 'rotate(0deg) translateY(-6px)' }}></span>
+                    <span className="cardback" style={{ transform: 'rotate(16deg)' }}></span>
+                  </span>
+                </button>
+                <button className="hb-tile hb-wide hb-bath hb-in" style={{ '--i': 4 }} onClick={() => { window.location.hash = '#/banhos'; }}>
+                  <span className="hb-orb orb-live" aria-hidden="true"></span>
+                  <span className="hb-txt">
+                    <span className="c-title">Banhos da Lua</span>
+                    <span className="c-cap" style={{ color: 'var(--ink-2)' }}>Ervas que combinam com a Lua de hoje</span>
+                  </span>
+                  <span className="hb-arrow"><Chev dir="right" cls="" /></span>
+                </button>
+              </div>
+              {st.profileSaved ? (
+                <button className="hb-prof prs hb-in" style={{ '--i': 5, marginTop: 12 }} onClick={R.goProfile} aria-label={`Seu perfil: ${R.pf?.name}. Editar`}>
+                  <span className="hb-prof-top">
+                    <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+                      <span className="c-label">Seu perfil</span>
+                      <span className="c-title">{R.pf?.name}</span>
+                      <span className="c-cap">{`${prof.date} às ${prof.time}, ${prof.city}`}</span>
+                    </span>
+                    <span className="c-label" style={{ color: 'var(--ink-2)', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 4, minHeight: 24 }}>Editar</span>
+                  </span>
+                  <span className="hb-three">
+                    {(R.bigThree || []).map((b, i) => (
+                      <span key={i}>
+                        <span className="sym" style={{ color: b.color }} aria-hidden="true">{b.glyph}</span>
+                        <span style={{ minWidth: 0 }}>
+                          <span className="c-cap" style={{ display: 'block' }}>{b.label}</span>
+                          <b>{b.sign}</b>
+                        </span>
+                      </span>
+                    ))}
+                  </span>
+                </button>
+              ) : (
+                <div className="c-card c-tint c-col hb-start hb-in" style={{ '--i': 5, marginTop: 12 }}>
+                  <span className="c-label">Comece por aqui</span>
+                  <span className="c-title" style={{ fontSize: 19, fontWeight: 400 }}>Crie seu perfil de nascimento</span>
+                  <p className="c-body2">Com data, hora e cidade, a Alma calcula seu mapa, seu horóscopo e seus números. Leva menos de um minuto.</p>
+                  <button className="c-btn c-gold" onClick={R.goProfile}>Criar meu perfil</button>
+                </div>
+              )}
+              <p className="c-cap hb-foot">Espelhos para se conhecer, não sentenças sobre o futuro.</p>
+            </div>
+          </div>
+        ) : null}
+
+        {/* ---------------- PERFIL ---------------- */}
+        {R.isProfile ? (
+          <div className="screen scroll">
+            <div className="c-page">
+              <div className="c-head">
+                <h1 className="c-h1">Conte à Alma quando você chegou</h1>
+                <p className="c-lead">Com data, hora e cidade, a leitura vai além do signo: ascendente, Lua, casas e ciclos pessoais.</p>
+              </div>
+              <div className="c-col" style={{ gap: 16 }}>
+                <label className="c-field">
+                  <span>Nome completo de registro</span>
+                  <input className="c-input" value={R.dName} onChange={R.onName} placeholder="Como está na certidão" autoComplete="name" />
+                </label>
+                <div className="c-grid2">
+                  <label className="c-field">
+                    <span>Data de nascimento</span>
+                    <input className="c-input" value={R.dDate} onChange={R.onDate} placeholder="dd/mm/aaaa" inputMode="numeric" maxLength="10" autoComplete="bday" />
+                  </label>
+                  <label className="c-field">
+                    <span>Hora</span>
+                    <input className="c-input" value={R.dTime} onChange={R.onTime} placeholder="hh:mm" inputMode="numeric" maxLength="5" />
+                  </label>
+                </div>
+                <label className="c-field">
+                  <span>Cidade de nascimento</span>
+                  <select className="c-input" value={R.dCity} onChange={R.onCity}>
+                    {(R.cityOpts || []).map((c, i) => <option key={i} value={c.name}>{c.label}</option>)}
+                  </select>
+                </label>
+                {R.hasErr ? (
+                  <p className="c-err" role="alert">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }}><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.5v.01" /></svg>
+                    {R.perr}
+                  </p>
+                ) : null}
+              </div>
+              <div className="c-card c-sm c-hint">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--lilac)" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                <p className="c-body2" style={{ fontSize: 15.5 }}>A hora muda o ascendente e as casas. Sem a hora certa, use 12:00: signos e numerologia continuam válidos, e o ascendente fica aproximado.</p>
+              </div>
+              <div className="c-stack">
+                <button className="c-btn c-gold" onClick={R.saveProfile}>Calcular meu céu</button>
+                <p className="c-cap" style={{ textAlign: 'center' }}>Seus dados de nascimento ficam só no seu perfil.</p>
               </div>
             </div>
-          </>
+          </div>
         ) : null}
+
+        {/* ---------------- CALCULANDO ---------------- */}
         {R.isCalc ? (
-          <>
-            <div className="screen">
-              <div className="spinfast" style={css("position: absolute; left: 75px; top: 230px; width: 240px; height: 240px")}>
-                {(R.calcRing || []).map((L4_z, I4) => (
-                  <React.Fragment key={I4}>
-                    <span className="sym pdot" style={css(`position: absolute; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 20px; ${(L4_z?.style) ?? ''}`)}>
-                      {L4_z?.g}
-                    </span>
-                  </React.Fragment>
-                ))}
-              </div>
-              <div style={css("position: absolute; left: 155px; top: 310px; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6dc, #f3d98b 40%, rgba(243,217,139,0) 72%); filter: blur(1px); animation: pulseS 2s ease-in-out infinite")}></div>
-              <div style={css("position: absolute; top: 520px; left: 32px; right: 32px; text-align: center; display: flex; flex-direction: column; gap: 10px")}>
-                <span className="fade" style={css("font-size: 22px; font-weight: 200")}>
-                  {"Lendo o céu do seu nascimento"}
-                </span>
-                <span className="fade" style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.65); animation-delay: .5s")}>
-                  {R.pf?.line}
-                </span>
-              </div>
+          <div className="screen">
+            <div className="spinfast" style={css("position: absolute; left: 75px; top: 230px; width: 240px; height: 240px")}>
+              {(R.calcRing || []).map((z, i) => (
+                <span key={i} className="sym pdot" style={css(`position: absolute; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 20px; ${z.style}`)}>{z.g}</span>
+              ))}
             </div>
-          </>
+            <div style={css("position: absolute; left: 155px; top: 310px; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--lilac) 40%, transparent 72%); filter: blur(1px); animation: pulseS 2s ease-in-out infinite")}></div>
+            <div role="status" style={css("position: absolute; top: 520px; left: 32px; right: 32px; text-align: center; display: flex; flex-direction: column; gap: 8px")}>
+              <span className="fade c-h2" style={{ fontWeight: 300, fontSize: 22 }}>Lendo o céu do seu nascimento</span>
+              <span className="fade c-cap" style={{ animationDelay: '.3s', color: 'var(--ink-2)' }}>{R.pf?.line}</span>
+            </div>
+          </div>
         ) : null}
+
+        {/* ---------------- MAPA NATAL ---------------- */}
         {R.isMap ? (
-          <>
-            <div className="screen scroll">
-              <div style={css("box-sizing: border-box; padding: 100px 14px 40px; display: flex; flex-direction: column; gap: 16px")}>
-                <div>
-                  <div className="kicker">
-                    {"Mapa natal"}
-                  </div>
-                  <h1 style={css("margin: 8px 0 0; font-size: 26px; line-height: 1.2; font-weight: 300")}>
-                    {`O céu de ${(R.pf?.first) ?? ''}`}
-                  </h1>
-                  <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                    {R.pf?.line}
-                  </p>
-                </div>
-                <div className="glass" style={css("border-radius: 28px; padding: 15px; display: flex; justify-content: center")}>
-                  <div className="draw" style={css("position: relative; width: 320px; height: 320px")}>
-                    <div style={css("position: absolute; left: 10px; top: 10px; width: 300px; height: 300px; border-radius: 50%; border: 1px solid rgba(243,217,139,.35)")}></div>
-                    <div style={css("position: absolute; left: 40px; top: 40px; width: 240px; height: 240px; border-radius: 50%; border: 1px solid rgba(255,255,255,.14)")}></div>
-                    <div style={css("position: absolute; left: 100px; top: 100px; width: 120px; height: 120px; border-radius: 50%; border: 1px solid rgba(255,255,255,.1); background: radial-gradient(circle, rgba(243,217,139,.08), transparent 70%)")}></div>
-                    {(R.mandala?.lines || []).map((L5_l, I5) => (
-                      <React.Fragment key={I5}>
-                        <div className="divline" style={css(L5_l?.style)}></div>
-                      </React.Fragment>
-                    ))}
-                    {(R.mandala?.signs || []).map((L6_g, I6) => (
-                      <React.Fragment key={I6}>
-                        <span className="sym" style={css(`position: absolute; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 17.5px; ${(L6_g?.style) ?? ''}`)}>
-                          {L6_g?.g}
-                        </span>
-                      </React.Fragment>
-                    ))}
-                    <div style={css("position: absolute; left: 10px; top: 159px; width: 150px; height: 2px; background: linear-gradient(90deg, #f3d98b, rgba(243,217,139,0)); box-shadow: 0 0 10px #f3d98b")}></div>
-                    <span style={css("position: absolute; left: 14px; top: 140px; font-size: 14px; letter-spacing: .18em; color: #f3d98b")}>
-                      {"ASC"}
-                    </span>
-                    {(R.mandala?.planets || []).map((L7_p, I7) => (
-                      <React.Fragment key={I7}>
-                        <span className="pdot sym" style={css(`position: absolute; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17.5px; background: rgba(12,10,28,.85); ${(L7_p?.style) ?? ''}`)}>
-                          {L7_p?.g}
-                        </span>
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-                <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                  {(R.planetRows || []).map((L8_r, I8) => (
-                    <React.Fragment key={I8}>
-                      <button className="glass pill" onClick={L8_r?.pick} aria-expanded={L8_r?.expanded} style={css("width: 100%; border-radius: 18px; padding: 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 8px")}>
-                        <span style={css("width: 100%; display: flex; align-items: center; gap: 12px")}>
-                          <span className="sym" style={css(`width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; border: 1px solid ${(L8_r?.color) ?? ''}; color: ${(L8_r?.color) ?? ''}`)}>
-                            {L8_r?.g}
-                          </span>
-                          <span style={css("flex-grow: 1; display: flex; flex-direction: column; gap: 2px")}>
-                            <span style={css("font-size: 17.5px")}>
-                              {`${(L8_r?.name) ?? ''} em ${(L8_r?.sign) ?? ''}`}
-                            </span>
-                            <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.55)")}>
-                              {`${(L8_r?.deg) ?? ''} · ${(L8_r?.house) ?? ''}`}
-                            </span>
-                          </span>
-                          <span className="sym" style={css(`font-size: 18px; color: ${(L8_r?.signColor) ?? ''}`)}>
-                            {L8_r?.sg}
-                          </span>
-                        </span>
-                        {L8_r?.open ? (
-                          <>
-                            <span className="fade" style={css("font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.82)")}>
-                              {L8_r?.text}
-                            </span>
-                          </>
-                        ) : null}
-                      </button>
-                    </React.Fragment>
-                  ))}
-                </div>
-                <div className="glass" style={css("margin-top: 6px; border-radius: 24px; padding: 20px 18px; display: flex; flex-direction: column; gap: 12px; border-color: rgba(185,166,255,.4)")}>
-                  <span className="kicker" style={css("color: #c9b8ff")}>
-                    {"Agora que você conhece o seu céu"}
-                  </span>
-                  <span style={css("font-size: 18px; font-weight: 300; line-height: 1.35")}>
-                    {"Veja como os planetas de hoje conversam com o seu mapa"}
-                  </span>
-                  <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.65)")}>
-                    {"Leituras para hoje, a semana, o mês, os próximos 6 meses e o próximo ano."}
-                  </span>
-                  <button className="cta" onClick={R.mapToHoro} style={css("height: 54px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a); box-shadow: 0 0 30px rgba(243,217,139,.22)")}>
-                    <span className="sym" style={css("font-size: 18px")}>
-                      {"☉︎"}
-                    </span>
-                    {"Ver meu horóscopo"}
-                  </button>
-                  <button className="pill" onClick={R.mapToNum} style={css("height: 44px; border-radius: 999px; font-size: 17.5px; color: rgba(244,241,234,.8); border: 1px solid rgba(255,255,255,.16)")}>
-                    {"Ver minha numerologia"}
-                  </button>
-                </div>
-                <p style={css("margin: 0; font-size: 16px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.45)")}>
-                  {"Posições calculadas por efemérides aproximadas (precisão de cerca de 1°), zodíaco tropical e casas por signo inteiro. Fuso sem horário de verão histórico."}
-                </p>
+          <div className="screen scroll">
+            <div className="c-page">
+              <div className="c-head">
+                <h1 className="c-h1">{`O céu de ${R.pf?.first}`}</h1>
+                <p className="c-cap" style={{ color: 'var(--ink-2)' }}>{R.pf?.line}</p>
               </div>
-            </div>
-          </>
-        ) : null}
-        {R.isHoro ? (
-          <>
-            <div className="screen scroll">
-              <div style={css("box-sizing: border-box; padding: 100px 14px 40px; display: flex; flex-direction: column; gap: 16px")}>
-                <div>
-                  <div className="kicker">
-                    {"Horóscopo pelo seu mapa"}
-                  </div>
-                  <h1 style={css("margin: 8px 0 0; font-size: 26px; line-height: 1.2; font-weight: 300")}>
-                    {R.horo?.title}
-                  </h1>
-                  <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                    {`Sol em ${(R.horo?.sun) ?? ''} · Lua em ${(R.horo?.moon) ?? ''} · Ascendente em ${(R.horo?.asc) ?? ''}`}
-                  </p>
-                </div>
-                <div className="scroll" style={css("display: flex; gap: 8px; overflow-x: auto; margin: 0 -14px; padding: 0 14px 2px")}>
-                  {(R.periods || []).map((L9_p, I9) => (
-                    <React.Fragment key={I9}>
-                      <button className="pill" onClick={L9_p?.pick} aria-pressed={L9_p?.pressed} style={css(`flex-shrink: 0; height: 44px; padding: 0 18px; border-radius: 999px; font-size: 17.5px; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); ${(L9_p?.style) ?? ''}`)}>
-                        {L9_p?.label}
-                      </button>
-                    </React.Fragment>
+              <div className="mp-wrap">
+                <div className="draw" style={css("position: relative; width: 320px; height: 320px")} role="img" aria-label="Mandala do seu mapa natal">
+                  <div style={css("position: absolute; left: 10px; top: 10px; width: 300px; height: 300px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--lilac) 45%, transparent)")}></div>
+                  <div style={css("position: absolute; left: 40px; top: 40px; width: 240px; height: 240px; border-radius: 50%; border: 1px solid var(--line)")}></div>
+                  <div style={css("position: absolute; left: 100px; top: 100px; width: 120px; height: 120px; border-radius: 50%; border: 1px solid var(--line); background: radial-gradient(circle, color-mix(in srgb, var(--lilac) 16%, transparent), transparent 70%)")}></div>
+                  {(R.mandala?.lines || []).map((l, i) => <div key={i} className="divline" style={css(l.style)}></div>)}
+                  {(R.mandala?.signs || []).map((g, i) => (
+                    <span key={i} className="sym" aria-hidden="true" style={css(`position: absolute; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 17.5px; ${g.style}`)}>{g.g}</span>
+                  ))}
+                  <div style={css("position: absolute; left: 10px; top: 159px; width: 150px; height: 2px; background: linear-gradient(90deg, var(--gold), transparent); box-shadow: 0 0 10px var(--gold)")}></div>
+                  <span style={css("position: absolute; left: 16px; top: 136px; font-size: 14px; font-weight: 600; color: var(--gold)")}>AC</span>
+                  {(R.mandala?.planets || []).map((pl, i) => (
+                    <span key={i} className="pdot sym" aria-hidden="true" style={css(`position: absolute; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; background: #17123a; ${pl.style}`)}>{pl.g}</span>
                   ))}
                 </div>
-                <div className="glass fade" style={css(`border-radius: 26px; padding: 22px 20px; display: flex; flex-direction: column; gap: 12px; border-color: rgba(185,166,255,.35); ${(R.horo?.anim) ?? ''}`)}>
-                  <div style={css("display: flex; align-items: center; gap: 12px")}>
-                    <span className="sym" style={css(`width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid ${(R.horo?.color) ?? ''}; color: ${(R.horo?.color) ?? ''}; box-shadow: 0 0 20px ${(R.horo?.glow) ?? ''}`)}>
-                      {R.horo?.g}
-                    </span>
-                    <span style={css("display: flex; flex-direction: column; gap: 2px")}>
-                      <span className="kicker" style={css("font-size: 15px")}>
-                        {R.horo?.range}
+              </div>
+              <div className="c-stack">
+                <h2 className="c-h2">Seus planetas</h2>
+                <div className="mp-list">
+                  {(R.planetRows || []).map((r, i) => (
+                    <button key={i} className="mp-row" onClick={r.pick} aria-expanded={r.expanded}>
+                      <span className="mp-line">
+                        <span className="mp-badge sym" style={{ borderColor: r.color, color: r.color, fontSize: r.g === 'AC' ? 13 : 17 }} aria-hidden="true">{r.g}</span>
+                        <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <span className="c-title" style={{ fontWeight: 400 }}>{`${r.name} em ${r.sign}`}</span>
+                          <span className="c-cap">{`${r.deg}, ${r.house.toLowerCase()}`}</span>
+                        </span>
+                        <span className="sym" style={{ fontSize: 18, color: r.signColor }} aria-hidden="true">{r.sg}</span>
+                        <span style={{ color: 'var(--ink-3)', display: 'flex' }}><Chev size={16} /></span>
                       </span>
-                      <span style={css("font-size: 17px")}>
-                        {R.horo?.head}
-                      </span>
+                      {r.open ? <span className="fade c-body2" style={{ display: 'block' }}>{r.text}</span> : null}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="c-card c-tint c-col">
+                <span className="c-label">Agora que você conhece o seu céu</span>
+                <span className="c-title" style={{ fontSize: 19, fontWeight: 400 }}>Veja como os planetas de hoje conversam com o seu mapa</span>
+                <p className="c-body2">Leituras para hoje, a semana, o mês, os próximos 6 meses e o próximo ano.</p>
+                <button className="c-btn c-gold" onClick={R.mapToHoro}><span className="sym" aria-hidden="true">☉︎</span>Ver meu horóscopo</button>
+                <button className="c-btn c-ghost" onClick={R.mapToNum}>Ver minha numerologia</button>
+              </div>
+              <p className="c-cap">Posições calculadas por efemérides aproximadas (precisão de cerca de 1°), zodíaco tropical e casas por signo inteiro. Fuso sem horário de verão histórico.</p>
+            </div>
+          </div>
+        ) : null}
+
+        {/* ---------------- HORÓSCOPO ---------------- */}
+        {R.isHoro ? (
+          <div className="screen scroll">
+            <div className="c-page">
+              <div className="c-head">
+                <h1 className="c-h1">{R.horo?.title}</h1>
+                <p className="c-cap" style={{ color: 'var(--ink-2)' }}>{`Pelo seu mapa: Sol em ${R.horo?.sun}, Lua em ${R.horo?.moon} e ascendente em ${R.horo?.asc}`}</p>
+              </div>
+              <div className="c-stack">
+                <div className="c-seg" role="group" aria-label="Período da leitura">
+                  {(R.periods || []).map((pp, i) => <button key={i} onClick={pp.pick} aria-pressed={pp.pressed}>{pp.label}</button>)}
+                </div>
+                <div className="c-card c-tint c-col hz-main" style={css(R.horo?.anim)}>
+                  <div className="hz-top">
+                    <span className="hz-glyph sym" style={{ borderColor: R.horo?.color, color: R.horo?.color, boxShadow: `0 0 20px ${R.horo?.glow}` }} aria-hidden="true">{R.horo?.g}</span>
+                    <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+                      <span className="c-cap" style={{ color: 'var(--ink-2)' }}>{R.horo?.range}</span>
+                      <span className="c-title">{R.horo?.head}</span>
                     </span>
                   </div>
-                  <p style={css("margin: 0; font-size: 17px; font-weight: 300; line-height: 1.65")}>
-                    {R.horo?.p1}
-                  </p>
-                  {this.state.horoMore ? (
+                  <p className="c-body">{R.horo?.p1}</p>
+                  {st.horoMore ? (
                     <>
                       {R.horo?.p2 ? <p className="hz-more-p">{R.horo.p2}</p> : null}
                       {R.horo?.hasExtra ? <p className="hz-more-p">{R.horo.extra}</p> : null}
                     </>
                   ) : null}
                   {R.horo?.p2 || R.horo?.hasExtra ? (
-                    <button className="hz-more" onClick={() => this.setState({ horoMore: !this.state.horoMore })} aria-expanded={this.state.horoMore ? 'true' : 'false'}>
-                      {this.state.horoMore ? 'Ler menos' : 'Ler a leitura completa'} <span aria-hidden="true" style={{ display: 'inline-block', transform: `rotate(${this.state.horoMore ? -90 : 90}deg)` }}>›</span>
+                    <button className="c-link" onClick={() => this.setState({ horoMore: !st.horoMore })} aria-expanded={st.horoMore ? 'true' : 'false'}>
+                      {st.horoMore ? 'Ler menos' : 'Ler a leitura completa'} <Chev size={16} />
                     </button>
                   ) : null}
                 </div>
-                <div className="hz-areas">
-                  <div className="hz-tabs">
-                    {(R.horo?.areas || []).map((a, i) => {
-                      const on = (this.state.horoArea || 0) === i;
-                      return (
-                        <button key={i} className={'hz-tab' + (on ? ' on' : '')} style={{ '--c': a.color }} onClick={() => this.setState({ horoArea: i })} aria-pressed={on ? 'true' : 'false'}>
-                          <span className="hz-tab-ic">{a.ic}</span>
-                          <span className="hz-tab-l">{a.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {(R.horo?.areas || [])[this.state.horoArea || 0] ? (
-                    <p className="hz-area-t" key={this.state.horoArea || 0} style={{ '--c': R.horo.areas[this.state.horoArea || 0].color }}>{R.horo.areas[this.state.horoArea || 0].text}</p>
-                  ) : null}
+              </div>
+              <div className="hz-areas">
+                <h2 className="c-h2">Por área da vida</h2>
+                <div className="hz-tabs">
+                  {(R.horo?.areas || []).map((a, i) => {
+                    const on = (st.horoArea || 0) === i;
+                    return (
+                      <button key={i} className={'hz-tab' + (on ? ' on' : '')} style={{ '--c': a.color }} onClick={() => this.setState({ horoArea: i })} aria-pressed={on ? 'true' : 'false'}>
+                        <span className="hz-tab-dot" aria-hidden="true" />{a.label}
+                      </button>
+                    );
+                  })}
                 </div>
-                <div style={css("border-radius: 22px; padding: 16px 18px; background: rgba(243,217,139,.07); border: 1px solid rgba(243,217,139,.28)")}>
-                  <div className="goldtext" style={css("font-size: 16px; letter-spacing: .24em; text-transform: uppercase")}>
-                    {"Convite do período"}
-                  </div>
-                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                    {R.horo?.invite}
-                  </p>
-                </div>
-                <button onClick={R.toggleTech} aria-expanded={R.techExpanded} style={css("height: 44px; display: flex; align-items: center; justify-content: space-between; font-size: 17px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>
-                  <span>
-                    {"Base técnica da leitura"}
-                  </span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" style={css(R.techChev)} aria-hidden="true">
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
+                {(R.horo?.areas || [])[st.horoArea || 0] ? (
+                  <p className="hz-area-t" key={st.horoArea || 0} style={{ '--c': R.horo.areas[st.horoArea || 0].color }}>{R.horo.areas[st.horoArea || 0].text}</p>
+                ) : null}
+              </div>
+              <div className="c-card c-tint c-note" style={{ '--c': 'var(--mint)' }}>
+                <span className="c-label">Convite do período</span>
+                <p className="c-body" style={{ fontWeight: 400 }}>{R.horo?.invite}</p>
+              </div>
+              <div>
+                <button className="hz-tech" onClick={R.toggleTech} aria-expanded={R.techExpanded}>
+                  <span>Base técnica da leitura</span>
+                  <Chev size={18} />
                 </button>
                 {R.showTech ? (
-                  <>
-                    <div className="fade" style={css("border-radius: 18px; padding: 14px 16px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; gap: 8px")}>
-                      {(R.horo?.tech || []).map((L11_t, I11) => (
-                        <React.Fragment key={I11}>
-                          <span style={css("font-size: 17px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
-                            {L11_t?.t}
-                          </span>
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </>
+                  <div className="fade c-card c-sm c-stack-s">
+                    {(R.horo?.tech || []).map((t, i) => <p key={i} className="c-body2" style={{ fontSize: 15.5 }}>{t.t}</p>)}
+                  </div>
                 ) : null}
-                <div style={css("margin-top: 8px; font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>Seu mapa em movimento</div>
-                <NatalSphere sim={this} profile={this.state.profile} />
+              </div>
+              <div className="c-stack">
+                <div className="c-head" style={{ gap: 4 }}>
+                  <h2 className="c-h2">Seu mapa em movimento</h2>
+                  <p className="c-cap">Os planetas do seu nascimento girando ao redor de você.</p>
+                </div>
+                <NatalSphere sim={this} profile={st.profile} />
               </div>
             </div>
-          </>
+          </div>
         ) : null}
+
+        {/* ---------------- NUMEROLOGIA ---------------- */}
         {R.isNum ? (
-          <>
-            <div className="screen scroll">
-              <div style={css("box-sizing: border-box; padding: 100px 14px 40px; display: flex; flex-direction: column; gap: 16px")}>
-                <div>
-                  <div className="kicker">
-                    {"Numerologia pitagórica"}
-                  </div>
-                  <h1 style={css("margin: 8px 0 0; font-size: 26px; line-height: 1.2; font-weight: 300")}>
-                    {`Os números de ${(R.pf?.first) ?? ''}`}
-                  </h1>
-                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
-                    {"A numerologia pitagórica transforma seu nome de registro e sua data de nascimento em números de 1 a 9, além dos números mestres 11, 22 e 33. Cada número é um símbolo para refletir sobre quem você é e o momento que vive. Toque em cada um para entender."}
-                  </p>
-                </div>
-                <div className="glass" style={css("border-radius: 28px; padding: 24px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; position: relative; overflow: hidden")}>
-                  <div className="spin" style={css("position: absolute; left: 50%; top: 24px; width: 150px; height: 150px; margin-left: -75px; border-radius: 50%; border: 1px dashed rgba(243,217,139,.35)")}></div>
-                  <div style={css("position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center")}>
-                    <span className="goldtext" style={css("font-size: 72px; font-weight: 200; line-height: 1")}>
-                      {R.px?.n}
-                    </span>
-                  </div>
-                  <span className="kicker">
-                    {"Caminho de vida"}
-                  </span>
-                  <span style={css("font-size: 20px; font-weight: 300")}>
-                    {R.px?.title}
-                  </span>
-                  <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.8)")}>
-                    {R.px?.short}
-                  </p>
-                  <button onClick={R.px?.toggle} aria-expanded={R.px?.expanded} style={css("height: 44px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: #f3d98b; border: 1px solid rgba(243,217,139,.4)")}>
-                    {R.px?.btn}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" style={css(R.px?.chev)} aria-hidden="true">
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </button>
-                  {R.px?.open ? (
-                    <>
-                      <div className="fade" style={css("display: flex; flex-direction: column; gap: 14px; text-align: left")}>
-                        <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                          <span className="kicker" style={css("font-size: 15px")}>
-                            {"O que é"}
-                          </span>
-                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.8)")}>
-                            {R.px?.what}
-                          </span>
-                        </div>
-                        <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                          <span className="kicker" style={css("font-size: 15px; color: #f3d98b")}>
-                            {`Seu número: ${(R.px?.n) ?? ''} · ${(R.px?.title) ?? ''}`}
-                          </span>
-                          <span style={css("font-size: 17px; font-weight: 300; line-height: 1.6")}>
-                            {R.px?.ess}
-                          </span>
-                        </div>
-                        {R.px?.isPerson ? (
-                          <>
-                            <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                              <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
-                                  {"Sua luz"}
-                                </div>
-                                <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                  {R.px?.luz}
-                                </p>
-                              </div>
-                              <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
-                                  {"Seu desafio"}
-                                </div>
-                                <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                  {R.px?.sombra}
-                                </p>
-                              </div>
-                              <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.28)")}>
-                                <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>
-                                  {"Convite"}
-                                </div>
-                                <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55")}>
-                                  {R.px?.convite}
-                                </p>
-                              </div>
-                            </div>
-                          </>
-                        ) : null}
-                        {R.px?.isCycle ? (
-                          <>
-                            <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                              {R.px?.isPY ? (
-                                <>
-                                  <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                                    <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                                      {`Você está no ano ${(R.px?.n) ?? ''} de um ciclo de 9`}
-                                    </span>
-                                    <div style={css("display: flex; gap: 6px")}>
-                                      {(R.px?.dots || []).map((L12_d, I12) => (
-                                        <React.Fragment key={I12}>
-                                          <span style={css(`flex-grow: 1; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; ${(L12_d?.style) ?? ''}`)}>
-                                            {L12_d?.n}
-                                          </span>
-                                        </React.Fragment>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </>
-                              ) : null}
-                              <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
-                                  {"Favorece"}
-                                </div>
-                                <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                  {R.px?.fazer}
-                                </p>
-                              </div>
-                              <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
-                                  {"Evite"}
-                                </div>
-                                <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                  {R.px?.evitar}
-                                </p>
-                              </div>
-                            </div>
-                          </>
-                        ) : null}
-                        <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; gap: 6px")}>
-                          <span className="kicker" style={css("font-size: 15px")}>
-                            {"Como calculamos"}
-                          </span>
-                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
-                            {R.px?.how}
-                          </span>
-                          <span style={css("font-size: 17px; font-weight: 400; color: #f3d98b")}>
-                            {R.px?.calc}
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  ) : null}
-                </div>
-                <div className="kicker" style={css("margin-top: 6px")}>
-                  {"Seu nome"}
-                </div>
-                {(R.nameItems || []).map((L13_it, I13) => (
-                  <React.Fragment key={I13}>
-                    <div className="glass" style={css(`border-radius: 22px; overflow: hidden; ${(L13_it?.cardStyle) ?? ''}`)}>
-                      <button onClick={L13_it?.toggle} aria-expanded={L13_it?.expanded} style={css("width: 100%; padding: 14px 16px; display: flex; align-items: center; gap: 14px; text-align: left")}>
-                        <span style={css("width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 200; color: #f3d98b; border: 1px solid rgba(243,217,139,.45)")}>
-                          {L13_it?.n}
-                        </span>
-                        <span style={css("flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px")}>
-                          <span style={css("font-size: 17.5px; font-weight: 400")}>
-                            {L13_it?.label}
-                          </span>
-                          <span style={css("font-size: 17px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.6)")}>
-                            {`${(L13_it?.title) ?? ''} · ${(L13_it?.short) ?? ''}`}
-                          </span>
-                        </span>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(244,241,234,.6)" strokeWidth="1.6" strokeLinecap="round" style={css(`flex-shrink: 0; ${(L13_it?.chev) ?? ''}`)} aria-hidden="true">
-                          <path d="M6 9l6 6 6-6" />
-                        </svg>
-                      </button>
-                      {L13_it?.open ? (
-                        <>
-                          <div style={css("padding: 0 16px 18px")}>
-                            <div className="fade" style={css("display: flex; flex-direction: column; gap: 14px; text-align: left")}>
-                              <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 15px")}>
-                                  {"O que é"}
-                                </span>
-                                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.8)")}>
-                                  {L13_it?.what}
-                                </span>
-                              </div>
-                              <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 15px; color: #f3d98b")}>
-                                  {`Seu número: ${(L13_it?.n) ?? ''} · ${(L13_it?.title) ?? ''}`}
-                                </span>
-                                <span style={css("font-size: 17px; font-weight: 300; line-height: 1.6")}>
-                                  {L13_it?.ess}
-                                </span>
-                              </div>
-                              {L13_it?.isPerson ? (
-                                <>
-                                  <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                                    <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
-                                        {"Sua luz"}
-                                      </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                        {L13_it?.luz}
-                                      </p>
-                                    </div>
-                                    <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
-                                        {"Seu desafio"}
-                                      </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                        {L13_it?.sombra}
-                                      </p>
-                                    </div>
-                                    <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.28)")}>
-                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>
-                                        {"Convite"}
-                                      </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55")}>
-                                        {L13_it?.convite}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </>
-                              ) : null}
-                              {L13_it?.isCycle ? (
-                                <>
-                                  <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                                    {L13_it?.isPY ? (
-                                      <>
-                                        <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                                          <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                                            {`Você está no ano ${(L13_it?.n) ?? ''} de um ciclo de 9`}
-                                          </span>
-                                          <div style={css("display: flex; gap: 6px")}>
-                                            {(L13_it?.dots || []).map((L14_d, I14) => (
-                                              <React.Fragment key={I14}>
-                                                <span style={css(`flex-grow: 1; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; ${(L14_d?.style) ?? ''}`)}>
-                                                  {L14_d?.n}
-                                                </span>
-                                              </React.Fragment>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      </>
-                                    ) : null}
-                                    <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
-                                        {"Favorece"}
-                                      </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                        {L13_it?.fazer}
-                                      </p>
-                                    </div>
-                                    <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
-                                        {"Evite"}
-                                      </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                        {L13_it?.evitar}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </>
-                              ) : null}
-                              <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 15px")}>
-                                  {"Como calculamos"}
-                                </span>
-                                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
-                                  {L13_it?.how}
-                                </span>
-                                <span style={css("font-size: 17px; font-weight: 400; color: #f3d98b")}>
-                                  {L13_it?.calc}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  </React.Fragment>
-                ))}
-                <div className="kicker" style={css("margin-top: 6px")}>
-                  {"Sua data e seus ciclos"}
-                </div>
-                {(R.dateItems || []).map((L15_it, I15) => (
-                  <React.Fragment key={I15}>
-                    <div className="glass" style={css(`border-radius: 22px; overflow: hidden; ${(L15_it?.cardStyle) ?? ''}`)}>
-                      <button onClick={L15_it?.toggle} aria-expanded={L15_it?.expanded} style={css("width: 100%; padding: 14px 16px; display: flex; align-items: center; gap: 14px; text-align: left")}>
-                        <span style={css("width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 200; color: #f3d98b; border: 1px solid rgba(243,217,139,.45)")}>
-                          {L15_it?.n}
-                        </span>
-                        <span style={css("flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px")}>
-                          <span style={css("font-size: 17.5px; font-weight: 400")}>
-                            {L15_it?.label}
-                          </span>
-                          <span style={css("font-size: 17px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.6)")}>
-                            {`${(L15_it?.title) ?? ''} · ${(L15_it?.short) ?? ''}`}
-                          </span>
-                        </span>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(244,241,234,.6)" strokeWidth="1.6" strokeLinecap="round" style={css(`flex-shrink: 0; ${(L15_it?.chev) ?? ''}`)} aria-hidden="true">
-                          <path d="M6 9l6 6 6-6" />
-                        </svg>
-                      </button>
-                      {L15_it?.open ? (
-                        <>
-                          <div style={css("padding: 0 16px 18px")}>
-                            <div className="fade" style={css("display: flex; flex-direction: column; gap: 14px; text-align: left")}>
-                              <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 15px")}>
-                                  {"O que é"}
-                                </span>
-                                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.8)")}>
-                                  {L15_it?.what}
-                                </span>
-                              </div>
-                              <div style={css("display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 15px; color: #f3d98b")}>
-                                  {`Seu número: ${(L15_it?.n) ?? ''} · ${(L15_it?.title) ?? ''}`}
-                                </span>
-                                <span style={css("font-size: 17px; font-weight: 300; line-height: 1.6")}>
-                                  {L15_it?.ess}
-                                </span>
-                              </div>
-                              {L15_it?.isPerson ? (
-                                <>
-                                  <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                                    <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
-                                        {"Sua luz"}
-                                      </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                        {L15_it?.luz}
-                                      </p>
-                                    </div>
-                                    <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
-                                        {"Seu desafio"}
-                                      </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                        {L15_it?.sombra}
-                                      </p>
-                                    </div>
-                                    <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.28)")}>
-                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #f3d98b")}>
-                                        {"Convite"}
-                                      </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55")}>
-                                        {L15_it?.convite}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </>
-                              ) : null}
-                              {L15_it?.isCycle ? (
-                                <>
-                                  <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                                    {L15_it?.isPY ? (
-                                      <>
-                                        <div style={css("display: flex; flex-direction: column; gap: 8px")}>
-                                          <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                                            {`Você está no ano ${(L15_it?.n) ?? ''} de um ciclo de 9`}
-                                          </span>
-                                          <div style={css("display: flex; gap: 6px")}>
-                                            {(L15_it?.dots || []).map((L16_d, I16) => (
-                                              <React.Fragment key={I16}>
-                                                <span style={css(`flex-grow: 1; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; ${(L16_d?.style) ?? ''}`)}>
-                                                  {L16_d?.n}
-                                                </span>
-                                              </React.Fragment>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      </>
-                                    ) : null}
-                                    <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(143,227,176,.08); border: 1px solid rgba(143,227,176,.25)")}>
-                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>
-                                        {"Favorece"}
-                                      </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                        {L15_it?.fazer}
-                                      </p>
-                                    </div>
-                                    <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,179,138,.08); border: 1px solid rgba(255,179,138,.25)")}>
-                                      <div style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #ffb38a")}>
-                                        {"Evite"}
-                                      </div>
-                                      <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                                        {L15_it?.evitar}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </>
-                              ) : null}
-                              <div style={css("border-radius: 16px; padding: 12px 14px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; gap: 6px")}>
-                                <span className="kicker" style={css("font-size: 15px")}>
-                                  {"Como calculamos"}
-                                </span>
-                                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.75)")}>
-                                  {L15_it?.how}
-                                </span>
-                                <span style={css("font-size: 17px; font-weight: 400; color: #f3d98b")}>
-                                  {L15_it?.calc}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  </React.Fragment>
-                ))}
-                <p style={css("margin: 4px 0 0; font-size: 16px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.45)")}>
-                  {"Os números são símbolos para autoconhecimento. Use o que fizer sentido e deixe o resto."}
-                </p>
+          <div className="screen scroll">
+            <div className="c-page">
+              <div className="c-head">
+                <h1 className="c-h1">{`Os números de ${R.pf?.first}`}</h1>
+                <p className="c-lead">Na numerologia pitagórica, seu nome de registro e sua data de nascimento viram números de 1 a 9, além dos mestres 11, 22 e 33. Toque em cada um para entender.</p>
               </div>
+              <div className="c-card c-tint nm-hero">
+                <div className="nm-ring"><span className="nm-big">{R.px?.n}</span></div>
+                <span className="c-label">Caminho de vida</span>
+                <span className="c-h2" style={{ fontWeight: 400, fontSize: 21 }}>{R.px?.title}</span>
+                <p className="c-body2" style={{ maxWidth: 300 }}>{R.px?.short}</p>
+                <button className="c-btn c-ghost-c" style={{ marginTop: 4 }} onClick={R.px?.toggle} aria-expanded={R.px?.expanded}>
+                  {R.px?.btn}<Chev size={16} />
+                </button>
+                {R.px?.open ? <div style={{ marginTop: 8, width: '100%' }}><NumBody it={R.px} /></div> : null}
+              </div>
+              <div className="c-stack">
+                <h2 className="c-h2">Seu nome</h2>
+                {(R.nameItems || []).map(numRow)}
+              </div>
+              <div className="c-stack">
+                <h2 className="c-h2">Sua data e seus ciclos</h2>
+                {(R.dateItems || []).map(numRow)}
+              </div>
+              <p className="c-cap">Os números são símbolos para autoconhecimento. Use o que fizer sentido e deixe o resto.</p>
             </div>
-          </>
+          </div>
         ) : null}
+
+        {/* ---------------- TARÔ: TIRAGEM ---------------- */}
         {R.isTSpread ? (
-          <>
-            <div className="screen scroll">
-              <div style={css("box-sizing: border-box; padding: 100px 14px 40px; display: flex; flex-direction: column; gap: 16px")}>
-                <div>
-                  <div className="kicker">
-                    {"Tarô guiado"}
-                  </div>
-                  <h1 style={css("margin: 8px 0 0; font-size: 28px; line-height: 1.2; font-weight: 300")}>
-                    {"Como você quer jogar?"}
-                  </h1>
-                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
-                    {"Arcanos maiores, os 22 grandes símbolos do tarô. A Alma guia cada gesto e lê as cartas com você."}
-                  </p>
-                </div>
-                <button className="glass pill" onClick={R.pick1} style={css("width: 100%; border-radius: 24px; padding: 20px; text-align: left; display: flex; align-items: center; gap: 18px")}>
-                  <span className="cardback" style={css("width: 50px; height: 80px; flex-shrink: 0; border-radius: 8px")}></span>
-                  <span style={css("display: flex; flex-direction: column; gap: 4px")}>
-                    <span style={css("font-size: 18px; font-weight: 300")}>
-                      {"Uma carta"}
-                    </span>
-                    <span style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                      {"Conselho do dia. Rápido e direto."}
-                    </span>
-                  </span>
-                </button>
-                <button className="glass pill" onClick={R.pick3} style={css("width: 100%; border-radius: 24px; padding: 20px; text-align: left; display: flex; align-items: center; gap: 18px; border-color: rgba(243,217,139,.4)")}>
-                  <span style={css("display: flex; gap: 4px; flex-shrink: 0")}>
-                    <span className="cardback" style={css("width: 30px; height: 50px; border-radius: 6px")}></span>
-                    <span className="cardback" style={css("width: 30px; height: 50px; border-radius: 6px")}></span>
-                    <span className="cardback" style={css("width: 30px; height: 50px; border-radius: 6px")}></span>
-                  </span>
-                  <span style={css("display: flex; flex-direction: column; gap: 4px")}>
-                    <span style={css("font-size: 18px; font-weight: 300")}>
-                      {"Três cartas"}
-                    </span>
-                    <span style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                      {"Raiz, presente e caminho."}
-                    </span>
-                  </span>
-                </button>
-                <div style={css("border-radius: 20px; padding: 14px 16px; background: rgba(255,255,255,.04); font-size: 17px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.6)")}>
-                  {"Em breve: Cruz Celta com 10 cartas e os 56 arcanos menores."}
-                </div>
+          <div className="screen scroll">
+            <div className="c-page">
+              <div className="c-head">
+                <h1 className="c-h1">Como você quer jogar?</h1>
+                <p className="c-lead">Os 22 arcanos maiores, os grandes símbolos do tarô. A Alma guia cada gesto e lê as cartas com você.</p>
               </div>
+              <div className="tr-spreads">
+                <button className="tr-spread" onClick={R.pick1}>
+                  <span className="tr-art" aria-hidden="true">
+                    <span className="cardback" style={{ left: '50%', width: 62, height: 100, marginLeft: -31, transform: 'rotate(-4deg)' }}></span>
+                  </span>
+                  <span className="c-title">Uma carta</span>
+                  <span className="c-cap" style={{ color: 'var(--ink-2)' }}>Conselho do dia, rápido e direto</span>
+                </button>
+                <button className="tr-spread" onClick={R.pick3}>
+                  <span className="tr-art" aria-hidden="true">
+                    <span className="cardback" style={{ left: '50%', width: 50, height: 82, marginLeft: -66, top: 12, transform: 'rotate(-12deg)' }}></span>
+                    <span className="cardback" style={{ left: '50%', width: 50, height: 82, marginLeft: -25, top: 4 }}></span>
+                    <span className="cardback" style={{ left: '50%', width: 50, height: 82, marginLeft: 16, top: 12, transform: 'rotate(12deg)' }}></span>
+                  </span>
+                  <span className="c-title">Três cartas</span>
+                  <span className="c-cap" style={{ color: 'var(--ink-2)' }}>Raiz, presente e caminho</span>
+                </button>
+              </div>
+              <p className="c-cap">Em breve: Cruz Celta com 10 cartas e os 56 arcanos menores.</p>
             </div>
-          </>
+          </div>
         ) : null}
+
+        {/* ---------------- TARÔ: INTENÇÃO ---------------- */}
         {R.isTQuestion ? (
-          <>
-            <div className="screen">
-              <div style={css("position: absolute; left: 0; right: 0; top: 110px; display: flex; justify-content: center")}>
-                <div style={css("position: relative; width: 120px; height: 190px")}>
-                  <div className="glow" style={css("left: -40px; top: -30px; width: 200px; height: 200px")}></div>
-                  <div className="flame" style={css("top: 34px")}></div>
-                  <div style={css("position: absolute; left: 50%; top: 66px; width: 2px; height: 10px; margin-left: -1px; background: #3a2e20")}></div>
-                  <div style={css("position: absolute; left: 34px; top: 74px; width: 52px; height: 100px; border-radius: 6px 6px 10px 10px; background: linear-gradient(90deg, #efe4cf, #fff8ea 45%, #d9ccb2)")}></div>
+          <div className="screen scroll">
+            <div className="c-page" style={{ paddingTop: 88, gap: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'center' }} aria-hidden="true">
+                <div style={css("position: relative; width: 120px; height: 176px")}>
+                  <div className="glow" style={css("left: -40px; top: -36px; width: 200px; height: 200px")}></div>
+                  <div className="flame" style={css("top: 24px")}></div>
+                  <div style={css("position: absolute; left: 50%; top: 56px; width: 2px; height: 10px; margin-left: -1px; background: #3a2e20")}></div>
+                  <div style={css("position: absolute; left: 34px; top: 64px; width: 52px; height: 100px; border-radius: 6px 6px 10px 10px; background: linear-gradient(90deg, #efe4cf, #fff8ea 45%, #d9ccb2)")}></div>
                 </div>
               </div>
-              <div style={css("position: absolute; left: 20px; right: 20px; top: 320px; display: flex; flex-direction: column; gap: 16px")}>
-                <div className="glass" style={css("border-radius: 20px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start")}>
-                  <span style={css("width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 12px #f3d98b")}></span>
-                  <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                    {"A vela está acesa. Respire fundo e pense no que você quer compreender. Pode escrever, ou apenas sentir."}
-                  </span>
-                </div>
-                <label style={css("display: flex; flex-direction: column; gap: 6px")}>
-                  <span className="kicker" style={css("font-size: 15px")}>
-                    {"Sua pergunta (opcional)"}
-                  </span>
-                  <input value={R.tq} onChange={R.onTq} placeholder="O que preciso compreender agora?" style={css("height: 52px; padding: 0 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); font-size: 17px; font-weight: 300; outline: none")} />
-                </label>
-                <div style={css("display: flex; flex-wrap: wrap; gap: 8px")}>
-                  {(R.tqChips || []).map((L17_c, I17) => (
-                    <React.Fragment key={I17}>
-                      <button className="pill" onClick={L17_c?.pick} style={css("min-height: 44px; max-width: 100%; padding: 6px 14px; border-radius: 22px; text-align: left; line-height: 1.35; font-size: 17px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12)")}>
-                        {L17_c?.t}
-                      </button>
-                    </React.Fragment>
+              <div className="c-head" style={{ textAlign: 'center', alignItems: 'center' }}>
+                <h1 className="c-h1" style={{ fontSize: 24 }}>A vela está acesa</h1>
+                <p className="c-lead" style={{ maxWidth: 320 }}>Respire fundo e pense no que você quer compreender. Pode escrever, ou apenas sentir.</p>
+              </div>
+              <label className="c-field">
+                <span>Sua pergunta (opcional)</span>
+                <input className="c-input" value={R.tq} onChange={R.onTq} placeholder="O que preciso compreender agora?" enterKeyHint="go" onKeyDown={(e) => { if (e.key === 'Enter') R.toShuffle(); }} />
+              </label>
+              <div className="c-stack-s">
+                <span className="c-cap">Ou escolha uma intenção</span>
+                <div className="c-chips">
+                  {(R.tqChips || []).map((c, i) => (
+                    <button key={i} className="c-chip" onClick={c.pick} aria-pressed={R.tq === c.t ? 'true' : 'false'}>{c.t}</button>
                   ))}
                 </div>
-                <button className="cta" onClick={R.toShuffle} style={css("margin-top: 8px; height: 58px; border-radius: 999px; font-size: 17px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a)")}>
-                  {"Estou pronto"}
-                </button>
               </div>
+              <button className="c-btn c-gold" onClick={R.toShuffle} style={{ marginTop: 4 }}>Embaralhar as cartas</button>
             </div>
-          </>
+          </div>
         ) : null}
+
+        {/* ---------------- TARÔ: EMBARALHAR ---------------- */}
         {R.isTShuffle ? (
-          <>
-            <div className="screen">
-              <div className="glass" style={css("position: absolute; left: 20px; right: 20px; top: 100px; border-radius: 20px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start")}>
-                <span style={css("width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 12px #f3d98b")}></span>
-                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                  {R.shufGuide}
-                </span>
-              </div>
-              <div style={css("position: absolute; left: 135px; top: 260px; width: 120px; height: 190px")}>
-                {(R.shufCards || []).map((L18_c, I18) => (
-                  <React.Fragment key={I18}>
-                    <span className="cardback shuf" style={css(`left: 0; top: 0; width: 120px; height: 190px; border-radius: 12px; ${(L18_c?.style) ?? ''}`)}></span>
-                  </React.Fragment>
-                ))}
-              </div>
-              <div style={css("position: absolute; left: 0; right: 0; top: 560px; display: flex; flex-direction: column; align-items: center; gap: 14px")}>
-                <button onPointerDown={R.holdStart} onPointerUp={R.holdEnd} onPointerLeave={R.holdEnd} onClick={R.shufClick} aria-label="Embaralhar" style={css(`position: relative; width: 116px; height: 116px; border-radius: 50%; touch-action: none; user-select: none; -webkit-user-select: none; ${(R.shufRing) ?? ''}`)}>
-                  <span style={css("position: absolute; inset: 6px; border-radius: 50%; background: #16122e; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px")}>
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f3d98b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M4 7h3.5c4 0 5 10 9 10H20M17 14l3 3-3 3M4 17h3.5c1.4 0 2.4-1.2 3.3-2.8M13.2 9.8C14.1 8.2 15.1 7 16.5 7H20M17 4l3 3-3 3" />
-                    </svg>
-                    <span style={css("font-size: 17px; color: rgba(244,241,234,.85)")}>
-                      {R.shufPct}
-                    </span>
-                  </span>
-                </button>
-                <span style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                  {"Segure para embaralhar"}
-                </span>
-              </div>
+          <div className="screen">
+            <div className="c-card tr-guide" style={css("position: absolute; left: 16px; right: 16px; top: 96px")} role="status">
+              <p className="c-body">{R.shufGuide}</p>
             </div>
-          </>
+            <div style={css("position: absolute; left: 135px; top: 270px; width: 120px; height: 190px")} aria-hidden="true">
+              {(R.shufCards || []).map((c, i) => <span key={i} className="cardback shuf" style={css(`left: 0; top: 0; width: 120px; height: 190px; border-radius: 12px; ${c.style}`)}></span>)}
+            </div>
+            <div style={css("position: absolute; left: 0; right: 0; top: 560px; display: flex; flex-direction: column; align-items: center; gap: 12px")}>
+              <button className="shuf-btn" onPointerDown={R.holdStart} onPointerUp={R.holdEnd} onPointerLeave={R.holdEnd} onClick={R.shufClick} aria-label="Embaralhar" style={css(R.shufRing)}>
+                <span className="shuf-in">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 7h3.5c4 0 5 10 9 10H20M17 14l3 3-3 3M4 17h3.5c1.4 0 2.4-1.2 3.3-2.8M13.2 9.8C14.1 8.2 15.1 7 16.5 7H20M17 4l3 3-3 3" />
+                  </svg>
+                  {R.shufPct}
+                </span>
+              </button>
+              <span className="c-cap" style={{ color: 'var(--ink-2)' }}>Segure para embaralhar, ou toque várias vezes</span>
+            </div>
+          </div>
         ) : null}
+
+        {/* ---------------- TARÔ: CORTAR ---------------- */}
         {R.isTCut ? (
-          <>
-            <div className="screen">
-              <div className="glass" style={css("position: absolute; left: 20px; right: 20px; top: 100px; border-radius: 20px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start")}>
-                <span style={css("width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 12px #f3d98b")}></span>
-                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                  {"Agora corte o baralho. Três montes estão à sua frente: toque no que chamar você."}
-                </span>
-              </div>
-              <div style={css("position: absolute; left: 20px; right: 20px; top: 320px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px")}>
-                {(R.piles || []).map((L19_p, I19) => (
-                  <React.Fragment key={I19}>
-                    <button onClick={L19_p?.pick} aria-label={L19_p?.aria} style={css(`position: relative; height: 200px; transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); ${(L19_p?.style) ?? ''}`)}>
-                      <span className="cardback" style={css("position: absolute; left: 6px; top: 12px; right: 6px; bottom: 12px; border-radius: 10px; transform: rotate(-4deg)")}></span>
-                      <span className="cardback" style={css("position: absolute; left: 6px; top: 6px; right: 6px; bottom: 18px; border-radius: 10px; transform: rotate(3deg)")}></span>
-                      <span className="cardback" style={css(`position: absolute; left: 6px; top: 0; right: 6px; bottom: 24px; border-radius: 10px; ${(L19_p?.topStyle) ?? ''}`)}></span>
-                    </button>
-                  </React.Fragment>
-                ))}
-              </div>
+          <div className="screen">
+            <div className="c-card tr-guide" style={css("position: absolute; left: 16px; right: 16px; top: 96px")}>
+              <p className="c-body">Agora corte o baralho. Três montes estão à sua frente: toque no que chamar você.</p>
             </div>
-          </>
+            <div style={css("position: absolute; left: 16px; right: 16px; top: 320px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px")}>
+              {(R.piles || []).map((pl, i) => (
+                <button key={i} className="tr-pile" onClick={pl.pick} aria-label={pl.aria} style={css(pl.style)}>
+                  <span className="cardback" style={css("position: absolute; left: 6px; top: 12px; right: 6px; bottom: 12px; border-radius: 10px; transform: rotate(-4deg)")}></span>
+                  <span className="cardback" style={css("position: absolute; left: 6px; top: 6px; right: 6px; bottom: 18px; border-radius: 10px; transform: rotate(3deg)")}></span>
+                  <span className="cardback" style={css(`position: absolute; left: 6px; top: 0; right: 6px; bottom: 24px; border-radius: 10px; ${pl.topStyle}`)}></span>
+                </button>
+              ))}
+            </div>
+            <p className="c-cap" style={css("position: absolute; left: 16px; right: 16px; top: 548px; text-align: center")}>Monte 1, 2 ou 3: confie no primeiro impulso.</p>
+          </div>
         ) : null}
+
+        {/* ---------------- TARÔ: LEQUE ---------------- */}
         {R.isTFan ? (
-          <>
-            <div className="screen">
-              <div className="glass" style={css("position: absolute; left: 20px; right: 20px; top: 100px; border-radius: 20px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start")}>
-                <span style={css("width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 12px #f3d98b")}></span>
-                <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                  {R.fanGuide}
-                </span>
+          <div className="screen">
+            <div className="c-card tr-guide" style={css("position: absolute; left: 16px; right: 16px; top: 96px")}>
+              <p className="c-body">{R.fanGuide}</p>
+            </div>
+            <div className="tr-count" role="status">{R.fanCount}</div>
+            <div style={css("position: absolute; left: 0; top: 320px; width: 390px; height: 400px")}>
+              {(R.fan || []).map((c, i) => (
+                <button key={i} className="fancard cardback" onClick={c.pick} aria-label={c.aria} aria-pressed={c.pressed} style={css(`left: 168px; top: 20px; width: 54px; height: 88px; border-radius: 8px; ${c.style}`)}></button>
+              ))}
+            </div>
+            {R.fanReady ? (
+              <div className="fade" style={css("position: absolute; left: 16px; right: 16px; top: 740px")}>
+                <button className="c-btn c-gold" onClick={R.toReveal}>Colocar na mesa</button>
               </div>
-              <div style={css("position: absolute; left: 0; right: 0; top: 250px; text-align: center; font-size: 17.5px; letter-spacing: .16em; text-transform: uppercase; color: #f3d98b")}>
-                {R.fanCount}
+            ) : null}
+          </div>
+        ) : null}
+
+        {/* ---------------- TARÔ: LEITURA ---------------- */}
+        {R.isTReveal ? (
+          <div className="screen scroll">
+            <div className="c-page" style={{ gap: 16, paddingBottom: 48 }}>
+              <div className="c-card tr-guide" role="status">
+                <p className="c-body">{R.revealGuide}</p>
               </div>
-              <div style={css("position: absolute; left: 0; top: 320px; width: 390px; height: 400px")}>
-                {(R.fan || []).map((L20_c, I20) => (
-                  <React.Fragment key={I20}>
-                    <button className="fancard cardback" onClick={L20_c?.pick} aria-label={L20_c?.aria} aria-pressed={L20_c?.pressed} style={css(`left: 168px; top: 20px; width: 54px; height: 88px; border-radius: 8px; ${(L20_c?.style) ?? ''}`)}></button>
-                  </React.Fragment>
+              {R.hasTq ? <p className="c-body2" style={{ textAlign: 'center', fontStyle: 'italic' }}>{`“${R.tq}”`}</p> : null}
+              <div style={css("display: flex; justify-content: center; gap: 10px")}>
+                {(R.slots || []).map((sl, i) => (
+                  <div key={i} style={css("display: flex; flex-direction: column; align-items: center; gap: 8px")}>
+                    <button className="flip" onClick={sl.flipIt} aria-label={sl.aria} style={css(sl.box)}>
+                      <span className="flipin" style={css(`display: block; ${sl.inner}`)}>
+                        <span className="face cardback" style={css(`display: block; ${sl.backStyle}`)}></span>
+                        <span className="face front" style={css(`display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-sizing: border-box; border: 1px solid rgba(243,217,139,.6); background: linear-gradient(170deg, #fbf5e6, #efe3c8); color: #2a1f3d; ${sl.frontPad}`)}>
+                          <span style={css(`font-size: ${sl.numSize}; letter-spacing: .06em; font-weight: 600; color: #6e521c`)}>{sl.num}</span>
+                          <svg viewBox="0 0 60 60" style={css(sl.sigilSize)} aria-hidden="true">
+                            <circle cx="30" cy="30" r="27" fill="none" stroke={sl.hue} strokeWidth="1" />
+                            <circle cx="30" cy="30" r="20" fill={sl.hueSoft} />
+                            <polygon points={sl.poly} fill="none" stroke="#3a2c58" strokeWidth="1.2" strokeLinejoin="round" />
+                            <polygon points={sl.star} fill={sl.hue} opacity=".85" />
+                            <circle cx="30" cy="30" r="2.4" fill="#3a2c58" />
+                          </svg>
+                          <span style={css(`font-size: ${sl.nameSize}; font-weight: 600; text-align: center; line-height: 1.2`)}>{sl.name}</span>
+                        </span>
+                      </span>
+                    </button>
+                    <span className="c-label" style={{ color: 'var(--rose)' }}>{sl.pos}</span>
+                  </div>
                 ))}
               </div>
-              {R.fanReady ? (
+              {(R.readings || []).map((r, i) => (
+                <div key={i} className="c-card c-tint tr-read fade c-stack-s">
+                  <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <span className="c-label">{r.pos}</span>
+                    <span className="c-title">{r.name}</span>
+                    <span className="c-cap">{r.kw}</span>
+                  </span>
+                  <p className="c-body">
+                    {(r.words || []).map((w, k) => <span key={k} className="word" style={css(w.style)}>{w.w}</span>)}
+                  </p>
+                </div>
+              ))}
+              {R.allFlipped ? (
                 <>
-                  <div className="fade" style={css("position: absolute; left: 20px; right: 20px; top: 740px")}>
-                    <button className="cta" onClick={R.toReveal} style={css("width: 100%; height: 58px; border-radius: 999px; font-size: 17px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a); box-shadow: 0 0 30px rgba(243,217,139,.3)")}>
-                      {"Colocar na mesa"}
-                    </button>
+                  <div className="c-card c-tint c-col fade" style={{ animationDelay: '1.2s', padding: 20 }}>
+                    <span className="c-label">A leitura da Alma</span>
+                    <p className="c-body" style={{ fontSize: 17.5 }}>{R.synth?.p1}</p>
+                    <p className="c-body2">{R.synth?.p2}</p>
+                    <div className="c-card c-sm c-tint c-note" style={{ '--c': 'var(--mint)' }}>
+                      <span className="c-label">Convite</span>
+                      <p className="c-body" style={{ fontWeight: 400 }}>{R.synth?.adv}</p>
+                    </div>
                   </div>
+                  <a href="Main.dc.html" onClick={R.handoff} className="c-card c-tint tr-handoff fade" style={{ animationDelay: '1.5s' }}>
+                    <span className="tr-orb" aria-hidden="true"></span>
+                    <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <span className="c-title">Perguntar ao Conselho da Alma</span>
+                      <span className="c-cap" style={{ color: 'var(--ink-2)' }}>Sua pergunta e suas cartas vão para as 14 sabedorias, que refletem com você e ajudam a criar um plano.</span>
+                    </span>
+                    <span style={{ color: 'var(--lilac)', display: 'flex' }}><Chev dir="right" cls="" /></span>
+                  </a>
+                  <button className="c-btn c-ghost fade" onClick={R.newReading} style={{ animationDelay: '1.6s' }}>Fazer nova tiragem</button>
+                  <p className="c-cap fade" style={{ textAlign: 'center', animationDelay: '1.7s' }}>O tarô é um espelho, não uma sentença. Fique com o que ressoar.</p>
                 </>
               ) : null}
             </div>
-          </>
-        ) : null}
-        {R.isTReveal ? (
-          <>
-            <div className="screen scroll">
-              <div style={css("box-sizing: border-box; padding: 100px 14px 48px; display: flex; flex-direction: column; gap: 16px")}>
-                <div className="glass" style={css("border-radius: 20px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start")}>
-                  <span style={css("width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 12px #f3d98b")}></span>
-                  <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55")}>
-                    {R.revealGuide}
-                  </span>
-                </div>
-                {R.hasTq ? (
-                  <>
-                    <p style={css("margin: 0; text-align: center; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.7)")}>
-                      {`“${(R.tq) ?? ''}”`}
-                    </p>
-                  </>
-                ) : null}
-                <div style={css("display: flex; justify-content: center; gap: 12px")}>
-                  {(R.slots || []).map((L21_s, I21) => (
-                    <React.Fragment key={I21}>
-                      <div style={css("display: flex; flex-direction: column; align-items: center; gap: 8px")}>
-                        <button className="flip" onClick={L21_s?.flipIt} aria-label={L21_s?.aria} style={css(L21_s?.box)}>
-                          <span className="flipin" style={css(`display: block; ${(L21_s?.inner) ?? ''}`)}>
-                            <span className="face cardback" style={css(`display: block; ${(L21_s?.backStyle) ?? ''}`)}></span>
-                            <span className="face front" style={css(`display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-sizing: border-box; border: 1px solid rgba(243,217,139,.6); background: linear-gradient(170deg, #fbf5e6, #efe3c8); color: #2a1f3d; ${(L21_s?.frontPad) ?? ''}`)}>
-                              <span style={css(`font-size: ${(L21_s?.numSize) ?? ''}; letter-spacing: .1em; font-weight: 500; color: #8a6a2a`)}>
-                                {L21_s?.num}
-                              </span>
-                              <svg viewBox="0 0 60 60" style={css(L21_s?.sigilSize)} aria-hidden="true">
-                                <circle cx="30" cy="30" r="27" fill="none" stroke={L21_s?.hue} strokeWidth="1" />
-                                <circle cx="30" cy="30" r="20" fill={L21_s?.hueSoft} />
-                                <polygon points={L21_s?.poly} fill="none" stroke="#3a2c58" strokeWidth="1.2" strokeLinejoin="round" />
-                                <polygon points={L21_s?.star} fill={L21_s?.hue} opacity=".85" />
-                                <circle cx="30" cy="30" r="2.4" fill="#3a2c58" />
-                              </svg>
-                              <span style={css(`font-size: ${(L21_s?.nameSize) ?? ''}; font-weight: 500; text-align: center; line-height: 1.2`)}>
-                                {L21_s?.name}
-                              </span>
-                            </span>
-                          </span>
-                        </button>
-                        <span className="kicker" style={css("font-size: 15px")}>
-                          {L21_s?.pos}
-                        </span>
-                      </div>
-                    </React.Fragment>
-                  ))}
-                </div>
-                {(R.readings || []).map((L22_r, I22) => (
-                  <React.Fragment key={I22}>
-                    <div className="glass fade" style={css("border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px")}>
-                      <span className="kicker" style={css("font-size: 15px; color: #f3d98b")}>
-                        {`${(L22_r?.pos) ?? ''} · ${(L22_r?.name) ?? ''}`}
-                      </span>
-                      <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.55)")}>
-                        {L22_r?.kw}
-                      </span>
-                      <span style={css("font-size: 17px; font-weight: 300; line-height: 1.55")}>
-                        {(L22_r?.words || []).map((L23_w, I23) => (
-                          <React.Fragment key={I23}>
-                            <span className="word" style={css(L23_w?.style)}>
-                              {L23_w?.w}
-                            </span>
-                          </React.Fragment>
-                        ))}
-                      </span>
-                    </div>
-                  </React.Fragment>
-                ))}
-                {R.allFlipped ? (
-                  <>
-                    <div className="glass fade" style={css("border-radius: 26px; padding: 22px 20px; display: flex; flex-direction: column; gap: 10px; border-color: rgba(243,217,139,.4); animation-delay: 1.2s")}>
-                      <div className="goldtext" style={css("font-size: 16px; letter-spacing: .26em; text-transform: uppercase")}>
-                        {"A leitura da Alma"}
-                      </div>
-                      <p style={css("margin: 0; font-size: 17px; font-weight: 300; line-height: 1.6")}>
-                        {R.synth?.p1}
-                      </p>
-                      <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.75)")}>
-                        {R.synth?.p2}
-                      </p>
-                      <div style={css("margin-top: 4px; padding: 12px 14px; border-radius: 16px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.22)")}>
-                        <div style={css("font-size: 15px; letter-spacing: .2em; text-transform: uppercase; color: #f3d98b")}>
-                          {"Convite"}
-                        </div>
-                        <p style={css("margin: 6px 0 0; font-size: 17.5px; line-height: 1.5")}>
-                          {R.synth?.adv}
-                        </p>
-                      </div>
-                    </div>
-                    <a href="Main.dc.html" onClick={R.handoff} className="glass pill fade" style={css("border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; border-color: rgba(185,166,255,.45); animation-delay: 1.6s")}>
-                      <span style={css("width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 35% 30%, #fff, #c9b8ff 45%, rgba(201,184,255,.2) 75%); box-shadow: 0 0 20px rgba(201,184,255,.5)")}></span>
-                      <span style={css("flex-grow: 1; display: flex; flex-direction: column; gap: 4px")}>
-                        <span style={css("font-size: 17.5px; font-weight: 400")}>
-                          {"Perguntar ao Conselho da Alma"}
-                        </span>
-                        <span style={css("font-size: 17px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.62)")}>
-                          {"Sua pergunta e suas cartas vão para as 14 sabedorias, que refletem com você e ajudam a criar um plano."}
-                        </span>
-                      </span>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(244,241,234,.7)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M9 5l7 7-7 7" />
-                      </svg>
-                    </a>
-                    <button className="glass pill fade" onClick={R.newReading} style={css("height: 50px; border-radius: 18px; font-size: 17.5px; animation-delay: 1.7s")}>
-                      {"Fazer nova tiragem"}
-                    </button>
-                    <p className="fade" style={css("margin: 0; text-align: center; font-size: 16px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.45); animation-delay: 1.8s")}>
-                      {"O tarô é um espelho, não uma sentença. Fique com o que ressoar."}
-                    </p>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </>
+          </div>
         ) : null}
       </div>
     </div>

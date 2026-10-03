@@ -17,7 +17,7 @@
   --ease-out: cubic-bezier(.22,.8,.24,1); --ease-in: cubic-bezier(.45,0,.9,.4);
   --t-screen: 28px; --t-section: 19px; --t-card: 17px; --t-body: 16.5px; --t-caption: 14.5px;
 }
-html, body, #root { margin: 0; height: 100%; background: #0b0a16; }
+html, body, #root { margin: 0; height: 100%; background: var(--night); }
 body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .app-bg { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 30%, #17142e, #07060f 70%); }
 .app-frame { width: 390px; height: 844px; flex-shrink: 0; position: relative; transform-origin: center center; }
@@ -50,7 +50,7 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 /* Fundos das telas continuam por trás da área do relógio (iPhone) */
 .app-fill .hm-aurora, .app-fill .bh-aurora, .app-fill .stf { top: calc(-1 * var(--sat, 0px)); }
 .app-fill .dz-aurora { top: calc(-1 * var(--sat, 0px)); }
-.app-fill .sc-sym > div:first-child, .app-fill .sc-main > .alma { box-shadow: 0 calc(-1 * var(--sat, 0px)) 0 0 var(--topc, #0a0918); }
+.app-fill .sc-sym > div:first-child, .app-fill .sc-main > .alma { box-shadow: 0 calc(-1 * var(--sat, 0px)) 0 0 var(--topc, var(--night)); }
 
 /* Esferas vivas: degradê girando por dentro e brilho de vidro */
 .orb-live { position: relative; overflow: hidden; isolation: isolate; background: var(--o-base, #6f5ae6); }
@@ -61,12 +61,12 @@ body { overflow: hidden; -webkit-tap-highlight-color: transparent; }
 
 /* Brilho que corre pela borda das caixas: sensação de fluidez em todo o app */
 @property --ga { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-:where(:is(.hm-card, .hm-ask, .hm-tile, .bh-card, .bh-moon, .bh-word, .dz-rec, .dz-plancard, .dz .glass, .sc-main .glass, .sc-sym .glass):not(.sky-tile):not([style*="position: absolute"]):not([style*="position:absolute"])) { position: relative; }
-:is(.hm-card, .hm-ask, .hm-tile, .bh-card, .bh-moon, .bh-word, .dz-rec, .dz-plancard, .dz .glass, .sc-main .glass, .sc-sym .glass):not(.sky-tile)::before {
+:where(:is(.hm-card, .hm-ask, .hm-tile, .bh-card, .bh-moon, .bh-word, .dz-rec, .dz-plancard, .dz .glass, .sc-main .glass, .sc-sym .glass, .sc-sym .c-card):not(.sky-tile):not([style*="position: absolute"]):not([style*="position:absolute"])) { position: relative; }
+:is(.hm-card, .hm-ask, .hm-tile, .bh-card, .bh-moon, .bh-word, .dz-rec, .dz-plancard, .dz .glass, .sc-main .glass, .sc-sym .glass, .sc-sym .c-card):not(.sky-tile)::before {
   content: ''; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none; z-index: 1;
   background: conic-gradient(from var(--ga), transparent 0 55%, var(--g1, rgba(201,184,255,.6)) 72%, var(--g0, #fff) 80%, var(--g2, rgba(245,168,200,.75)) 87%, transparent 97%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
-  animation: glowRun 8s linear infinite; opacity: .95; filter: drop-shadow(0 0 3px var(--g1, rgba(201,184,255,.8)));
+  animation: glowRun 12s linear infinite; opacity: .7; filter: drop-shadow(0 0 2px var(--g1, rgba(201,184,255,.6)));
 }
 :is(.hm-card, .hm-tile, .bh-card, .dz-rec, .dz .glass, .sc-main .glass, .sc-sym .glass):nth-child(3n+2)::before { animation-delay: -2.7s; animation-duration: 9s; }
 :is(.hm-card, .hm-tile, .bh-card, .dz-rec, .dz .glass, .sc-main .glass, .sc-sym .glass):nth-child(3n)::before { animation-delay: -5.3s; animation-duration: 10s; }

@@ -1,56 +1,51 @@
-.skh { position: relative; margin: 0 -14px; height: 408px; cursor: pointer; }
+/* Céu de hoje: a roda do zodíaco é o "ser" de Céu. Pode girar e respirar devagar (Jhey), o resto é sereno. */
+.skh { position: relative; margin: 0 -16px; padding: 4px 16px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; border-radius: var(--r-card); outline: none; -webkit-tap-highlight-color: transparent; }
+.skh:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
 .skh-neb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; mix-blend-mode: screen; }
-.skh-neb-a { width: 300px; height: 260px; left: -20px; top: 10px; background: conic-gradient(from 0deg, #7a5cff, #f5a8c8, #a8d8ff, #7a5cff); opacity: .42; animation: skhNeb 14s ease-in-out infinite alternate, skhHue 18s linear infinite; }
-.skh-neb-b { width: 240px; height: 220px; right: -30px; top: 110px; background: radial-gradient(circle, #ffb38a, #b9a6ff 60%, transparent); opacity: .3; animation: skhNeb 17s ease-in-out infinite alternate-reverse, skhHue 24s linear infinite reverse; }
-@keyframes skhNeb { to { transform: translate(34px, 26px) scale(1.15); } }
-@keyframes skhHue { to { filter: blur(60px) hue-rotate(360deg); } }
-.skh-stage { position: absolute; left: 50%; top: 4px; width: 320px; height: 320px; margin-left: -160px; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.7,.2,1); }
-.skh-halo { position: absolute; inset: 70px; border-radius: 50%; background: radial-gradient(circle, rgba(201,184,255,.45), rgba(122,92,255,.12) 55%, transparent 72%); animation: skhBreath 5s ease-in-out infinite; }
-@keyframes skhBreath { 50% { transform: scale(1.14); opacity: .7; } }
-.skh-wheel { position: absolute; inset: 0; animation: skhSpin 160s linear infinite, skhIn 1.6s cubic-bezier(.2,.7,.2,1) both; }
+.skh-neb-a { width: 280px; height: 240px; left: -10px; top: 0; background: conic-gradient(from 0deg, #7a5cff, #f5a8c8, #8ec8ff, #7a5cff); opacity: .42; animation: skhNeb 14s ease-in-out infinite alternate; }
+.skh-neb-b { width: 220px; height: 200px; right: -20px; top: 100px; background: radial-gradient(circle, #ffb38a, #c9b8ff 60%, transparent); opacity: .3; animation: skhNeb 17s ease-in-out infinite alternate-reverse; }
+@keyframes skhNeb { to { transform: translate(30px, 22px) scale(1.12); } }
+
+.skh-stage { position: relative; width: 288px; height: 288px; flex-shrink: 0; transform-style: preserve-3d; transition: transform .6s var(--ease-out); }
+.skh-halo { position: absolute; inset: 63px; border-radius: 50%; background: radial-gradient(circle, rgba(201,184,255,.5), rgba(122,92,255,.14) 55%, transparent 72%); animation: skhBreath 6s ease-in-out infinite; }
+@keyframes skhBreath { 50% { transform: scale(1.12); opacity: .75; } }
+.skh-wheel { position: absolute; inset: 0; animation: skhSpin 160s linear infinite, skhIn 900ms var(--ease-out) backwards; }
 @keyframes skhSpin { to { rotate: 360deg; } }
-@keyframes skhIn { from { opacity: 0; scale: .7; filter: blur(8px); } to { opacity: 1; scale: 1; filter: none; } }
-.skh-up { animation: skhSpin 160s linear infinite reverse, skhPop .8s cubic-bezier(.2,1.5,.4,1) both; }
-@keyframes skhPop { from { opacity: 0; scale: 0; } }
+@keyframes skhIn { from { opacity: 0; scale: .92; filter: blur(6px); } to { opacity: 1; scale: none; filter: none; } }
+.skh-up { animation: skhSpin 160s linear infinite reverse, skhPop 600ms var(--ease-out) backwards; }
+@keyframes skhPop { from { opacity: 0; scale: .6; } }
 .skh-ring { position: absolute; border-radius: 50%; pointer-events: none; }
-.skh-ring-o { inset: 8px; border: 1px solid transparent; background: conic-gradient(from 0deg, rgba(243,217,139,.7), rgba(185,166,255,.2), rgba(168,216,255,.7), rgba(245,168,200,.25), rgba(243,217,139,.7)) border-box; -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
-.skh-ring-i { inset: 36px; border: 1px solid rgba(255,255,255,.12); }
-.skh-tick { position: absolute; height: 1px; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(255,255,255,.22), transparent); }
-.skh-sign { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; display: flex; align-items: center; justify-content: center; font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; font-size: 17.5px; text-shadow: 0 0 10px currentColor; }
-.skh-dotmark { position: absolute; width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; border-radius: 50%; background: rgba(255,255,255,.5); }
+.skh-ring-o { inset: 7px; border: 1px solid transparent; background: conic-gradient(from 0deg, rgba(243,217,139,.8), rgba(201,184,255,.35), rgba(142,200,255,.8), rgba(245,168,200,.4), rgba(243,217,139,.8)) border-box; -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.skh-ring-i { inset: 32px; border: 1px solid rgba(255,255,255,.16); }
+.skh-tick { position: absolute; height: 1px; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(255,255,255,.28), transparent); }
+.skh-sign { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; display: flex; align-items: center; justify-content: center; font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; font-size: 17px; text-shadow: 0 0 10px currentColor; }
+.skh-dotmark { position: absolute; width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; border-radius: 50%; background: var(--ink-3); }
 .skh-pl { position: absolute; width: 0; height: 0; }
-.skh-pl i { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--c) 60%); box-shadow: 0 0 12px var(--c); animation: skhTw 3s ease-in-out infinite; }
-.skh-pl b { position: absolute; left: 9px; top: -20px; font-weight: 400; font-size: 15.5px; color: var(--c); font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; }
-@keyframes skhTw { 50% { box-shadow: 0 0 20px var(--c); } }
+.skh-pl i { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--c) 60%); box-shadow: 0 0 14px var(--c); }
+.skh-pl b { position: absolute; left: 9px; top: -20px; font-weight: 400; font-size: 15px; color: var(--c); font-family: 'Noto Sans Symbols', 'Noto Sans', sans-serif; }
 .skh-sun { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fffbe8, #f3d98b 45%, #ffb38a); box-shadow: 0 0 22px #f3d98b, 0 0 50px rgba(255,179,138,.6); }
-.skh-sun::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; border: 1px dashed rgba(243,217,139,.55); animation: skhSpin 12s linear infinite; }
+.skh-sun::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 1px dashed rgba(243,217,139,.6); animation: skhSpin 20s linear infinite; }
 .skh-moon { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; filter: drop-shadow(0 0 10px rgba(247,241,224,.7)); }
-.skh-core { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) translateZ(40px); display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; pointer-events: none; }
-.skh-k { font-size: 14.5px; letter-spacing: .24em; text-transform: uppercase; color: rgba(244,241,234,.6); }
-.skh-t { font-size: 27px; line-height: 1.1; font-weight: 200; background: linear-gradient(90deg, #fff, #e4d6ff, #fff4d1, #fff); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 6s linear infinite; }
-.skh-now { position: absolute; left: 20px; right: 20px; bottom: 16px; display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
-.skh-now span { height: 34px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; font-size: 17px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); animation: skhIn 1s .8s ease both; }
-.skh-now i { width: 7px; height: 7px; border-radius: 50%; }
-.skh-shoot { position: absolute; top: 40px; left: 60%; width: 110px; height: 1.5px; border-radius: 2px; background: linear-gradient(90deg, rgba(255,255,255,.95), transparent); transform: rotate(-24deg); opacity: 0; pointer-events: none; animation: skhShoot 9s ease-in 2s infinite; }
-.skh-shoot-2 { top: 150px; left: 15%; animation-delay: 6.5s; animation-duration: 13s; }
+
+/* Centro: um disco escuro garante leitura mesmo quando um planeta passa por perto */
+.skh-core { position: absolute; left: 50%; top: 50%; width: 132px; height: 132px; margin: -66px 0 0 -66px; border-radius: 50%; transform: translateZ(30px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; pointer-events: none;
+  background: radial-gradient(circle, color-mix(in srgb, var(--night) 82%, transparent) 0 58%, color-mix(in srgb, var(--night) 0%, transparent) 72%); }
+.skh-k { font-size: 14.5px; font-weight: 500; line-height: 1.3; color: var(--lilac); }
+.skh-t { font-size: 28px; font-weight: 300; line-height: 1.15; letter-spacing: -.01em; color: var(--ink); }
+.skh-s { font-size: 14.5px; line-height: 1.3; color: var(--ink-2); }
+
+.skh-now { position: relative; display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+.skh-now > span { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); min-height: 36px; padding: 0 14px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 8px; font-size: 15px; line-height: 1.2; color: var(--ink); background: var(--surface); border: 1px solid var(--line); }
+.skh-now .skh-cta { color: var(--ink); font-weight: 500; background: color-mix(in srgb, var(--lilac) 18%, transparent); border-color: color-mix(in srgb, var(--lilac) 45%, transparent); gap: 4px; padding-right: 10px; transition: transform 120ms var(--ease-out); }
+.skh:active .skh-cta { transform: scale(.97); }
+.skh-mdot { width: 8px; height: 8px; border-radius: 50%; background: #f7f1e0; box-shadow: 0 0 10px #f7f1e0; }
+
+.skh-shoot { position: absolute; top: 40px; left: 60%; width: 110px; height: 1.5px; border-radius: 2px; background: linear-gradient(90deg, rgba(255,255,255,.95), transparent); transform: rotate(-24deg); opacity: 0; pointer-events: none; animation: skhShoot 11s ease-in 3s infinite; }
+.skh-shoot-2 { top: 150px; left: 15%; animation-delay: 8s; animation-duration: 15s; }
 @keyframes skhShoot { 0% { opacity: 0; translate: 0 0; } 2% { opacity: 1; } 8% { opacity: 0; translate: -180px 80px; } 100% { opacity: 0; translate: -180px 80px; } }
-/* Cartões de Céu: entrada em cascata, borda viva e brilho */
-.sc-sym .sky-tile { position: relative; overflow: hidden; animation: skhTile .9s cubic-bezier(.2,.7,.2,1) backwards; }
-.sc-sym .sky-tile::before { content: ''; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; background: conic-gradient(from var(--a, 0deg), transparent 0 60%, rgba(243,217,139,.8), rgba(185,166,255,.8), transparent 90%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: skhBorder 6s linear infinite; pointer-events: none; }
-.sc-sym .sky-tile::after { content: ''; position: absolute; top: 0; bottom: 0; width: 60%; left: -80%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.09), transparent); animation: skhSheen 7s ease-in-out infinite; pointer-events: none; }
-.sc-sym .sky-tile:active { transform: scale(.97); }
-@property --a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-@keyframes skhBorder { to { --a: 360deg; } }
-@keyframes skhSheen { 0%, 60% { left: -80%; } 100% { left: 130%; } }
-@keyframes skhTile { from { opacity: 0; transform: translateY(24px) scale(.96); filter: blur(8px); } to { opacity: 1; transform: none; filter: none; } }
-.sc-sym .sky-tile:nth-child(1) { animation-delay: .15s; } .sc-sym .sky-tile:nth-child(2) { animation-delay: .25s; } .sc-sym .sky-tile:nth-child(3) { animation-delay: .35s; }
-.sc-sym .sky-tile:nth-child(4) { animation-delay: .45s; } .sc-sym .sky-tile:nth-child(5) { animation-delay: .55s; }
-.sc-sym .sky-tile:nth-child(2)::before { animation-delay: -1.5s; } .sc-sym .sky-tile:nth-child(3)::before { animation-delay: -3s; } .sc-sym .sky-tile:nth-child(4)::before { animation-delay: -4.5s; }
-.sc-sym .sky-float { animation: skhFloat 5s ease-in-out infinite; }
-@keyframes skhFloat { 50% { transform: translateY(-5px) rotate(3deg); } }
-.sc-sym .sky-spin { animation: skhSpin 24s linear infinite; }
-.sc-sym .sky-pulse { animation: skhPulse 3.2s ease-in-out infinite; }
-@keyframes skhPulse { 50% { transform: scale(1.08); box-shadow: 0 0 40px rgba(243,217,139,.45); } }
-.sc-sym .sky-bubble { animation: skhPulse2 4s ease-in-out infinite; }
-@keyframes skhPulse2 { 50% { transform: scale(1.1) translateY(-3px); box-shadow: 0 0 40px rgba(143,227,176,.6); } }
-@media (prefers-reduced-motion: reduce) { .skh *, .sc-sym .sky-tile, .sc-sym .sky-tile::before, .sc-sym .sky-tile::after { animation: none !important; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .skh *, .skh *::before, .skh *::after { animation: none !important; }
+  .skh-stage { transition: none; transform: none !important; }
+  .skh-shoot { display: none; }
+}

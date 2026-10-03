@@ -37,7 +37,9 @@ export default function NatalSphere({ sim, profile }) {
   useEffect(() => {
     let raf, last = performance.now();
     const loop = (t) => { const dt = Math.min(64, t - last); last = t; setRot((r) => (r + dt * 0.004) % 360); raf = requestAnimationFrame(loop); };
-    raf = requestAnimationFrame(loop);
+    // Movimento reduzido: o mapa fica parado, sem órbita contínua.
+    const still = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!still) raf = requestAnimationFrame(loop);
     // os planetas caem na órbita quando a esfera aparece na tela
     let k = null;
     const io = typeof IntersectionObserver !== 'undefined' ? new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { k = setTimeout(() => setLanded(true), 60); io.disconnect(); } }, { threshold: 0.35 }) : null;
@@ -66,7 +68,7 @@ export default function NatalSphere({ sim, profile }) {
     return out;
   }, [ch]);
 
-  const W = 350, H = 330, cx = W / 2, cy = H / 2 - 6;
+  const W = 350, H = 280, cx = W / 2, cy = H / 2 - 6;
   const rx = 150, ry = 54 + tilt.y * 18;
   const place = (lon, radX, radY) => {
     const a = (180 - (lon - ch.asc) - rot) * Math.PI / 180;
@@ -105,7 +107,7 @@ export default function NatalSphere({ sim, profile }) {
         <div className="sp-orbit sp-orbit2" style={{ left: cx - rx - 22, top: cy - ry - 12, width: (rx + 22) * 2, height: (ry + 12) * 2 }} />
         {sim.SG.map((g, i) => {
           const p = place(i * 30 + 15, rx + 22, ry + 12);
-          return <span key={'z' + i} className="sp-zod sym" style={{ left: p.x - 9, top: p.y - 9, zIndex: p.depth > 0 ? 4 : 1, opacity: p.depth > 0 ? 0.55 : 0.18, color: sim.ELC[i % 4] }}>{g}</span>;
+          return <span key={'z' + i} className="sp-zod sym" style={{ left: p.x - 9, top: p.y - 9, zIndex: p.depth > 0 ? 4 : 1, opacity: p.depth > 0 ? 0.7 : 0.25, color: sim.ELC[i % 4] }} aria-hidden="true">{g}</span>;
         })}
         <div className="sp-ball" style={{ left: cx - 78, top: cy - 78 }}>
           <div className="sp-sheen" style={{ transform: `translate(${-tilt.x * 14}px, ${-tilt.y * 14}px)` }} />
@@ -123,44 +125,48 @@ export default function NatalSphere({ sim, profile }) {
                 onClick={() => setSel(p.k)}
                 aria-label={`${p.name} em ${sim.SIGNS[p.sign]}`}
                 aria-pressed={isSel ? 'true' : 'false'}
-                style={{ color: p.color, borderColor: p.color + (isSel ? '' : '88'), boxShadow: `0 0 ${isSel ? 26 : 14}px ${p.color}${isSel ? 'aa' : '55'}`, transform: `translateY(${landed ? 0 : -150}px) scale(${sc * (isSel ? 1.18 : 1)})`, transition: settled ? 'box-shadow .4s ease, border-color .4s ease' : `transform 1.3s cubic-bezier(.2,.9,.3,1.15) ${i * 110}ms`, fontSize: p.k === 'asc' ? 12 : 17 }}
+                style={{ color: p.color, borderColor: p.color + (isSel ? '' : '88'), background: isSel ? `color-mix(in srgb, ${p.color} 22%, #17123a)` : undefined, boxShadow: `0 0 ${isSel ? 26 : 14}px ${p.color}${isSel ? 'aa' : '55'}`, transform: `translateY(${landed ? 0 : -150}px) scale(${sc * (isSel ? 1.18 : 1)})`, transition: settled ? 'box-shadow .2s ease, border-color .2s ease, background-color .2s ease' : `transform 1.2s cubic-bezier(.2,.9,.3,1.12) ${i * 100}ms`, fontSize: p.k === 'asc' ? 13 : 17 }}
               >{p.g}</button>
             </div>
           );
         })}
       </div>
       <div className="sp-legend">
-        <span>Toque em um símbolo</span>
-        <span className="sp-dot" /> <span>pulsando: ativo hoje</span>
+        <span>Toque em um planeta para ler</span>
+        <span className="sp-key"><span className="sp-dot" aria-hidden="true" />ativo hoje</span>
         {needsMotion ? <button className="sp-motion" onClick={askMotion}>Ativar movimento</button> : null}
       </div>
 
-      <div className="glass sp-card" key={s.k}>
+      <div className="sp-card" key={s.k} style={{ '--pc': s.color }}>
         <div className="sp-head">
-          <span className="sp-badge sym" style={{ color: s.color, borderColor: s.color }}>{s.g}</span>
-          <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <span className="sp-badge sym" style={{ color: s.color, borderColor: s.color, fontSize: s.k === 'asc' ? 14 : 19 }} aria-hidden="true">{s.g}</span>
+          <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
             <span className="sp-title">{s.name} em {sim.SIGNS[s.sign]}</span>
-            <span className="sp-sub">{Math.floor(s.deg)}° · Casa {s.house} · {sim.HOUSE[s.house - 1]}</span>
+            <span className="sp-sub">{Math.floor(s.deg)}°, casa {s.house}: {sim.HOUSE[s.house - 1]}</span>
           </span>
         </div>
-        <div className="kicker" style={{ fontSize: 15, marginTop: 4 }}>Como age em você</div>
-        <p className="sp-text">{how}</p>
+        <div className="sp-sec">
+          <span className="sp-k">Como age em você</span>
+          <p className="sp-text">{how}</p>
+        </div>
         {act.length ? (
           <div className="sp-today">
-            <div className="sp-today-k">Hoje no céu</div>
+            <span className="sp-k">Hoje no céu</span>
             {act.map((a, j) => (
               <p key={j}>{sim.PL[a.tk].name} em trânsito forma {a.name} com {({ asc: 'o seu ascendente', moon: 'a sua Lua', venus: 'a sua Vênus' })[s.k] || `o seu ${s.name}`} (orbe {a.orb.toFixed(1).replace('.', ',')}°): {TONE[a.k]}.</p>
             ))}
           </div>
         ) : null}
-        <div className="kicker" style={{ fontSize: 15, marginTop: 6 }}>Dicas para cada área</div>
-        <div className="sp-tips">
-          {AREAS.map((a, j) => (
-            <div key={j} className="sp-tip">
-              <span style={{ color: a[1] }}>{a[0]}</span>
-              <p>{TIPS[s.k][j]}</p>
-            </div>
-          ))}
+        <div className="sp-sec">
+          <span className="sp-k">Dicas para cada área</span>
+          <div className="sp-tips">
+            {AREAS.map((a, j) => (
+              <div key={j} className="sp-tip" style={{ '--c': a[1] }}>
+                <span>{a[0]}</span>
+                <p>{TIPS[s.k][j]}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

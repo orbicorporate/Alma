@@ -319,7 +319,7 @@ export default function Constelacao() {
         }
         ctx.globalCompositeOperation = 'source-over';
         if (z > 1.05 && it.kind !== 'estrela') {
-          ctx.globalAlpha = r * Math.min(1, (z - 1.05) * 3) * 0.9; ctx.fillStyle = '#f4f1ea'; ctx.font = '300 12.5px Manrope, sans-serif'; ctx.textAlign = 'center';
+          ctx.globalAlpha = r * Math.min(1, (z - 1.05) * 3) * 0.9; ctx.fillStyle = '#F6F3FF'; ctx.font = '400 14px Manrope, sans-serif'; ctx.textAlign = 'center';
           const lab = (it.title || '').length > 26 ? it.title.slice(0, 25) + '…' : it.title || '';
           ctx.fillText(lab, p.x, p.y + size * 2.2 + 12); ctx.textAlign = 'left'; ctx.globalAlpha = 1;
         }
@@ -341,10 +341,10 @@ export default function Constelacao() {
         const ly = c0.y - (90 + 36 * Math.sqrt(L.count[th.k])) * z * 0.7;
         const topFade = Math.min(1, Math.max(0, (ly - 170) / 60)), inFade = Math.min(1, Math.max(0, (t - 1.5) / 1.5));
         if (topFade * inFade < 0.02 || ly > H - 180) return;
-        ctx.globalAlpha = inFade * 0.8 * topFade;
-        ctx.fillStyle = th.color; ctx.font = '400 13px Manrope, sans-serif'; ctx.textAlign = 'center';
+        ctx.globalAlpha = inFade * 0.95 * topFade;
+        ctx.fillStyle = th.color; ctx.font = '500 15px Manrope, sans-serif'; ctx.textAlign = 'center';
         ctx.shadowColor = th.color; ctx.shadowBlur = 12;
-        ctx.fillText(th.label.toUpperCase().split('').join(' '), c0.x, ly);
+        ctx.fillText(th.label, c0.x, ly);
         ctx.shadowBlur = 0; ctx.textAlign = 'left';
       });
       ctx.globalAlpha = 1;
@@ -405,56 +405,62 @@ export default function Constelacao() {
   const counts = { pergunta: 0, diario: 0, estrela: 0 };
   items.forEach((i) => { if (i.kind === 'pergunta') counts.pergunta++; else if (i.kind === 'estrela') counts.estrela++; else if (!['plano', 'taro'].includes(i.kind)) counts.diario++; });
 
+  const plural = (n, a, b) => `${n} ${n === 1 ? a : b}`;
+  const selTheme = sel ? (THEMES.find((x) => x.k === sel.theme) || {}) : {};
   return (
-    <div className="cz">
+    <div className={'cz' + (sel ? ' cz-has-card' : '')}>
       <canvas ref={cv} className="cz-canvas" style={{ width: dim.W, height: dim.H, left: (390 - dim.W) / 2 }} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} onWheel={onWheel} aria-label="Sua constelação" role="img" />
       <div className="cz-veil-top" />
       <div className="cz-top">
-        <button className="cz-ic" aria-label="Voltar" onClick={() => { window.location.hash = '#/'; }}>‹</button>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <button className="cz-ic" aria-label="Voltar" onClick={() => { window.location.hash = '#/'; }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" /></svg>
+        </button>
+        <div className="cz-head">
           <span className="cz-title">Sua constelação</span>
-          <span className="cz-sub">{counts.pergunta} {counts.pergunta === 1 ? 'pergunta' : 'perguntas'} · {counts.estrela} {counts.estrela === 1 ? 'estrela' : 'estrelas'} · {counts.diario} {counts.diario === 1 ? 'registro' : 'registros'}</span>
+          <span className="cz-sub">{plural(counts.pergunta, 'pergunta', 'perguntas')}, {plural(counts.estrela, 'estrela', 'estrelas')} e {plural(counts.diario, 'registro', 'registros')}</span>
         </div>
       </div>
       <div className="cz-themes">
-        {L.used.map((th) => <button key={th.k} className="cz-chip" onClick={() => focusTheme(th.k)} style={{ borderColor: th.color + '88', color: th.color }}><i style={{ background: th.color }} />{th.label} · {L.count[th.k] || 0}</button>)}
+        {L.used.map((th) => <button key={th.k} className="cz-chip" onClick={() => focusTheme(th.k)} style={{ '--c': th.color }} aria-label={`${th.label}, ${L.count[th.k] || 0}`}><i aria-hidden="true" />{th.label}<b aria-hidden="true">{L.count[th.k] || 0}</b></button>)}
       </div>
       {items.length === 0 ? (
         <div className="cz-empty">
           <p>Seu céu começa com a primeira pergunta, anotação ou sonho.</p>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-            <button className="cz-btn" onClick={() => { window.location.hash = '#/'; }}>Perguntar à Alma</button>
+          <div className="cz-empty-btns">
+            <button className="cz-btn cz-btn-main" onClick={() => { window.location.hash = '#/'; }}>Perguntar à Alma</button>
             <button className="cz-btn" onClick={() => { window.location.hash = '#/diario'; }}>Abrir o diário</button>
           </div>
         </div>
       ) : null}
       {items.length > 1 ? (
         <div className="cz-time">
-          <span>{cut >= 1000 ? 'Hoje' : fmt(cutAt)}</span>
+          <span className="cz-time-now" aria-live="polite">{cut >= 1000 ? 'Hoje' : fmt(cutAt)}</span>
           <input className="cz-range" style={{ '--p': `${cut / 10}%` }} type="range" min="0" max="1000" value={cut} onChange={(e) => setCut(+e.target.value)} aria-label="Linha do tempo da constelação" />
-          <span className="cz-time-hint">Rebobine o tempo · pince para aproximar</span>
+          <span className="cz-time-hint">Volte no tempo ou pince para aproximar</span>
         </div>
       ) : null}
       {sel ? (
-        <div className="cz-card" key={sel.id}>
+        <div className="cz-card" key={sel.id} role="dialog" aria-label={sel.title} style={{ '--c': selTheme.color }}>
           <div className="cz-card-head">
-            <span className="cz-kind" style={{ color: (THEMES.find((x) => x.k === sel.theme) || {}).color }}>{KIND[sel.kind]} · {(THEMES.find((x) => x.k === sel.theme) || {}).label}</span>
-            <button className="cz-x" aria-label="Fechar" onClick={() => setSel(null)}>×</button>
+            <span className="cz-kind"><i aria-hidden="true" />{KIND[sel.kind]}{selTheme.label ? `, ${selTheme.label.toLowerCase()}` : ''}</span>
+            <button className="cz-x" aria-label="Fechar" onClick={() => setSel(null)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
           </div>
-          <span className="cz-date">{fmt(sel.at)}{sel.resolved ? ' · resolvida' : ''}</span>
           <span className="cz-card-title">{sel.title}</span>
+          <span className="cz-date">{fmt(sel.at)}{sel.resolved ? ', resolvida' : ''}</span>
           {sel.text ? <p className="cz-card-text">{sel.text}</p> : null}
           {parentOf ? <span className="cz-parent">Da pergunta: “{parentOf.title}”</span> : null}
+          {sel.kind === 'pergunta' && sel.stars.length ? <span className="cz-parent">{sel.stars.length} {sel.stars.length === 1 ? 'resposta estrelada' : 'respostas estreladas'} orbitando esta estrela</span> : null}
           {confirm ? (
             <div className="cz-del-box">
               <span>{sel.kind === 'pergunta' ? 'Excluir esta pergunta, as respostas estreladas e o plano?' : sel.kind === 'plano' ? 'Excluir este plano? A pergunta continua no céu.' : 'Excluir este item do seu céu?'} Não dá para desfazer.</span>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className="cz-del-btns">
                 <button className="cz-btn cz-btn-del" onClick={removeSel}>Excluir</button>
                 <button className="cz-btn" onClick={() => setConfirm(false)}>Cancelar</button>
               </div>
             </div>
           ) : <button className="cz-del" onClick={() => setConfirm(true)}>Excluir do céu</button>}
-          {sel.kind === 'pergunta' && sel.stars.length ? <span className="cz-parent">{sel.stars.length} {sel.stars.length === 1 ? 'resposta estrelada' : 'respostas estreladas'} orbitando esta estrela</span> : null}
         </div>
       ) : null}
     </div>

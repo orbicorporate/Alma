@@ -11,6 +11,26 @@ import { contextQS, contextOf, stepFor, planSteps, planNameOf, moodOf } from '..
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
 import { similarEntry, suggestTags, voiceRank, namesLine, reminderHour, skyLine, track, buzz, historyFor, recentQuestions } from '../insight.js';
 
+// Ícones de traço único (1.6), mesmo desenho em toda a tela. Decorativos: o texto ao lado diz o que é.
+const sv = (w, kids, extra) => <svg width={w} height={w} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...extra}>{kids}</svg>;
+const Ico = {
+  chev: () => sv(18, <path d="M9 6l6 6-6 6" />, { className: 'ico-chev' }),
+  check: ({ w = 14 }) => sv(w, <path d="M5 12.5l4.5 4.5L19 7.5" />, { strokeWidth: 2.2 }),
+  star: () => <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" /></svg>,
+  clock: () => sv(14, <><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></>),
+  cal: () => sv(14, <><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M3.5 10h17M8 3v4M16 3v4" /></>),
+  bell: ({ on }) => sv(15, <><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" fill={on ? 'currentColor' : 'none'} /><path d="M10 20.5a2 2 0 0 0 4 0" /></>),
+  pen: ({ w = 16 }) => sv(w, <><path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M13.5 6.5l4 4" /></>),
+  note: () => sv(15, <><path d="M5 4.5h14v11l-4 4H5z" /><path d="M8.5 9h7M8.5 12.5h4" /></>),
+  undo: () => sv(15, <><path d="M9 14L4 9l5-5" /><path d="M4 9h10a6 6 0 0 1 0 12h-3" /></>),
+  plus: () => sv(16, <path d="M12 5v14M5 12h14" />),
+  expand: () => sv(14, <path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" />),
+  spark: () => sv(18, <path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4zM18.5 16.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z" />),
+  gear: () => sv(18, <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" /></>),
+  cloud: () => sv(18, <path d="M7 18.5h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.4 1.6A3.3 3.3 0 0 0 7 18.5z" />),
+  play: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" /></svg>
+};
+
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -288,6 +308,10 @@ class Component extends DCLogic {
     const setStep = (j, patch) => this.updAt(idx, (en) => { en.plan = en.plan.map((x, k) => k === j ? Object.assign({}, x, patch) : x); return en; });
     const pct = Math.round(100 * doneN / total);
     const defName = planNameOf(e);
+    // Data legível: relativa quando está perto, com o dia da semana ao lado; cor pelo prazo.
+    const relOf = (x) => x.due < -1 ? `Atrasado há ${-x.due} dias` : x.due === -1 ? 'Atrasado desde ontem' : x.due === 0 ? 'Hoje' : x.due === 1 ? 'Amanhã' : x.due < 7 ? `Em ${x.due} dias` : x.date;
+    const dayOf = (x) => x.date.replace(/^(Hoje|Amanhã) · /, '');
+    const toneOf = (x) => x.done ? 'done' : x.due < 0 ? 'late' : x.due === 0 ? 'today' : 'soon';
     const ed = s.planEdit;
     return {
       confirmPlanDel: !!s.confirmPlanDel,
@@ -306,11 +330,12 @@ class Component extends DCLogic {
         this.updAt(idx, (en) => { en.plan = en.plan.concat([{ t: 'Novo passo', iso: nIso, done: false, remind: true }]); return en; });
         this.setState({ planEdit: { j: e.plan.length, t: '', iso: nIso }, nameEdit: null });
       },
-      q: `“${e.q}”`, doneN, total, allDone: doneN === total,
+      q: `“${e.q}”`, showQ: !!e.planName || defName.length < (e.q || '').replace(/\?$/, '').length - 1, doneN, total, allDone: doneN === total, pct,
+      curRel: cur >= 0 ? relOf(plan[cur]) : '', curDay: cur >= 0 && relOf(plan[cur]) !== plan[cur].date ? dayOf(plan[cur]) : '', curTone: cur >= 0 ? toneOf(plan[cur]) : 'done',
       open14: () => this.setState({ c14: { q: e.q, list: this.councilOf(e) } }),
-      headline: doneN === total ? 'Plano concluído' : doneN === 0 ? 'Vamos começar pelo passo 1' : `Você está no passo ${cur + 1}`,
-      sub: doneN === total ? 'Todos os passos feitos. Que caminho bonito.' : `Próximo: ${plan[cur].date.replace('Hoje · ', 'hoje, ')}`,
-      ringStyle: `background: conic-gradient(#8fe3b0 0% ${pct}%, rgba(255,255,255,.1) ${pct}% 100%); transition: background 1s ease`,
+      headline: doneN === total ? 'Plano concluído' : doneN === 0 ? 'Comece pelo passo 1' : `Você está no passo ${cur + 1} de ${total}`,
+      sub: doneN === total ? 'Todos os passos feitos. Que caminho bonito.' : 'Um passo por vez. A Alma te lembra no dia.',
+      ringStyle: `--p: ${pct}%`,
       resolveLabel: e.resolved ? 'Pergunta resolvida' : 'Sim, já resolvi',
       resolve: () => {
         if (e.resolved) return;
@@ -330,16 +355,17 @@ class Component extends DCLogic {
           remove: () => { this.updAt(idx, (en) => { en.plan = en.plan.filter((_, k) => k !== j); return en; }); this.setState({ planEdit: null }); this.flash('Passo removido'); },
           canRemove: total > 1,
           n: j + 1, t: x.t, date: x.date + (x.hour != null && !x.done ? ` · ${x.hour}h` : ''), kicker: `Passo ${j + 1} de ${total}`,
+          rel: x.done ? dayOf(x) : relOf(x), day: !x.done && relOf(x) !== x.date ? dayOf(x) + (x.hour != null ? `, ${x.hour}h` : '') : (x.hour != null && !x.done ? `${x.hour}h` : ''), tone: toneOf(x),
           done, todo: !done, isCurrent: isCurrent && !editing, isFuture: !done && !isCurrent && !editing,
           badgeOn: done || isCurrent, badge: done ? 'Concluído' : 'Agora',
           badgeStyle: done ? 'background: rgba(143,227,176,.16); color: #8fe3b0' : 'background: rgba(243,217,139,.18); color: #f3d98b',
           cardStyle: isCurrent ? 'border-color: rgba(243,217,139,.55); box-shadow: 0 0 40px rgba(243,217,139,.12), inset 0 1px 0 rgba(255,255,255,.14)' : done ? 'opacity: .7' : 'opacity: .85',
-          numStyle: done ? 'background: #8fe3b0' : isCurrent ? 'background: #f3d98b; color: #1a1408; box-shadow: 0 0 18px rgba(243,217,139,.6)' : 'border: 1px solid rgba(244,241,234,.4); color: rgba(244,241,234,.85)',
+          numStyle: done ? 'background: #8fe3b0' : isCurrent ? 'background: #f3d98b; color: #1a1408; box-shadow: 0 0 18px rgba(243,217,139,.6)' : 'border: 1px solid var(--ink-3); color: var(--ink)',
           textStyle: done ? 'text-decoration: line-through; opacity: .6' : '',
-          dateColor: done ? 'rgba(244,241,234,.45)' : (x.due <= 0 ? '#f3d98b' : 'rgba(244,241,234,.75)'),
+          dateColor: done ? 'var(--ink-3)' : (x.due <= 0 ? '#f3d98b' : 'var(--ink-2)'),
           remindP: x.remind ? 'true' : 'false',
           bellLabel: x.remind ? 'Lembrete ligado' : 'Sem lembrete',
-          bellStyle: x.remind && !done ? 'background: rgba(243,217,139,.14); color: #f3d98b; border: 1px solid rgba(243,217,139,.4)' : 'background: rgba(255,255,255,.04); color: rgba(244,241,234,.6); border: 1px solid rgba(255,255,255,.12)',
+          bellStyle: x.remind && !done ? 'background: rgba(243,217,139,.14); color: #f3d98b; border: 1px solid rgba(243,217,139,.4)' : 'background: rgba(255,255,255,.04); color: var(--ink-2); border: 1px solid rgba(255,255,255,.12)',
           bellFill: x.remind && !done ? '#f3d98b' : 'none', bellStroke: x.remind && !done ? '#f3d98b' : 'currentColor',
           complete: () => { setStep(j, { done: true }); this.flash(j === total - 1 ? 'Último passo concluído' : `Passo ${j + 1} concluído`); },
           undo: () => setStep(j, { done: false }),
@@ -481,7 +507,7 @@ class Component extends DCLogic {
       return {
         label: k, pressed: on ? 'true' : 'false',
         pick: () => this.setState({ kind: k, kindPicked: true }),
-        style: on ? 'background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.5); box-shadow: 0 0 22px var(--m1)' : 'background: rgba(255,255,255,.04); color: rgba(244,241,234,.78)'
+        style: on ? 'background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.5); box-shadow: 0 0 22px var(--m1)' : 'background: rgba(255,255,255,.04); color: var(--ink-2)'
       };
     });
     const dots = [0, 1, 2].map((i) => ({ style: s.count > i ? 'background: #f3d98b; box-shadow: 0 0 14px #f3d98b' : 'background: rgba(255,255,255,.18)' }));
@@ -558,7 +584,7 @@ class Component extends DCLogic {
         style: `left: ${(x - 23).toFixed(1)}px; top: ${(y - 23).toFixed(1)}px; z-index: ${foc ? 2 : 1}; opacity: ${on ? 1 : 0.25}; transform: scale(${foc ? 1.14 : on ? 1 : 0.84}); border-color: ${on ? a.color : 'rgba(255,255,255,.14)'}; box-shadow: ${on ? '0 0 ' + (foc ? 44 : 28) + 'px ' + a.color + (foc ? '99' : '55') + ', inset 0 1px 0 rgba(255,255,255,.2)' : 'none'}`
       });
     });
-    let councilStatus, councilSub, statusColor = 'rgba(244,241,234,.85)';
+    let councilStatus, councilSub, statusColor = 'var(--ink)';
     if (s.focus >= 0) {
       councilStatus = AG[s.focus].name; councilSub = SYM[AG[s.focus].name].about; statusColor = AG[s.focus].color;
     } else if (s.lit < N) {
@@ -611,7 +637,7 @@ class Component extends DCLogic {
       const on = s.filter === f.id;
       return {
         label: f.label, color: f.color, pressed: on ? 'true' : 'false',
-        style: on ? 'background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.5)' : 'background: rgba(255,255,255,.04); color: rgba(244,241,234,.75)',
+        style: on ? 'background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.5)' : 'background: rgba(255,255,255,.04); color: var(--ink-2)',
         pick: () => this.setState({ filter: f.id, open: -1 })
       };
     });
@@ -639,12 +665,12 @@ class Component extends DCLogic {
     const plans = ents.map((e, i) => ({ e, i })).filter(({ e }) => e.plan && e.plan.length).reverse().map(({ e, i }) => {
       const pl = e.plan.map(stepInfo), done = pl.filter((x) => x.done).length, nx = pl.find((x) => !x.done);
       const pct = Math.round(100 * done / pl.length), fin = done === pl.length;
-      const rel = nx ? (nx.due < 0 ? 'atrasado' : nx.due === 0 ? 'hoje' : nx.due === 1 ? 'amanhã' : `em ${nx.due} dias`) : '';
+      const rel = nx ? (nx.due < -1 ? `Atrasado há ${-nx.due} dias` : nx.due === -1 ? 'Atrasado desde ontem' : nx.due === 0 ? 'Hoje' : nx.due === 1 ? 'Amanhã' : `Em ${nx.due} dias`) : (e.resolved ? 'Resolvida' : 'Concluído');
+      const tone = fin ? 'mint' : nx.due < 0 ? 'late' : nx.due === 0 ? 'today' : 'soon';
       return {
-        q: planNameOf(e), prog: `${done} de ${pl.length} passos`,
-        ring: `background: conic-gradient(#8fe3b0 0% ${pct}%, rgba(255,255,255,.1) ${pct}% 100%)`,
-        next: fin ? (e.resolved ? 'Plano concluído e pergunta resolvida' : 'Todos os passos feitos. Já pode marcar como resolvida.') : `Próximo: ${nx.t} · ${rel}`,
-        nextStyle: fin ? 'color: #8fe3b0' : (nx.due <= 0 ? 'color: #f3d98b' : 'color: rgba(244,241,234,.65)'),
+        q: planNameOf(e), prog: `${done} de ${pl.length} passos`, done, total: pl.length, fin, rel, tone,
+        ring: `--p: ${pct}%`,
+        next: fin ? (e.resolved ? 'Todos os passos feitos' : 'Todos os passos feitos. Já pode marcar como resolvida.') : nx.t,
         open: () => this.setState({ screen: 'plan', planIdx: i, planPrev: 'journal', sheet: -1 })
       };
     });
@@ -673,12 +699,11 @@ class Component extends DCLogic {
     });
     const nRes = ents.filter((e) => e.resolved).length;
     const JF = [{ id: 'all', label: `Todas · ${ents.length}` }, { id: 'open', label: `Em aberto · ${ents.length - nRes}` }, { id: 'resolved', label: `Resolvidas · ${nRes}` }];
-    const jhint = { all: 'Cada pergunta que você trouxe vira uma estrela. Toque numa para rever as respostas e o plano.', open: 'Perguntas que você ainda está vivendo. Quando sentir que encontrou sua resposta, abra a pergunta e marque como resolvida.', resolved: 'Perguntas que você marcou como resolvidas. Elas continuam no seu céu, brilhando em paz.' }[s.jfilter] || '';
+    const jhint = { all: 'Toque numa pergunta para rever respostas e plano.', open: 'Achou sua resposta? Abra a pergunta e marque como resolvida.', resolved: 'Elas continuam no seu céu, brilhando em paz.' }[s.jfilter] || '';
     const jfilters = JF.map((f) => {
       const on = s.jfilter === f.id;
       return {
-        label: f.label, pressed: on ? 'true' : 'false',
-        style: on ? 'background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.5)' : 'background: rgba(255,255,255,.04); color: rgba(244,241,234,.75)',
+        label: f.label.split(' · ')[0], count: f.label.split(' · ')[1], pressed: on ? 'true' : 'false', on,
         pick: () => this.setState({ jfilter: f.id })
       };
     });
@@ -687,7 +712,8 @@ class Component extends DCLogic {
       .map(({ i, e }) => {
         const col = KC[e.kind] || '#f3d98b';
         return {
-          q: e.q, meta: `${e.date} · ${e.kind}${e.plan ? ' · plano ' + e.plan.filter((x) => x.done).length + ' de ' + e.plan.length : ''}${e.stars.length ? ' · ★ ' + e.stars.length : ''}`, n: e.stars.length, resolved: !!e.resolved,
+          q: e.q, meta: `${e.date}, ${e.kind.toLowerCase()}`, kc: col,
+          planTag: e.plan ? `Plano ${e.plan.filter((x) => x.done).length}/${e.plan.length}` : '', n: e.stars.length, resolved: !!e.resolved,
           status: e.resolved ? 'Resolvida' : 'Em aberto',
           statusStyle: e.resolved ? 'color: #8fe3b0; border-color: rgba(143,227,176,.5); background: rgba(143,227,176,.1)' : 'color: #c9b8ff; border-color: rgba(201,184,255,.45); background: rgba(201,184,255,.08)',
           rowStyle: e.resolved ? 'opacity: .75' : '',
@@ -712,10 +738,10 @@ class Component extends DCLogic {
       plan: (se.plan || []).map((pp, j) => ({
         t: pp.t, date: pp.date, n: j + 1, done: pp.done, todo: !pp.done,
         pressed: pp.done ? 'true' : 'false', aria: `Passo ${j + 1}: marcar como concluído`, remindP: pp.remind ? 'true' : 'false',
-        numStyle: pp.done ? 'background: #8fe3b0; box-shadow: 0 0 14px rgba(143,227,176,.6)' : 'border: 1px solid rgba(244,241,234,.4); color: rgba(244,241,234,.85)',
+        numStyle: pp.done ? 'background: #8fe3b0; box-shadow: 0 0 14px rgba(143,227,176,.6)' : 'border: 1px solid var(--ink-3); color: var(--ink)',
         textStyle: pp.done ? 'opacity: .5; text-decoration: line-through' : '',
-        dateColor: pp.done ? 'rgba(244,241,234,.4)' : (pp.due <= 0 ? '#f3d98b' : 'rgba(244,241,234,.55)'),
-        bellFill: pp.remind && !pp.done ? '#f3d98b' : 'none', bellStroke: pp.remind && !pp.done ? '#f3d98b' : 'rgba(244,241,234,.45)',
+        dateColor: pp.done ? 'var(--ink-3)' : (pp.due <= 0 ? '#f3d98b' : 'var(--ink-3)'),
+        bellFill: pp.remind && !pp.done ? '#f3d98b' : 'none', bellStroke: pp.remind && !pp.done ? '#f3d98b' : 'var(--ink-3)',
         toggle: () => updEntry((e) => { e.plan = e.plan.map((x, k) => k === j ? Object.assign({}, x, { done: !x.done }) : x); return e; }),
         bell: () => {
           updEntry((e) => { e.plan = e.plan.map((x, k) => k === j ? Object.assign({}, x, { remind: !x.remind }) : x); return e; });
@@ -834,7 +860,7 @@ class Component extends DCLogic {
       showBack: ['plan', 'answers', 'journal', 'deepen'].includes(scr), showWord: !['plan', 'answers', 'journal', 'deepen'].includes(scr),
       backLabel: scr === 'plan' ? (s.planPrev === 'answers' ? 'Respostas' : 'Minha Alma') : scr === 'answers' ? 'Suas escolhas' : scr === 'deepen' ? (s.step > 0 ? 'Anterior' : 'Pergunta') : 'Voltar', showJournal: scr === 'ask' || scr === 'answers',
       breathWord: s.inhale ? 'Inspire' : 'Solte',
-      breathWordStyle: s.inhale ? 'letter-spacing: .14em; color: #f4f1ea' : 'letter-spacing: .02em; color: rgba(244,241,234,.8)',
+      breathWordStyle: s.inhale ? 'letter-spacing: .14em; color: var(--ink)' : 'letter-spacing: .02em; color: var(--ink-2)',
       breathSub: s.medit ? 'Com o que depende de você, inspire. Com o que não depende, solte. Fique o tempo que precisar.' : 'Três respirações antes de perguntar. A Alma escuta melhor no silêncio.',
       breathReady: s.medit || s.count >= 3, showSkip: !s.medit && s.count < 3,
       breathCta: s.medit ? 'Voltar ao Conselho' : 'Entrar',
@@ -978,7 +1004,7 @@ Object.assign(Component.prototype, {
           </div>
           <div style={css('display: flex; flex-direction: column; gap: 8px; margin: 4px 0 6px')}>
             {perks.map((p, i) => (
-              <span key={i} className="fade" style={css(`display: flex; align-items: center; gap: 10px; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.82); animation-delay: ${0.3 + i * 0.15}s`)}>
+              <span key={i} className="fade" style={css(`display: flex; align-items: center; gap: 10px; font-size: 17.5px; font-weight: 300; color: var(--ink-2); animation-delay: ${0.3 + i * 0.15}s`)}>
                 <i style={css(`width: 8px; height: 8px; border-radius: 50%; background: ${p[0]}; box-shadow: 0 0 10px ${p[0]}; flex-shrink: 0`)} />{p[1]}
               </span>
             ))}
@@ -986,17 +1012,17 @@ Object.assign(Component.prototype, {
           <button className="cta" onClick={async () => { const r = await signInWithGoogle(); if (r.error) this.setState({ loginMsg: r.error }); }} style={css('height: 54px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17.5px; font-weight: 500; color: #1f1f1f; background: #ffffff; box-shadow: 0 0 30px rgba(255,255,255,.15)')}>
             {G}Continuar com Google
           </button>
-          <div style={css('display: flex; align-items: center; gap: 10px; font-size: 16px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.4)')}>
+          <div style={css('display: flex; align-items: center; gap: 10px; font-size: 14.5px; color: var(--ink-3)')}>
             <span style={css('flex-grow: 1; height: 1px; background: rgba(255,255,255,.12)')} />ou com e-mail<span style={css('flex-grow: 1; height: 1px; background: rgba(255,255,255,.12)')} />
           </div>
           <div style={css('display: flex; gap: 8px')}>
-            <input type="email" value={this.state.loginEmail} onChange={(e) => this.setState({ loginEmail: e.target.value, loginMsg: '' })} placeholder="seu@email.com" aria-label="Seu e-mail" style={css('flex-grow: 1; min-width: 0; height: 50px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #f4f1ea; font: inherit; font-size: 17.5px; outline: none')} />
+            <input type="email" value={this.state.loginEmail} onChange={(e) => this.setState({ loginEmail: e.target.value, loginMsg: '' })} placeholder="seu@email.com" aria-label="Seu e-mail" style={css('flex-grow: 1; min-width: 0; height: 50px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: var(--ink); font: inherit; font-size: 17.5px; outline: none')} />
             <button className="cta" onClick={() => this.sendLink()} style={css('flex-shrink: 0; height: 50px; padding: 0 18px; border-radius: 999px; font-size: 17.5px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #c9b8ff, #efe8ff 50%, #b8d8ff)')}>Enviar link</button>
           </div>
-          {this.state.loginMsg ? <span style={css('text-align: center; font-size: 17px; line-height: 1.5; color: #f3d98b')}>{this.state.loginMsg}</span> : <span style={css('text-align: center; font-size: 17px; line-height: 1.5; color: rgba(244,241,234,.5)')}>Sem senha: enviamos um link de acesso para o seu e-mail.</span>}
+          {this.state.loginMsg ? <span style={css('text-align: center; font-size: 17px; line-height: 1.5; color: #f3d98b')}>{this.state.loginMsg}</span> : <span style={css('text-align: center; font-size: 17px; line-height: 1.5; color: var(--ink-3)')}>Sem senha: enviamos um link de acesso para o seu e-mail.</span>}
           <div style={css('flex-grow: 1')} />
-          <button onClick={skip} style={css('height: 44px; align-self: center; padding: 0 18px; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.7)')}>Continuar sem conta</button>
-          <span style={css('text-align: center; font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.42)')}>Sem conta, tudo fica salvo só neste aparelho. Você pode entrar depois na sua constelação.</span>
+          <button onClick={skip} style={css('height: 44px; align-self: center; padding: 0 18px; font-size: 17.5px; font-weight: 300; color: var(--ink-2)')}>Continuar sem conta</button>
+          <span style={css('text-align: center; font-size: 16px; font-weight: 300; line-height: 1.5; color: var(--ink-3)')}>Sem conta, tudo fica salvo só neste aparelho. Você pode entrar depois na sua constelação.</span>
         </div>
       </div>
     );
@@ -1005,38 +1031,37 @@ Object.assign(Component.prototype, {
     const a = this.state.auth;
     if (a.loggedIn) {
       return (
-        <div style={css('border-radius: 18px; padding: 12px 16px; background: rgba(143,227,176,.07); border: 1px solid rgba(143,227,176,.25); display: flex; align-items: center; gap: 10px')}>
-          <span style={css('flex-grow: 1; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.8)')}>Constelação salva na nuvem · {a.email}</span>
-          <button onClick={() => signOut()} style={css('height: 36px; padding: 0 12px; font-size: 17px; color: rgba(244,241,234,.7)')}>Sair</button>
+        <div className="mj-link">
+          <span className="mj-ico" style={css("--c: var(--mint)")}><Ico.cloud /></span>
+          <span className="mj-link-t">Salva na nuvem<small>{a.email}</small></span>
+          <button className="mj-out tap" onClick={() => signOut()}>Sair</button>
         </div>
       );
     }
     const lo = !!this.state.loginOpen;
     return (
-      <div className={'glass al-login' + (lo ? ' on' : '')} style={css('border-radius: 22px; padding: 4px 6px 4px 18px; display: flex; flex-direction: column; gap: 10px')}>
-        <button className="al-login-head" onClick={() => this.setState({ loginOpen: !lo })} aria-expanded={lo ? 'true' : 'false'}>
-          <span className="al-login-t">
-            <span className="kicker" style={css('color: #c9b8ff; font-size: 13px')}>Guarde sua constelação</span>
-            <span>Hoje tudo fica só neste aparelho</span>
-          </span>
+      <div className={'al-login' + (lo ? ' on' : '')}>
+        <button className="mj-link al-login-head" onClick={() => this.setState({ loginOpen: !lo })} aria-expanded={lo ? 'true' : 'false'}>
+          <span className="mj-ico" style={css("--c: var(--lilac)")}><Ico.cloud /></span>
+          <span className="mj-link-t">Guardar na nuvem<small>Hoje tudo fica só neste aparelho</small></span>
           <span className="al-login-go">{lo ? 'Fechar' : 'Entrar'}</span>
         </button>
-        {lo ? (<div className="al-more" style={css('display: flex; flex-direction: column; gap: 10px; padding: 0 12px 14px 0')}>
-        <span style={css('font-size: 16.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.75)')}>Entre para ver suas perguntas, estrelas e planos em qualquer aparelho. Sem senha: enviamos um link de acesso.</span>
+        {lo ? (<div className="al-more" style={css("display: flex; flex-direction: column; gap: 10px; padding: 0 16px 16px")}>
+        <span style={css("font-size: 15.5px; font-weight: 300; line-height: 1.5; color: var(--ink-2)")}>Entre para ver suas perguntas, estrelas e planos em qualquer aparelho. Sem senha: enviamos um link de acesso.</span>
         {a.enabled ? (
           <>
-            <button className="cta" onClick={async () => { const r = await signInWithGoogle(); if (r.error) this.setState({ loginMsg: r.error }); }} style={css('height: 46px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17.5px; font-weight: 500; color: #1f1f1f; background: #ffffff')}>
+            <button className="cta" onClick={async () => { const r = await signInWithGoogle(); if (r.error) this.setState({ loginMsg: r.error }); }} style={css("height: 46px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16.5px; font-weight: 500; color: #1f1f1f; background: #ffffff")}>
               <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.3 0-11.6-4.2-13.5-10l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>
               Continuar com Google
             </button>
-            <span style={css('text-align: center; font-size: 16px; letter-spacing: .14em; text-transform: uppercase; color: rgba(244,241,234,.4)')}>ou</span>
-            <input type="email" value={this.state.loginEmail} onChange={(e) => this.setState({ loginEmail: e.target.value, loginMsg: '' })} placeholder="seu@email.com" aria-label="Seu e-mail" style={css('height: 46px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: #f4f1ea; font: inherit; font-size: 17.5px; outline: none')} />
-            <button className="cta" onClick={() => this.sendLink()} style={css('height: 46px; border-radius: 999px; font-size: 17.5px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #c9b8ff, #efe8ff 50%, #b8d8ff)')}>Enviar link de acesso</button>
+            <span style={css("text-align: center; font-size: 14.5px; color: var(--ink-3)")}>ou</span>
+            <input type="email" value={this.state.loginEmail} onChange={(e) => this.setState({ loginEmail: e.target.value, loginMsg: '' })} placeholder="seu@email.com" aria-label="Seu e-mail" style={css("height: 46px; padding: 0 14px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 16.5px")} />
+            <button className="cta" onClick={() => this.sendLink()} style={css("height: 46px; border-radius: 999px; font-size: 16.5px; font-weight: 500; color: #1a1030; background: linear-gradient(120deg, #c9b8ff, #efe8ff 50%, #b8d8ff)")}>Enviar link de acesso</button>
           </>
         ) : (
-          <span style={css('font-size: 16px; color: rgba(244,241,234,.5)')}>O login ainda não está ativo neste ambiente.</span>
+          <span style={css("font-size: 15px; color: var(--ink-3)")}>O login ainda não está ativo neste ambiente.</span>
         )}
-        {this.state.loginMsg ? <span style={css('font-size: 17px; line-height: 1.5; color: #f3d98b')}>{this.state.loginMsg}</span> : null}
+        {this.state.loginMsg ? <span style={css("font-size: 16px; line-height: 1.5; color: var(--gold)")}>{this.state.loginMsg}</span> : null}
         </div>) : null}
       </div>
     );
@@ -1075,8 +1100,8 @@ Component.prototype.render = function render() {
         <div style={css("position: absolute; top: 36px; left: 12px; right: 12px; height: 44px; z-index: 5; display: flex; align-items: center; justify-content: space-between; pointer-events: none")}>
           {R.showBack ? (
             <>
-              <button onClick={R.back} aria-label={'Voltar: ' + R.backLabel} style={css("pointer-events: auto; height: 40px; padding: 0 14px 0 8px; border-radius: 999px; display: flex; align-items: center; gap: 4px; font-size: 16px; color: #f4f1ea; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px)")}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <button onClick={R.back} aria-label={'Voltar: ' + R.backLabel} style={css("pointer-events: auto; height: 40px; padding: 0 14px 0 8px; border-radius: 999px; display: flex; align-items: center; gap: 4px; font-size: 16px; color: var(--ink); background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px)")}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M15 5l-7 7 7 7" />
                 </svg>
                 {R.backLabel}
@@ -1085,7 +1110,7 @@ Component.prototype.render = function render() {
           ) : null}
           {R.showWord ? (
             <>
-              <span style={css("padding-left: 10px; font-size: 17px; font-weight: 300; letter-spacing: .38em; color: rgba(244,241,234,.85)")}>
+              <span style={css("padding-left: 10px; font-size: 17px; font-weight: 300; letter-spacing: .38em; color: var(--ink)")}>
                 {"alma"}
               </span>
             </>
@@ -1094,7 +1119,7 @@ Component.prototype.render = function render() {
         </div>
         {R.isIntro ? (
           <>
-            <div className="screen">
+            <div className="screen ritual">
               <div className="orbit" aria-hidden="true" style={css("position: absolute; left: 65px; top: 170px; width: 260px; height: 260px")}>
                 {(R.introIcons || []).map((L2_a, I2) => (
                   <React.Fragment key={I2}>
@@ -1136,7 +1161,7 @@ Component.prototype.render = function render() {
                       </span>
                       <span style={css("width: 28px; height: 1px; background: linear-gradient(90deg, #f3d98b, transparent)")}></span>
                     </div>
-                    <p className="fade" style={css(`margin: 8px 0 0; font-size: 15.5px; letter-spacing: .2em; text-transform: uppercase; color: rgba(244,241,234,.6); ${(R.ph?.goldStyle) ?? ''}`)}>
+                    <p className="fade" style={css(`margin: 8px 0 0; font-size: 15px; letter-spacing: .02em; color: var(--ink-2); ${(R.ph?.goldStyle) ?? ''}`)}>
                       {R.ph?.from}
                     </p>
                   </div>
@@ -1144,7 +1169,7 @@ Component.prototype.render = function render() {
                     <button className="glass cta" onClick={R.startJourney} style={css("height: 56px; padding: 0 48px; border-radius: 999px; font-size: 17px; letter-spacing: .06em")}>
                       {"Começar"}
                     </button>
-                    <button onClick={R.nextPhrase} style={css("height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.6)")}>
+                    <button onClick={R.nextPhrase} style={css("height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: var(--ink-2)")}>
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M20 12a8 8 0 1 1-2.4-5.7" />
                         <path d="M20 4v5h-5" />
@@ -1173,7 +1198,7 @@ Component.prototype.render = function render() {
                       </span>
                       <span style={css("width: 28px; height: 1px; background: linear-gradient(90deg, #f3d98b, transparent)")}></span>
                     </div>
-                    <p className="fade" style={css(`margin: 8px 0 0; font-size: 15.5px; letter-spacing: .2em; text-transform: uppercase; color: rgba(244,241,234,.6); ${(R.ph?.goldStyle) ?? ''}`)}>
+                    <p className="fade" style={css(`margin: 8px 0 0; font-size: 15px; letter-spacing: .02em; color: var(--ink-2); ${(R.ph?.goldStyle) ?? ''}`)}>
                       {R.ph?.from}
                     </p>
                   </div>
@@ -1181,7 +1206,7 @@ Component.prototype.render = function render() {
                     <button className="glass cta" onClick={R.startJourney} style={css("height: 56px; padding: 0 48px; border-radius: 999px; font-size: 17px; letter-spacing: .06em")}>
                       {"Começar"}
                     </button>
-                    <button onClick={R.nextPhrase} style={css("height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.6)")}>
+                    <button onClick={R.nextPhrase} style={css("height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: var(--ink-2)")}>
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M20 12a8 8 0 1 1-2.4-5.7" />
                         <path d="M20 4v5h-5" />
@@ -1197,11 +1222,11 @@ Component.prototype.render = function render() {
         {this.state.screen === 'welcome' ? this.renderWelcome() : null}
         {R.isBreath ? (
           <>
-            <div className="screen">
+            <div className="screen ritual">
               <div className="breathword" style={css(`position: absolute; top: 478px; left: 0; right: 0; text-align: center; font-size: 42px; font-weight: 200; ${(R.breathWordStyle) ?? ''}`)}>
                 {R.breathWord}
               </div>
-              <p style={css("position: absolute; top: 546px; left: 44px; right: 44px; margin: 0; text-align: center; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.66)")}>
+              <p style={css("position: absolute; top: 546px; left: 44px; right: 44px; margin: 0; text-align: center; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: var(--ink-2)")}>
                 {R.breathSub}
               </p>
               <div style={css("position: absolute; top: 636px; left: 0; right: 0; display: flex; justify-content: center; gap: 12px")}>
@@ -1223,7 +1248,7 @@ Component.prototype.render = function render() {
               {R.showSkip ? (
                 <>
                   <div style={css("position: absolute; top: 760px; left: 0; right: 0; display: flex; justify-content: center")}>
-                    <button onClick={R.enter} style={css("height: 44px; padding: 0 20px; font-size: 17px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,241,234,.55)")}>
+                    <button onClick={R.enter} style={css("height: 44px; padding: 0 20px; font-size: 16.5px; color: var(--ink-2)")}>
                       {"Pular"}
                     </button>
                   </div>
@@ -1265,7 +1290,7 @@ Component.prototype.render = function render() {
                     </React.Fragment>
                   ))}
                 </div>
-                <div className="glass" style={css("height: 158px; border-radius: 26px; box-sizing: border-box; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px")}>
+                <div className="glass al-field" style={css("height: 158px; border-radius: var(--r-card); box-sizing: border-box; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; transition: border-color .2s var(--ease-out)")}>
                   <label htmlFor="alma-q" className="kicker" style={css(`font-size: 15px; ${(R.qLabelStyle) ?? ''}`)}>
                     {R.qLabel}
                   </label>
@@ -1285,7 +1310,7 @@ Component.prototype.render = function render() {
                     {"Soltar para a Alma"}
                   </button>
                   {R.sim ? null : (
-                    <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.5)")}>
+                    <span style={css("font-size: 15px; font-weight: 400; color: var(--ink-2)")}>
                       {"Catorze sabedorias vão refletir com você"}
                     </span>
                   )}
@@ -1296,8 +1321,8 @@ Component.prototype.render = function render() {
         ) : null}
         {R.isRelease ? (
           <>
-            <div className="screen">
-              <div style={css("position: absolute; top: 470px; left: 0; right: 0; text-align: center; font-size: 22px; font-weight: 200; letter-spacing: .04em; color: rgba(244,241,234,.9)")}>
+            <div className="screen ritual">
+              <div style={css("position: absolute; top: 470px; left: 0; right: 0; text-align: center; font-size: 22px; font-weight: 200; letter-spacing: .04em; color: var(--ink)")}>
                 {"A Alma está ouvindo"}
               </div>
               <div style={css("position: absolute; top: 528px; left: 36px; right: 36px; text-align: center; font-size: 19px; font-weight: 300; line-height: 1.5")}>
@@ -1341,7 +1366,7 @@ Component.prototype.render = function render() {
                   <div style={css("display: flex; flex-wrap: wrap; justify-content: center; gap: 10px")}>
                     {(R.dtags || []).map((L10_t, I10) => (
                       <React.Fragment key={I10}>
-                        <button className="pill" onClick={L10_t?.pick} aria-pressed={L10_t?.pressed} aria-label={L10_t?.pre ? `${L10_t?.label}, sugerida pelo que você costuma responder` : undefined} style={css(`min-height: 46px; max-width: 100%; padding: 8px 18px; border-radius: 23px; display: inline-flex; align-items: center; text-align: center; line-height: 1.3; font-size: 17.5px; font-weight: 400; border: 1px solid rgba(255,255,255,.16); ${(L10_t?.style) ?? ''}`)}>
+                        <button className="pill" onClick={L10_t?.pick} aria-pressed={L10_t?.pressed} aria-label={L10_t?.pre ? `${L10_t?.label}, sugerida pelo que você costuma responder` : undefined} style={css(`min-height: 46px; max-width: 100%; padding: 8px 18px; border-radius: 999px; display: inline-flex; align-items: center; text-align: center; line-height: 1.3; font-size: 17.5px; font-weight: 400; border: 1px solid rgba(255,255,255,.16); ${(L10_t?.style) ?? ''}`)}>
                           {L10_t?.pre ? <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ marginRight: 6, flexShrink: 0, opacity: .9 }}><path d="M12 3l1.8 5.6L19.5 10l-5.7 1.6L12 17.5l-1.8-5.9L4.5 10l5.7-1.4z" /></svg> : null}
                           {L10_t?.label}
                         </button>
@@ -1355,7 +1380,7 @@ Component.prototype.render = function render() {
                   ) : null}
                   {R.showOtherBtn ? (
                     <>
-                      <button className="pill" onClick={R.openOther} style={css("align-self: center; height: 44px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.75); border: 1px dashed rgba(255,255,255,.28)")}>
+                      <button className="pill" onClick={R.openOther} style={css("align-self: center; height: 44px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: var(--ink-2); border: 1px dashed rgba(255,255,255,.28)")}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <path d="M4 20h4L19 9l-4-4L4 16z" />
                           <path d="M13.5 6.5l4 4" />
@@ -1379,26 +1404,26 @@ Component.prototype.render = function render() {
                 </div>
                 <div style={css("flex-grow: 1")}></div>
                 {R.entendi ? (
-                  <div className="glass al-got-card" style={css("border-radius: 20px; padding: 14px 18px")}>
+                  <div className="glass al-got-card" style={css("border-radius: var(--r-card); padding: 14px 18px")}>
                     <div className="kicker" style={css("font-size: 15px; color: #c9b8ff")}>
                       {"A Alma entendeu"}
                     </div>
-                    <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.9)")}>
+                    <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.5; color: var(--ink)")}>
                       {R.entendi}
                     </p>
                     <button className="al-notthis" onClick={R.notThis}>Não é bem isso, quero explicar melhor</button>
                   </div>
                 ) : (
-                  <div className="glass" style={css("border-radius: 20px; padding: 14px 18px")}>
+                  <div className="glass" style={css("border-radius: var(--r-card); padding: 14px 18px")}>
                     <div className="kicker" style={css("font-size: 15px")}>
                       {"Você trouxe"}
                     </div>
-                    <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.78)")}>
+                    <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.5; color: var(--ink-2)")}>
                       {R.textShort}
                     </p>
                   </div>
                 )}
-                <button onClick={R.skipQ} style={css("height: 44px; align-self: center; padding: 0 20px; font-size: 17px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,241,234,.5)")}>
+                <button onClick={R.skipQ} style={css("height: 44px; align-self: center; padding: 0 20px; font-size: 16.5px; color: var(--ink-2)")}>
                   {"Pular pergunta"}
                 </button>
               </div>
@@ -1407,11 +1432,11 @@ Component.prototype.render = function render() {
         ) : null}
         {R.isCouncil ? (
           <>
-            <div className="screen">
+            <div className="screen ritual">
               <h1 style={css("position: absolute; top: 104px; left: 0; right: 0; margin: 0; text-align: center; font-size: 32px; font-weight: 200; letter-spacing: .02em")}>
                 {"O Conselho"}
               </h1>
-              <p style={css("position: absolute; top: 152px; left: 40px; right: 40px; margin: 0; text-align: center; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+              <p style={css("position: absolute; top: 152px; left: 40px; right: 40px; margin: 0; text-align: center; font-size: 17.5px; font-weight: 300; color: var(--ink-2)")}>
                 {"Catorze sabedorias refletem sobre o que você trouxe"}
               </p>
               <div style={css("position: absolute; left: 49px; top: 234px; width: 292px; height: 292px; border-radius: 50%; border: 1px solid rgba(255,255,255,.07)")}></div>
@@ -1439,7 +1464,7 @@ Component.prototype.render = function render() {
                     ) : null}
                     {L12_a?.showName ? (
                       <>
-                        <span className="fade" style={css(`position: absolute; top: 54px; left: 50%; transform: translateX(-50%); height: 26px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; white-space: nowrap; font-size: 17px; letter-spacing: .04em; background: rgba(22,20,40,.85); border: 1px solid ${(L12_a?.color) ?? ''}; color: #f4f1ea; pointer-events: none`)}>
+                        <span className="fade" style={css(`position: absolute; top: 54px; left: 50%; transform: translateX(-50%); height: 26px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; white-space: nowrap; font-size: 17px; letter-spacing: .04em; background: rgba(22,20,40,.85); border: 1px solid ${(L12_a?.color) ?? ''}; color: var(--ink); pointer-events: none`)}>
                           {L12_a?.name}
                         </span>
                       </>
@@ -1451,14 +1476,14 @@ Component.prototype.render = function render() {
                 <span style={css(`font-size: 18px; font-weight: 300; color: ${(R.statusColor) ?? ''}; transition: color .6s ease`)}>
                   {R.councilStatus}
                 </span>
-                <span style={css("font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.55)")}>
+                <span style={css("font-size: 17.5px; font-weight: 300; color: var(--ink-3)")}>
                   {R.councilSub}
                 </span>
               </div>
               {R.councilThinking ? (
                 <div className="fade" style={css("position: absolute; top: 650px; left: 20px; right: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center")}>
                   <span className="twinkle" style={css("width: 10px; height: 10px; border-radius: 50%; background: #f3d98b; box-shadow: 0 0 16px #f3d98b")}></span>
-                  <span style={css("font-size: 16px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.8)")}>As vozes estão escrevendo para você, com calma e profundidade…</span>
+                  <span style={css("font-size: 16px; font-weight: 300; line-height: 1.5; color: var(--ink-2)")}>As vozes estão escrevendo para você, com calma e profundidade…</span>
                 </div>
               ) : null}
               {R.councilReady ? (
@@ -1476,7 +1501,7 @@ Component.prototype.render = function render() {
         {R.isAnswers ? (
           <>
             <div className="screen scroll" style={css("overflow-y: auto")}>
-              <div style={css("box-sizing: border-box; padding: 108px 14px 56px; display: flex; flex-direction: column; gap: 16px")}>
+              <div style={css("box-sizing: border-box; padding: 108px 16px 120px; display: flex; flex-direction: column; gap: 16px")}>
                 <div>
                   <div className="kicker">
                     {"O Conselho respondeu"}
@@ -1487,7 +1512,7 @@ Component.prototype.render = function render() {
                 </div>
                 <div className={'glass al-brought' + (this.state.broughtOpen ? ' on' : '')} style={css("border-radius: 22px; padding: 4px 6px 4px 18px; display: flex; flex-direction: column; gap: 10px")}>
                   <button className="al-brought-head" onClick={() => this.setState({ broughtOpen: !this.state.broughtOpen })} aria-expanded={this.state.broughtOpen ? 'true' : 'false'}>
-                    <span className="kicker" style={css("font-size: 13px; flex-shrink: 0")}>{"Você trouxe"}</span>
+                    <span className="kicker" style={css("font-size: 14.5px; flex-shrink: 0")}>{"Você trouxe"}</span>
                     <span className="al-brought-t">{R.text}</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
                   </button>
@@ -1495,7 +1520,7 @@ Component.prototype.render = function render() {
                   <div className="al-more" style={css("display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 12px 0")}>
                     {(R.givenTags || []).map((L13_g, I13) => (
                       <React.Fragment key={I13}>
-                        <span style={css("min-height: 26px; padding: 3px 12px; border-radius: 14px; display: inline-flex; align-items: center; line-height: 1.35; font-size: 16px; background: rgba(255,255,255,.08); color: rgba(244,241,234,.8)")}>
+                        <span style={css("min-height: 26px; padding: 3px 12px; border-radius: var(--r-sm); display: inline-flex; align-items: center; line-height: 1.35; font-size: 16px; background: rgba(255,255,255,.08); color: var(--ink-2)")}>
                           {L13_g?.t}
                         </span>
                       </React.Fragment>
@@ -1503,9 +1528,9 @@ Component.prototype.render = function render() {
                   </div>
                   ) : null}
                 </div>
-                <div className="glass cardin" style={css("border-radius: 26px; padding: 22px 20px; position: relative; overflow: hidden; border-color: rgba(243,217,139,.36)")}>
+                <div className="glass cardin" style={css("border-radius: var(--r-card); padding: 20px 18px; position: relative; overflow: hidden; border-color: color-mix(in srgb, var(--gold) 34%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 10%, transparent), color-mix(in srgb, var(--lilac) 6%, transparent))")}>
                   <div className="goldglow"></div>
-                  <div className="goldtext" style={css("position: relative; font-size: 16px; letter-spacing: .26em; text-transform: uppercase")}>
+                  <div className="al-gold-k">
                     {"A resposta da Alma"}
                   </div>
                   {R.almaSec ? (
@@ -1515,13 +1540,13 @@ Component.prototype.render = function render() {
                       <p style={css("position: relative; margin: 14px 0 0; font-size: 18px; font-weight: 300; line-height: 1.55")}>
                         {R.almaP1}
                       </p>
-                      <p style={css("position: relative; margin: 16px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.82)")}>
+                      <p style={css("position: relative; margin: 16px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.65; color: var(--ink-2)")}>
                         {R.almaP2}
                       </p>
                     </>
                   )}
-                  <div style={css("position: relative; margin-top: 16px; padding: 14px 16px; border-radius: 18px; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.2)")}>
-                    <div style={css("font-size: 15px; letter-spacing: .2em; text-transform: uppercase; color: #f3d98b")}>
+                  <div style={css("position: relative; margin-top: 16px; padding: 14px 16px; border-radius: var(--r-sm); background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.2)")}>
+                    <div style={css("font-size: 15px; font-weight: 500; color: var(--gold)")}>
                       {"Um passo possível"}
                     </div>
                     <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55")}>
@@ -1541,7 +1566,7 @@ Component.prototype.render = function render() {
                 </div>
                 {R.voicesClosed ? (
                   <>
-                    <div className="glass cardin" style={css("margin-top: 8px; border-radius: 26px; padding: 20px 18px; display: flex; flex-direction: column; gap: 16px; border-color: rgba(201,184,255,.4); animation-delay: 450ms")}>
+                    <div className="glass cardin" style={css("margin-top: 8px; border-radius: var(--r-card); padding: 20px 18px; display: flex; flex-direction: column; gap: 16px; border-color: color-mix(in srgb, var(--lilac) 32%, transparent); background: color-mix(in srgb, var(--lilac) 8%, transparent); animation-delay: 120ms")}>
                       <div style={css("display: flex; flex-direction: column; gap: 4px")}>
                         <span className="kicker" style={css("color: #c9b8ff")}>
                           {"O Conselho"}
@@ -1549,15 +1574,15 @@ Component.prototype.render = function render() {
                         <span style={css("font-size: 20px; font-weight: 300; line-height: 1.3")}>
                           {`${(R.voiceCount) ?? ''} sabedorias refletiram sobre o que você trouxe`}
                         </span>
-                        <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>
-                          {"Cada uma traz um texto original e uma reflexão. Toque num símbolo para ouvir uma voz, ou veja todas."}
+                        <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.5; color: var(--ink-2)")}>
+                          {"Toque num símbolo para ouvir uma voz, ou veja todas."}
                         </span>
                         {R.favLine ? <span className="al-fav">{R.favLine}</span> : null}
                       </div>
                       <div style={css("display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px")}>
                         {(R.voiceSyms || []).map((L15_v, I15) => (
                           <React.Fragment key={I15}>
-                            <button className="pill" onClick={L15_v?.pick} aria-label={`Ver conselho: ${(L15_v?.name) ?? ''}`} style={css(`height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.05); border: 1px solid ${(L15_v?.border) ?? ''}`)}>
+                            <button className="pill" onClick={L15_v?.pick} aria-label={`Ver conselho: ${(L15_v?.name) ?? ''}`} style={css(`height: 44px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.05); border: 1px solid ${(L15_v?.border) ?? ''}`)}>
                               {L15_v?.isSvg ? (
                                 <>
                                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={L15_v?.color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1582,7 +1607,7 @@ Component.prototype.render = function render() {
                           <path d="M6 9l6 6 6-6" />
                         </svg>
                       </button>
-                      <span style={css("text-align: center; font-size: 17px; font-weight: 300; color: rgba(244,241,234,.5)")}>
+                      <span style={css("text-align: center; font-size: 17px; font-weight: 300; color: var(--ink-3)")}>
                         {R.starHint}
                       </span>
                     </div>
@@ -1595,7 +1620,7 @@ Component.prototype.render = function render() {
                         <div className="kicker">
                           {"As vozes"}
                         </div>
-                        <div style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.55)")}>
+                        <div style={css("font-size: 17px; font-weight: 300; color: var(--ink-3)")}>
                           {R.starHint}
                         </div>
                       </div>
@@ -1611,14 +1636,14 @@ Component.prototype.render = function render() {
                       </div>
                       {R.noCards ? (
                         <>
-                          <p style={css("margin: 8px 0; text-align: center; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                          <p style={css("margin: 8px 0; text-align: center; font-size: 17.5px; font-weight: 300; color: var(--ink-2)")}>
                             {"Toque na estrela das respostas que mais tocarem você."}
                           </p>
                         </>
                       ) : null}
                       {(R.cards || []).map((L17_c, I17) => (
                         <React.Fragment key={I17}>
-                          <div className="glass cardin" style={css(`border-radius: 24px; padding: 16px 16px 8px 18px; ${(L17_c?.style) ?? ''}`)}>
+                          <div className="glass cardin" style={css(`border-radius: var(--r-card); padding: 16px 16px 8px 18px; ${(L17_c?.style) ?? ''}`)}>
                             <div style={css("display: flex; align-items: center; gap: 12px")}>
                               <span style={css(`width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; ${(L17_c?.glyphStyle) ?? ''}`)}>
                                 {L17_c?.isSvg ? (
@@ -1640,7 +1665,7 @@ Component.prototype.render = function render() {
                                 <span style={css("font-size: 17.5px; font-weight: 500")}>
                                   {L17_c?.name}
                                 </span>
-                                <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                                <span style={css("font-size: 17px; font-weight: 300; color: var(--ink-2)")}>
                                   {L17_c?.ref}
                                 </span>
                               </span>
@@ -1654,7 +1679,7 @@ Component.prototype.render = function render() {
                                 ) : null}
                                 {L17_c?.off ? (
                                   <>
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(244,241,234,.55)" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A49CD0" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true">
                                       <path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" />
                                     </svg>
                                   </>
@@ -1664,7 +1689,7 @@ Component.prototype.render = function render() {
                             <div className="orig" dir={L17_c?.dir} style={css(`margin-top: 14px; line-height: 1.6; ${(L17_c?.origStyle) ?? ''}`)}>
                               {L17_c?.orig}
                             </div>
-                            <div style={css("margin-top: 4px; font-size: 15px; letter-spacing: .16em; text-transform: uppercase; color: rgba(244,241,234,.42)")}>
+                            <div style={css("margin-top: 4px; font-size: 14.5px; color: var(--ink-3)")}>
                               {`${(L17_c?.lang) ?? ''} · tradução livre`}
                             </div>
                             <div style={css("margin-top: 10px; font-size: 17px; font-weight: 300; line-height: 1.5")}>
@@ -1676,7 +1701,7 @@ Component.prototype.render = function render() {
                                 </React.Fragment>
                               ))}
                             </div>
-                            <button onClick={L17_c?.toggle} aria-expanded={L17_c?.expanded} style={css(`width: 100%; height: 44px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 17px; letter-spacing: .12em; text-transform: uppercase; color: ${(L17_c?.color) ?? ''}`)}>
+                            <button onClick={L17_c?.toggle} aria-expanded={L17_c?.expanded} style={css(`width: 100%; height: 44px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 15.5px; font-weight: 500; color: ${(L17_c?.color) ?? ''}`)}>
                               <span>
                                 {"O que essa voz quer te dizer"}
                               </span>
@@ -1686,7 +1711,7 @@ Component.prototype.render = function render() {
                             </button>
                             {L17_c?.open ? (
                               <>
-                                <p className="fade" style={css("margin: 0 0 12px; font-size: 17.5px; font-weight: 300; line-height: 1.65; color: rgba(244,241,234,.85)")}>
+                                <p className="fade" style={css("margin: 0 0 12px; font-size: 17.5px; font-weight: 300; line-height: 1.65; color: var(--ink)")}>
                                   {L17_c?.reflection}
                                 </p>
                               </>
@@ -1694,7 +1719,7 @@ Component.prototype.render = function render() {
                           </div>
                         </React.Fragment>
                       ))}
-                      <button onClick={R.closeVoices} style={css("height: 44px; align-self: center; padding: 0 18px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.65)")}>
+                      <button onClick={R.closeVoices} style={css("height: 44px; align-self: center; padding: 0 18px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: var(--ink-2)")}>
                         {"Recolher conselhos"}
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                           <path d="M6 15l6-6 6 6" />
@@ -1704,15 +1729,15 @@ Component.prototype.render = function render() {
                   </>
                 ) : null}
                 <div style={css("display: grid; grid-template-columns: 1fr 1fr; gap: 10px")}>
-                  <button className="glass pill ans-tile" onClick={() => this.setState({ ansSheet: 'plan' })} style={css("border-radius: 22px; padding: 16px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; border-color: rgba(143,227,176,.4)")}>
-                    <span style={css("width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #0c1f15; background: linear-gradient(135deg, #8fe3b0, #d4f7e0); box-shadow: 0 0 20px rgba(143,227,176,.45)")}>✓</span>
-                    <span style={css("font-size: 18px")}>Plano de ação</span>
-                    <span style={css("font-size: 15px; color: rgba(244,241,234,.6)")}>Passo a passo com datas</span>
+                  <button className="glass pill ans-tile" onClick={() => this.setState({ ansSheet: 'plan' })} style={css("border-radius: 22px; padding: 16px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; border-color: color-mix(in srgb, var(--mint) 32%, transparent); background: color-mix(in srgb, var(--mint) 9%, transparent)")}>
+                    <span style={css("width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0c1f15; background: linear-gradient(135deg, #8fe3b0, #d4f7e0)")}><Ico.check w="20" /></span>
+                    <span style={css("font-size: 17px; font-weight: 500")}>Plano de ação</span>
+                    <span style={css("font-size: 14.5px; color: var(--ink-2)")}>Passo a passo com datas</span>
                   </button>
-                  <button className="glass pill ans-tile" onClick={() => this.setState({ ansSheet: 'movie' })} style={css("border-radius: 22px; padding: 16px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; border-color: rgba(201,184,255,.4)")}>
-                    <span style={css("width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #1a1030; background: linear-gradient(135deg, #e4d6ff, #b9a6ff); box-shadow: 0 0 20px rgba(201,184,255,.45)")}>▶</span>
-                    <span style={css("font-size: 18px")}>Dica de filme</span>
-                    <span style={css("font-size: 15px; color: rgba(244,241,234,.6)")}>Para ver e refletir</span>
+                  <button className="glass pill ans-tile" onClick={() => this.setState({ ansSheet: 'movie' })} style={css("border-radius: 22px; padding: 16px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; border-color: color-mix(in srgb, var(--lilac) 32%, transparent); background: color-mix(in srgb, var(--lilac) 9%, transparent)")}>
+                    <span style={css("width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1a1030; background: linear-gradient(135deg, #e4d6ff, #b9a6ff)")}><Ico.play /></span>
+                    <span style={css("font-size: 17px; font-weight: 500")}>Dica de filme</span>
+                    <span style={css("font-size: 14.5px; color: var(--ink-2)")}>Para ver e refletir</span>
                   </button>
                 </div>
                 <button className="cta" onClick={R.saveEntry} style={css(`margin-top: 8px; width: 100%; height: 58px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a); ${(R.saveStyle) ?? ''}`)}>
@@ -1722,16 +1747,16 @@ Component.prototype.render = function render() {
                   {R.saveLabel}
                 </button>
                 <div style={css("display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px")}>
-                  <button className="glass pill" onClick={R.meditate} style={css("height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17.5px")}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" strokeWidth="1.4" aria-hidden="true">
+                  <button className="glass pill" onClick={R.meditate} style={css("height: 52px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17.5px")}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
                       <circle cx="12" cy="12" r="3" />
                       <circle cx="12" cy="12" r="7" opacity=".6" />
                       <circle cx="12" cy="12" r="10.5" opacity=".3" />
                     </svg>
                     {"Respirar 2 min"}
                   </button>
-                  <button className="glass pill" onClick={R.share} style={css("height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17.5px")}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <button className="glass pill" onClick={R.share} style={css("height: 52px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17.5px")}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M12 15V3" />
                       <path d="M7 8l5-5 5 5" />
                       <path d="M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6" />
@@ -1739,11 +1764,11 @@ Component.prototype.render = function render() {
                     {"Compartilhar"}
                   </button>
                 </div>
-                <button onClick={R.restart} style={css("height: 48px; align-self: center; padding: 0 20px; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.8)")}>
+                <button onClick={R.restart} style={css("height: 48px; align-self: center; padding: 0 20px; font-size: 17.5px; font-weight: 300; color: var(--ink-2)")}>
                   {"Fazer outra pergunta"}
                 </button>
-                <p style={css("margin: 0; text-align: center; font-size: 17px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.5)")}>
-                  {"Se o peso estiver grande demais, você não precisa carregar sozinho. CVV, ligue 188, 24 horas, gratuito."}
+                <p style={css("margin: 0; text-align: center; font-size: 14.5px; font-weight: 400; line-height: 1.5; color: var(--ink-3)")}>
+                  {"Se o peso estiver grande demais, você não precisa carregar sozinho. Ligue 188 (CVV), 24 horas e gratuito."}
                 </p>
               </div>
             </div>
@@ -1778,7 +1803,7 @@ Component.prototype.render = function render() {
               {this.state.ansSheet === 'movie' ? <MovieTip text={this.state.text} kind={this.state.kind} /> : null}
               {this.state.ansSheet === 'plan' ? (
                 <>
-                <div className="glass cardin" style={css("border-radius: 26px; padding: 22px 14px 20px; border-color: rgba(143,227,176,.4); box-shadow: 0 0 40px rgba(143,227,176,.08), inset 0 1px 0 rgba(255,255,255,.12); animation-delay: 300ms")}>
+                <div className="glass cardin" style={css("border-radius: var(--r-card); padding: 22px 14px 20px; border-color: rgba(143,227,176,.4); box-shadow: 0 0 40px rgba(143,227,176,.08), inset 0 1px 0 rgba(255,255,255,.12); animation-delay: 300ms")}>
                   <div style={css("display: flex; align-items: center; gap: 10px")}>
                     <span style={css("width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(143,227,176,.14); color: #8fe3b0")}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1793,7 +1818,7 @@ Component.prototype.render = function render() {
                   <h2 style={css("margin: 14px 0 0; font-size: 22px; line-height: 1.3; font-weight: 300")}>
                     {"Transforme estas respostas em um plano"}
                   </h2>
-                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: rgba(244,241,234,.75)")}>
+                  <p style={css("margin: 8px 0 0; font-size: 17.5px; font-weight: 300; line-height: 1.6; color: var(--ink-2)")}>
                     {"A Alma cria um passo a passo com datas e lembretes, e acompanha você até resolver."}
                   </p>
                   <div style={css("margin-top: 16px; display: flex; flex-direction: column; gap: 10px")}>
@@ -1803,13 +1828,13 @@ Component.prototype.render = function render() {
                           <span style={css("width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #8fe3b0; border: 1px solid rgba(143,227,176,.55)")}>
                             {L14_pv?.n}
                           </span>
-                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.4; color: rgba(244,241,234,.88)")}>
+                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.4; color: var(--ink)")}>
                             {L14_pv?.t}
                           </span>
                         </div>
                       </React.Fragment>
                     ))}
-                    <span style={css("padding-left: 38px; font-size: 17px; color: rgba(244,241,234,.5)")}>
+                    <span style={css("padding-left: 38px; font-size: 17px; color: var(--ink-3)")}>
                       {R.previewMore}
                     </span>
                   </div>
@@ -1826,98 +1851,94 @@ Component.prototype.render = function render() {
         {R.isJournal ? (
           <>
             <div className="screen scroll" style={css("overflow-y: auto")}>
-              <div style={css("box-sizing: border-box; padding: 108px 14px 48px; display: flex; flex-direction: column; gap: 18px")}>
-                <div>
-                  <div className="kicker">
-                    {"Minha Alma"}
-                  </div>
-                  <h1 style={css("margin: 8px 0 0; font-size: 28px; line-height: 1.2; font-weight: 300")}>
-                    {"Sua constelação"}
-                  </h1>
-                  <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
-                    {"Tudo o que você vive na Alma vira luz no seu céu."}
-                  </p>
-                </div>
-                {this.renderLogin()}
-                <a href="#/estilo" style={css("align-self: flex-start; height: 36px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.75); text-decoration: none")}>✦ Personalizar minha Alma ›</a>
-                <a href="#/ajustes" style={css("align-self: flex-start; height: 36px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.75); text-decoration: none")}>⚙︎ Ajustes e conta ›</a>
+              <div className="mj">
+                <header className="mj-head">
+                  <h1 className="mj-title">Minha Alma</h1>
+                  <p className="mj-sub">{R.entryCount ? `${R.entryCount} ${R.entryCount === 1 ? 'pergunta virou estrela' : 'perguntas viraram estrelas'} no seu céu` : 'Suas perguntas viram estrelas no seu céu'}</p>
+                </header>
+                <a href="#/constelacao" className="mj-sky" aria-label="Abrir sua constelação em tela inteira">
+                  <MiniCosmos w={358} h={232} />
+                  {(R.skyLines || []).map((L20_l, I20) => (
+                    <div key={I20} className="mj-sky-line" style={css(L20_l?.style)}></div>
+                  ))}
+                  {(R.skyStars || []).map((L21_s, I21) => (
+                    <span key={I21} className="mj-star" style={css(L21_s?.style)}>
+                      <span className="twinkle mj-star-dot" style={css(L21_s?.dot)}></span>
+                      <span className="mj-star-l">{L21_s?.label}</span>
+                    </span>
+                  ))}
+                  <span className="mj-sky-open">
+                    <Ico.expand />Abrir o céu
+                  </span>
+                </a>
                 {R.hasPlans ? (
-                  <div style={css("display: flex; flex-direction: column; gap: 10px")}>
-                    <span style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #8fe3b0")}>Seus planos de ação</span>
-                    <p style={css("margin: 0; font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>Cada pergunta pode virar um plano com passos e datas. Os passos do dia também aparecem no seu Diário.</p>
+                  <section className="mj-sec">
+                    <div className="mj-sec-h"><h2 style={css("color: var(--mint)")}>Planos de ação</h2><span>{R.plans.length}</span></div>
                     {(R.plans || []).map((pl, k) => (
-                      <button key={k} className="glass pill" onClick={pl.open} style={css("width: 100%; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; text-align: left; border-color: rgba(143,227,176,.28)")}>
-                        <span style={css(`width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; ${pl.ring}`)}>
-                          <span style={css("width: 36px; height: 36px; border-radius: 50%; background: #16132c; display: flex; align-items: center; justify-content: center; font-size: 15.5px; color: #8fe3b0")}>{pl.prog.split(' ')[0]}/{pl.prog.split(' ')[2]}</span>
+                      <button key={k} className={'mj-plan tap' + (pl.fin ? ' fin' : '')} onClick={pl.open}>
+                        <span className="mj-ring" style={css(pl.ring)} role="img" aria-label={pl.prog}>
+                          <span>{pl.done}<small>/{pl.total}</small></span>
                         </span>
-                        <span style={css("display: flex; flex-direction: column; gap: 4px; min-width: 0; flex-grow: 1")}>
-                          <span style={css("font-size: 17.5px; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap")}>{pl.q}</span>
-                          <span style={css(`font-size: 16.5px; line-height: 1.4; ${pl.nextStyle}`)}>{pl.next}</span>
+                        <span className="mj-plan-t">
+                          <span className="mj-plan-name">{pl.q}</span>
+                          <span className="mj-plan-next">{pl.next}</span>
+                          <span className={'mj-chip ' + pl.tone}>{pl.tone === 'late' ? <Ico.clock /> : null}{pl.rel}</span>
                         </span>
-                        <span aria-hidden="true" style={css("font-size: 22px; font-weight: 200; color: rgba(244,241,234,.5)")}>›</span>
+                        <Ico.chev />
+                      </button>
+                    ))}
+                  </section>
+                ) : null}
+                <section className="mj-sec">
+                  <div className="mj-sec-h"><h2>Suas perguntas</h2></div>
+                  <div className="mj-seg" role="group" aria-label="Filtrar perguntas">
+                    {(R.jfilters || []).map((L19_f, I19) => (
+                      <button key={I19} className={'tap' + (L19_f.on ? ' on' : '')} onClick={L19_f?.pick} aria-pressed={L19_f?.pressed}>
+                        {L19_f?.label}<span>{L19_f?.count}</span>
                       </button>
                     ))}
                   </div>
-                ) : null}
-                <a href="#/constelacao" aria-label="Abrir sua constelação em tela inteira" style={css("position: relative; display: block; height: 260px; margin: 0 -14px; overflow: hidden; text-decoration: none; color: inherit; -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 55%, transparent 100%)")}>
-                  <MiniCosmos w={390} h={260} />
-                  {(R.skyLines || []).map((L20_l, I20) => (
-                    <React.Fragment key={I20}>
-                      <div style={css(`position: absolute; margin-left: 14px; height: 1px; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(243,217,139,.15), rgba(243,217,139,.55), rgba(243,217,139,.15)); ${(L20_l?.style) ?? ''}`)}></div>
-                    </React.Fragment>
-                  ))}
-                  {(R.skyStars || []).map((L21_s, I21) => (
-                    <React.Fragment key={I21}>
-                      <span style={css(`position: absolute; margin-left: 14px; width: 64px; height: 64px; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; ${(L21_s?.style) ?? ''}`)}>
-                        <span className="twinkle" style={css(`width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 14px 4px rgba(201,184,255,.55), 0 0 30px rgba(168,216,255,.4); ${(L21_s?.dot) ?? ''}`)}></span>
-                        <span style={css("font-size: 15px; letter-spacing: .08em; color: rgba(244,241,234,.7)")}>
-                          {L21_s?.label}
-                        </span>
-                      </span>
-                    </React.Fragment>
-                  ))}
-                  <span style={css("position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 16px; letter-spacing: .08em; color: rgba(244,241,234,.6)")}>Toque para abrir o céu em tela inteira</span>
-                </a>
-                <div style={css("display: flex; flex-direction: column; gap: 10px; margin-top: 4px")}>
-                  <span style={css("font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: rgba(244,241,234,.6)")}>Suas perguntas</span>
-                  <div style={css("display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px")}>
-                  {(R.jfilters || []).map((L19_f, I19) => (
-                    <React.Fragment key={I19}>
-                      <button className="pill" onClick={L19_f?.pick} aria-pressed={L19_f?.pressed} style={css(`height: 42px; padding: 0 4px; border-radius: 999px; font-size: 16px; letter-spacing: -.01em; text-align: center; white-space: nowrap; border: 1px solid rgba(255,255,255,.14); ${(L19_f?.style) ?? ''}`)}>
-                        {L19_f?.label}
-                      </button>
-                    </React.Fragment>
-                  ))}
-                </div>
-                  <p style={css("margin: 0; font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>{R.jhint}</p>
-                </div>
-                <div style={css("display: flex; flex-direction: column; gap: 10px")}>
-                  {(R.entryRows || []).map((L22_e, I22) => (
-                    <React.Fragment key={I22}>
-                      <button className="glass pill" onClick={L22_e?.open} style={css(`width: 100%; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; text-align: left; ${(L22_e?.rowStyle) ?? ''}`)}>
-                        <span style={css(`width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; ${(L22_e?.dot) ?? ''}`)}></span>
-                        <span style={css("display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 0")}>
-                          <span style={css("font-size: 16px; color: rgba(244,241,234,.55)")}>
-                            {L22_e?.meta}
-                          </span>
-                          <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap")}>
-                            {L22_e?.q}
+                  <p className="mj-hint">{R.jhint}</p>
+                  <div className="mj-list">
+                    {(R.entryRows || []).map((L22_e, I22) => (
+                      <button key={I22} className={'mj-row tap' + (L22_e.resolved ? ' res' : '')} onClick={L22_e?.open} style={{ '--kc': L22_e.kc }}>
+                        <span className="mj-row-dot" style={css(L22_e?.dot)}></span>
+                        <span className="mj-row-t">
+                          <span className="mj-row-q">{L22_e?.q}</span>
+                          <span className="mj-row-meta">
+                            {L22_e.meta}
+                            {L22_e.planTag ? <span className="mj-tag">{L22_e.planTag}</span> : null}
+                            {L22_e.n ? <span className="mj-tag gold"><Ico.star />{L22_e.n}</span> : null}
+                            {L22_e.resolved ? <span className="mj-tag mint"><Ico.check />Resolvida</span> : null}
                           </span>
                         </span>
-                        <span style={css(`flex-shrink: 0; height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid; font-size: 16px; display: inline-flex; align-items: center; ${(L22_e?.statusStyle) ?? ''}`)}>
-                          {L22_e?.status}
-                        </span>
+                        <Ico.chev />
                       </button>
-                    </React.Fragment>
-                  ))}
-                  {R.noEntries ? (
-                    <>
-                      <p style={css("margin: 8px 0; text-align: center; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.55)")}>
-                        {"Nenhuma estrela aqui por enquanto."}
-                      </p>
-                    </>
-                  ) : null}
-                </div>
+                    ))}
+                    {R.noEntries ? (
+                      <div className="mj-empty">
+                        <p>{this.state.jfilter === 'resolved' ? 'Nenhuma pergunta resolvida ainda.' : 'Nenhuma pergunta aqui por enquanto.'}</p>
+                        <button className="mj-empty-go tap" onClick={R.restart}>Fazer uma pergunta</button>
+                      </div>
+                    ) : null}
+                  </div>
+                </section>
+                <section className="mj-sec">
+                  <div className="mj-sec-h"><h2>Conta e jeito da Alma</h2></div>
+                  <div className="mj-group">
+                    {this.renderLogin()}
+                    <a href="#/estilo" className="mj-link tap">
+                      <span className="mj-ico" style={css("--c: var(--rose)")}><Ico.spark /></span>
+                      <span className="mj-link-t">Personalizar minha Alma<small>Cores da esfera, giro e fundo</small></span>
+                      <Ico.chev />
+                    </a>
+                    <a href="#/ajustes" className="mj-link tap">
+                      <span className="mj-ico" style={css("--c: var(--sky)")}><Ico.gear /></span>
+                      <span className="mj-link-t">Ajustes e conta<small>Conta, preferências e seus dados</small></span>
+                      <Ico.chev />
+                    </a>
+                  </div>
+                </section>
               </div>
             </div>
           </>
@@ -1925,13 +1946,11 @@ Component.prototype.render = function render() {
         {R.isPlan ? (
           <>
             <div className="screen scroll" style={css("overflow-y: auto")}>
-              <div style={css("box-sizing: border-box; padding: 108px 14px 56px; display: flex; flex-direction: column; gap: 16px")}>
-                <div>
-                  <div className="kicker" style={css("color: #8fe3b0")}>
-                    {"Plano de ação"}
-                  </div>
+              <div className="mj pl">
+                <header className="mj-head">
+                  <span className="pl-k">Plano de ação</span>
                   {R.pl?.nameEditing ? (
-                    <div style={css("margin-top: 10px; display: flex; flex-direction: column; gap: 8px")}>
+                    <div style={css("margin-top: 8px; display: flex; flex-direction: column; gap: 8px")}>
                       <input className="pl-input" autoFocus value={R.pl.nameDraft} onChange={R.pl.onName} placeholder="Dê um nome ao seu plano" aria-label="Nome do plano" />
                       <div style={css("display: flex; gap: 8px")}>
                         <button className="pl-btn pl-btn-main" onClick={R.pl.saveName}>Salvar nome</button>
@@ -1939,208 +1958,117 @@ Component.prototype.render = function render() {
                       </div>
                     </div>
                   ) : (
-                    <button onClick={R.pl?.editName} aria-label="Editar nome do plano" style={css("margin-top: 8px; display: flex; align-items: flex-start; gap: 10px; text-align: left")}>
-                      <span style={css("font-size: 27px; line-height: 1.2; font-weight: 300")}>{R.pl?.name}</span>
-                      <span className="pl-pencil" aria-hidden="true">✎</span>
+                    <button className="pl-name" onClick={R.pl?.editName} aria-label={`Editar nome do plano: ${R.pl?.name}`}>
+                      <span className="mj-title">{R.pl?.name}</span>
+                      <span className="pl-pencil" aria-hidden="true"><Ico.pen /></span>
                     </button>
                   )}
-                  <p style={css("margin: 8px 0 0; font-size: 17px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.6)")}>
-                    {`Da pergunta ${R.pl?.q ?? ''}`}
-                  </p>
-                  <button className="c14-link" onClick={R.pl?.open14}>Ver as 14 respostas do Conselho ›</button>
+                  {R.pl?.showQ ? <p className="mj-sub">{`Da pergunta ${R.pl?.q ?? ''}`}</p> : null}
+                  <button className="c14-link" onClick={R.pl?.open14}>Ver as 14 respostas do Conselho <Ico.chev /></button>
+                </header>
+                <div className="pl-prog">
+                  <span className="mj-ring big" style={css(R.pl?.ringStyle)} role="img" aria-label={`${R.pl?.doneN} de ${R.pl?.total} passos concluídos`}>
+                    <span>{R.pl?.doneN}<small>/{R.pl?.total}</small></span>
+                  </span>
+                  <span className="pl-prog-t">
+                    <span className="pl-prog-h">{R.pl?.headline}</span>
+                    {R.pl?.allDone ? null : (
+                      <span className={'mj-chip ' + R.pl?.curTone}>{R.pl?.curTone === 'late' ? <Ico.clock /> : <Ico.cal />}{R.pl?.curRel}</span>
+                    )}
+                    <span className="pl-prog-s">{R.pl?.sub}</span>
+                  </span>
                 </div>
-                <div className="glass" style={css("border-radius: 24px; padding: 18px 20px; display: flex; align-items: center; gap: 18px")}>
-                  <div style={css(`position: relative; width: 68px; height: 68px; flex-shrink: 0; border-radius: 50%; ${(R.pl?.ringStyle) ?? ''}`)}>
-                    <div style={css("position: absolute; inset: 5px; border-radius: 50%; background: #16142a; display: flex; flex-direction: column; align-items: center; justify-content: center")}>
-                      <span style={css("font-size: 20px; font-weight: 300; line-height: 1")}>
-                        {`${(R.pl?.doneN) ?? ''}/${(R.pl?.total) ?? ''}`}
+                <ol className="pl-steps">
+                  {(R.pl?.steps || []).map((L23_st, I23) => (
+                    <li key={I23} className={'pl-step' + (L23_st.done ? ' done' : '') + (L23_st.isCurrent ? ' cur' : '') + (L23_st.isFuture ? ' fut' : '') + (L23_st.editing ? ' edit' : '')}>
+                      <span className="pl-num" aria-hidden="true">
+                        {L23_st?.done ? <span className="pop" style={css("display: flex")}><Ico.check w="16" /></span> : L23_st?.n}
                       </span>
-                    </div>
-                  </div>
-                  <div style={css("display: flex; flex-direction: column; gap: 4px")}>
-                    <span style={css("font-size: 17px; font-weight: 400")}>
-                      {R.pl?.headline}
-                    </span>
-                    <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.65)")}>
-                      {R.pl?.sub}
-                    </span>
-                  </div>
-                </div>
-                <div style={css("display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px")}>
-                  <div style={css("border-radius: 18px; padding: 12px 10px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center")}>
-                    <span style={css("width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #f3d98b; border: 1px solid rgba(243,217,139,.6)")}>
-                      {"1"}
-                    </span>
-                    <span style={css("font-size: 16px; line-height: 1.4; color: rgba(244,241,234,.7)")}>
-                      {"Siga na ordem, um passo por vez"}
-                    </span>
-                  </div>
-                  <div style={css("border-radius: 18px; padding: 12px 10px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center")}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f3d98b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" />
-                      <path d="M10 20.5a2 2 0 0 0 4 0" />
-                    </svg>
-                    <span style={css("font-size: 16px; line-height: 1.4; color: rgba(244,241,234,.7)")}>
-                      {"A Alma te lembra no dia de cada passo"}
-                    </span>
-                  </div>
-                  <div style={css("border-radius: 18px; padding: 12px 10px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center")}>
-                    <span style={css("width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #8fe3b0")}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0b0a16" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M5 12.5l4.5 4.5L19 7.5" />
-                      </svg>
-                    </span>
-                    <span style={css("font-size: 16px; line-height: 1.4; color: rgba(244,241,234,.7)")}>
-                      {"Marque ao concluir e veja seu avanço"}
-                    </span>
-                  </div>
-                </div>
-                {(R.pl?.steps || []).map((L23_st, I23) => (
-                  <React.Fragment key={I23}>
-                    <div className="glass cardin" style={css(`border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color .6s ease, opacity .6s ease; ${(L23_st?.cardStyle) ?? ''}`)}>
-                      <div style={css("display: flex; align-items: center; gap: 12px")}>
-                        <span style={css(`width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17.5px; font-weight: 400; transition: background .5s ease; ${(L23_st?.numStyle) ?? ''}`)}>
-                          {L23_st?.done ? (
-                            <>
-                              <span className="pop" style={css("display: flex")}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0b0a16" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                  <path d="M5 12.5l4.5 4.5L19 7.5" />
-                                </svg>
-                              </span>
-                            </>
-                          ) : null}
-                          {L23_st?.todo ? (
-                            <>
-                              {L23_st?.n}
-                            </>
-                          ) : null}
-                        </span>
-                        <span className="kicker" style={css("flex-grow: 1; font-size: 15px")}>
-                          {L23_st?.kicker}
-                        </span>
-                        {L23_st?.badgeOn ? (
-                          <>
-                            <span style={css(`height: 24px; padding: 0 10px; border-radius: 999px; display: flex; align-items: center; font-size: 16px; font-weight: 500; ${(L23_st?.badgeStyle) ?? ''}`)}>
-                              {L23_st?.badge}
-                            </span>
-                          </>
-                        ) : null}
-                      </div>
-                      {L23_st?.editing ? (
-                        <div style={css("display: flex; flex-direction: column; gap: 10px")}>
-                          <label className="pl-field"><span>O que fazer</span>
-                            <textarea className="pl-input" rows={2} autoFocus value={L23_st.draftT} onChange={L23_st.onT} placeholder="Descreva o passo" />
-                          </label>
-                          <label className="pl-field"><span>Data do lembrete</span>
-                            <input className="pl-input" type="date" value={L23_st.draftIso} onChange={L23_st.onIso} />
-                          </label>
-                          <div style={css("display: flex; gap: 8px; flex-wrap: wrap")}>
-                            <button className="pl-btn pl-btn-main" onClick={L23_st.save}>Salvar passo</button>
-                            <button className="pl-btn" onClick={L23_st.cancel}>Cancelar</button>
-                            {L23_st.canRemove ? <button className="pl-btn pl-btn-del" onClick={L23_st.remove}>Remover</button> : null}
-                          </div>
-                        </div>
-                      ) : null}
-                      {L23_st?.notEditing ? (
-                      <>
-                      <p style={css(`margin: 0; font-size: 18px; font-weight: 300; line-height: 1.4; ${(L23_st?.textStyle) ?? ''}`)}>
-                        {L23_st?.t}
-                      </p>
-                      <div style={css("display: flex; flex-wrap: wrap; gap: 8px")}>
-                        <span style={css(`height: 34px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px; font-size: 17px; background: rgba(255,255,255,.06); color: ${(L23_st?.dateColor) ?? ''}`)}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
-                            <path d="M3.5 10h17M8 3v4M16 3v4" />
-                          </svg>
-                          {L23_st?.date}
-                        </span>
-                        <button onClick={L23_st?.bell} aria-pressed={L23_st?.remindP} style={css(`height: 34px; padding: 0 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px; font-size: 17px; ${(L23_st?.bellStyle) ?? ''}`)}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill={L23_st?.bellFill} stroke={L23_st?.bellStroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" />
-                            <path d="M10 20.5a2 2 0 0 0 4 0" fill="none" />
-                          </svg>
-                          {L23_st?.bellLabel}
-                        </button>
-                        <button className="pl-edit" onClick={L23_st?.edit}>✎ Editar</button>
-                      </div>
-                      </>
-                      ) : null}
-                      {L23_st?.notEditing ? (
-                        L23_st.noteOpen ? (
-                          <div className="pl-note-ed">
-                            <label className="pl-field"><span>Sua resposta</span>
-                              <textarea className="pl-input" rows={4} autoFocus value={L23_st.noteDraft} onChange={L23_st.onNote} placeholder="Escreva aqui o que este passo pede de você" />
+                      <div className="pl-body">
+                        {L23_st?.isCurrent ? <span className="pl-now">Passo de agora</span> : null}
+                        {L23_st?.editing ? (
+                          <div style={css("display: flex; flex-direction: column; gap: 12px")}>
+                            <label className="pl-field"><span>O que fazer</span>
+                              <textarea className="pl-input" rows={2} autoFocus value={L23_st.draftT} onChange={L23_st.onT} placeholder="Descreva o passo" />
+                            </label>
+                            <label className="pl-field"><span>Data do lembrete</span>
+                              <input className="pl-input" type="date" value={L23_st.draftIso} onChange={L23_st.onIso} />
                             </label>
                             <div style={css("display: flex; gap: 8px; flex-wrap: wrap")}>
-                              {L23_st.todo ? <button className="pl-btn pl-btn-main" onClick={() => L23_st.saveNote(true)}>Guardar e concluir</button> : null}
-                              <button className={'pl-btn' + (L23_st.todo ? '' : ' pl-btn-main')} onClick={() => L23_st.saveNote(false)}>Guardar</button>
-                              <button className="pl-btn" onClick={L23_st.cancelNote}>Cancelar</button>
+                              <button className="pl-btn pl-btn-main" onClick={L23_st.save}>Salvar passo</button>
+                              <button className="pl-btn" onClick={L23_st.cancel}>Cancelar</button>
+                              {L23_st.canRemove ? <button className="pl-btn pl-btn-del" onClick={L23_st.remove}>Remover</button> : null}
                             </div>
                           </div>
-                        ) : L23_st.hasNote ? (
-                          <button className="pl-note" onClick={L23_st.openNote}>
-                            <span className="pl-note-k">Sua resposta <em>✎ editar</em></span>
-                            <span className="pl-note-t">{L23_st.note}</span>
-                          </button>
                         ) : (
-                          <button className="pl-note-add" onClick={L23_st.openNote}>✎ Responder dentro deste passo</button>
-                        )
-                      ) : null}
-                      {L23_st?.isCurrent && !L23_st.noteOpen ? (
-                        <>
-                          <button className="cta" onClick={L23_st?.complete} style={css("height: 50px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17.5px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0c1f15" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <path d="M5 12.5l4.5 4.5L19 7.5" />
-                            </svg>
-                            {"Concluí este passo"}
+                          <>
+                            <p className="pl-t"><span className="sr">{L23_st.kicker}{L23_st.done ? ', concluído' : ''}: </span>{L23_st?.t}</p>
+                            <div className="pl-meta">
+                              <span className={'mj-chip ' + L23_st.tone}>{L23_st.tone === 'late' ? <Ico.clock /> : <Ico.cal />}{L23_st.rel}{L23_st.day ? <em>{L23_st.day}</em> : null}</span>
+                              {L23_st.done ? null : (
+                                <button className={'pl-bell' + (L23_st.remindP === 'true' ? ' on' : '')} onClick={L23_st?.bell} aria-pressed={L23_st?.remindP} aria-label={L23_st?.bellLabel}>
+                                  <Ico.bell on={L23_st.remindP === 'true'} />{L23_st.remindP === 'true' ? 'Lembrete' : 'Sem lembrete'}
+                                </button>
+                              )}
+                            </div>
+                          </>
+                        )}
+                        {L23_st?.notEditing ? (
+                          L23_st.noteOpen ? (
+                            <div className="pl-note-ed">
+                              <label className="pl-field"><span>Sua resposta</span>
+                                <textarea className="pl-input" rows={4} autoFocus value={L23_st.noteDraft} onChange={L23_st.onNote} placeholder="Escreva aqui o que este passo pede de você" />
+                              </label>
+                              <div style={css("display: flex; gap: 8px; flex-wrap: wrap")}>
+                                {L23_st.todo ? <button className="pl-btn pl-btn-main" onClick={() => L23_st.saveNote(true)}>Guardar e concluir</button> : null}
+                                <button className={'pl-btn' + (L23_st.todo ? '' : ' pl-btn-main')} onClick={() => L23_st.saveNote(false)}>Guardar</button>
+                                <button className="pl-btn" onClick={L23_st.cancelNote}>Cancelar</button>
+                              </div>
+                            </div>
+                          ) : L23_st.hasNote ? (
+                            <button className="pl-note tap" onClick={L23_st.openNote}>
+                              <span className="pl-note-k">Sua resposta <em><Ico.pen w="13" />Editar</em></span>
+                              <span className="pl-note-t">{L23_st.note}</span>
+                            </button>
+                          ) : null
+                        ) : null}
+                        {L23_st?.isCurrent && !L23_st.noteOpen ? (
+                          <button className="cta pl-done" onClick={L23_st?.complete}>
+                            <Ico.check w="16" />Concluí este passo
                           </button>
-                        </>
-                      ) : null}
-                      {L23_st?.isFuture && !L23_st.noteOpen ? (
-                        <>
-                          <button onClick={L23_st?.complete} style={css("height: 44px; border-radius: 999px; font-size: 17.5px; color: rgba(244,241,234,.7); border: 1px solid rgba(255,255,255,.14)")}>
-                            {"Já fiz este passo"}
-                          </button>
-                        </>
-                      ) : null}
-                      {L23_st?.done ? (
-                        <>
-                          <button onClick={L23_st?.undo} style={css("height: 44px; align-self: flex-start; padding: 0 4px; font-size: 17.5px; color: rgba(244,241,234,.55)")}>
-                            {"Desfazer"}
-                          </button>
-                        </>
-                      ) : null}
-                    </div>
-                  </React.Fragment>
-                ))}
-                <button className="pl-add" onClick={R.pl?.addStep}>+ Adicionar um passo</button>
+                        ) : null}
+                        {L23_st?.notEditing && !L23_st.noteOpen ? (
+                          <div className="pl-acts">
+                            {L23_st.hasNote ? null : <button className="pl-act tap" onClick={L23_st.openNote}><Ico.note />Responder</button>}
+                            <button className="pl-act tap" onClick={L23_st?.edit}><Ico.pen w="15" />Editar</button>
+                            {L23_st?.isFuture ? <button className="pl-act tap" onClick={L23_st?.complete}><Ico.check w="15" />Já fiz</button> : null}
+                            {L23_st?.done ? <button className="pl-act tap" onClick={L23_st?.undo}><Ico.undo />Desfazer</button> : null}
+                          </div>
+                        ) : null}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                <button className="pl-add tap" onClick={R.pl?.addStep}><Ico.plus />Adicionar um passo</button>
+                {R.pl?.allDone ? (
+                  <div className="glass cardin pl-end">
+                    <div className="goldglow"></div>
+                    <div className="al-gold-k" style={css("font-size: 19px")}>Plano concluído</div>
+                    <p>Você caminhou até o fim. Essa pergunta já encontrou sua resposta?</p>
+                    <button onClick={R.pl?.resolve} className="cta pl-resolve">{R.pl?.resolveLabel}</button>
+                  </div>
+                ) : null}
                 {R.pl?.confirmPlanDel ? (
-                  <div className="glass" style={css("border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px; border-color: rgba(255,163,163,.4)")}>
-                    <span style={css("font-size: 17px; font-weight: 300; line-height: 1.5")}>Excluir este plano e todos os passos? A pergunta continua no seu céu.</span>
+                  <div className="pl-del-confirm fade">
+                    <span>Excluir este plano e todos os passos? A pergunta continua no seu céu.</span>
                     <div style={css("display: flex; gap: 8px")}>
                       <button className="pl-btn pl-btn-del" onClick={R.pl.delPlan}>Excluir plano</button>
                       <button className="pl-btn" onClick={R.pl.cancelDelPlan}>Cancelar</button>
                     </div>
                   </div>
                 ) : (
-                  <button onClick={R.pl?.askDelPlan} style={css("align-self: center; height: 40px; padding: 0 16px; font-size: 17.5px; color: rgba(255,163,163,.85)")}>Excluir este plano</button>
+                  <button className="pl-del tap" onClick={R.pl?.askDelPlan}>Excluir este plano</button>
                 )}
-                {R.pl?.allDone ? (
-                  <>
-                    <div className="glass cardin" style={css("border-radius: 26px; padding: 22px 20px; position: relative; overflow: hidden; border-color: rgba(243,217,139,.4); text-align: center")}>
-                      <div className="goldglow"></div>
-                      <div className="goldtext" style={css("position: relative; font-size: 17px; letter-spacing: .26em; text-transform: uppercase")}>
-                        {"Plano concluído"}
-                      </div>
-                      <p style={css("position: relative; margin: 10px 0 16px; font-size: 17px; font-weight: 300; line-height: 1.5")}>
-                        {"Você caminhou até o fim. Essa pergunta já encontrou sua resposta?"}
-                      </p>
-                      <button onClick={R.pl?.resolve} className="cta" style={css("position: relative; width: 100%; height: 50px; border-radius: 999px; font-size: 17.5px; font-weight: 500; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a)")}>
-                        {R.pl?.resolveLabel}
-                      </button>
-                    </div>
-                  </>
-                ) : null}
               </div>
             </div>
           </>
@@ -2148,7 +2076,7 @@ Component.prototype.render = function render() {
         {R.sheetOpen ? (
           <>
             <button className="scrim" onClick={R.closeSheet} aria-label="Fechar" style={css("position: absolute; inset: 0; z-index: 7; background: rgba(5,4,12,.6)")}></button>
-            <div className="sheet scroll" style={css("position: absolute; left: 0; right: 0; bottom: 0; height: 660px; z-index: 8; overflow-y: auto; border-radius: 32px 32px 0 0; background: rgba(22,20,40,.9); border-top: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px)")}>
+            <div className="sheet scroll" style={css("position: absolute; left: 0; right: 0; bottom: 0; height: 660px; z-index: 8; overflow-y: auto; border-radius: 32px 32px 0 0; background: rgba(27,22,64,.94); border-top: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px)")}>
               <div style={css("box-sizing: border-box; padding: 12px 14px 40px; display: flex; flex-direction: column; gap: 16px")}>
                 <div style={css("display: flex; justify-content: center")}>
                   <span style={css("width: 40px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.25)")}></span>
@@ -2158,7 +2086,7 @@ Component.prototype.render = function render() {
                     {R.sheet?.meta}
                   </span>
                   <button onClick={R.closeSheet} aria-label="Fechar painel" style={css("width: 44px; height: 44px; display: flex; align-items: center; justify-content: center")}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
                       <path d="M6 6l12 12M18 6L6 18" />
                     </svg>
                   </button>
@@ -2169,14 +2097,14 @@ Component.prototype.render = function render() {
                 <div style={css("display: flex; flex-wrap: wrap; gap: 6px")}>
                   {(R.sheet?.tags || []).map((L24_g, I24) => (
                     <React.Fragment key={I24}>
-                      <span style={css("height: 26px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 17px; background: rgba(255,255,255,.08); color: rgba(244,241,234,.8)")}>
+                      <span style={css("height: 26px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 17px; background: rgba(255,255,255,.08); color: var(--ink-2)")}>
                         {L24_g?.t}
                       </span>
                     </React.Fragment>
                   ))}
                 </div>
-                <div style={css("border-radius: 22px; padding: 18px; position: relative; overflow: hidden; background: rgba(243,217,139,.06); border: 1px solid rgba(243,217,139,.3)")}>
-                  <div className="goldtext" style={css("font-size: 16px; letter-spacing: .26em; text-transform: uppercase")}>
+                <div style={css("border-radius: var(--r-card); padding: 18px; position: relative; overflow: hidden; background: color-mix(in srgb, var(--gold) 8%, transparent); border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent)")}>
+                  <div className="al-gold-k">
                     {"A resposta da Alma"}
                   </div>
                   {R.sheet?.sec ? this.secsView(R.sheet.sec, R.tradColor) : (
@@ -2184,7 +2112,8 @@ Component.prototype.render = function render() {
                       {R.sheet?.alma}
                     </p>
                   )}
-                  <p style={css("margin: 10px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55; color: #f3d98b")}>
+                  <p style={css("margin: 12px 0 0; padding-top: 14px; border-top: 1px solid var(--line); font-size: 16.5px; font-weight: 400; line-height: 1.5; color: var(--gold)")}>
+                    <span style={css("display: block; margin-bottom: 4px; font-size: 14.5px; font-weight: 500; color: var(--ink-2)")}>Um passo possível</span>
                     {R.sheet?.step}
                   </p>
                 </div>
@@ -2207,11 +2136,11 @@ Component.prototype.render = function render() {
                       <span style={css("width: 100%; height: 4px; border-radius: 4px; background: rgba(255,255,255,.1); overflow: hidden; display: block")}>
                         <span style={css(`display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #8fe3b0, #f3d98b); ${(R.sheet?.barStyle) ?? ''}`)}></span>
                       </span>
-                      <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.45; color: rgba(244,241,234,.85)")}>
+                      <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.45; color: var(--ink)")}>
                         {R.sheet?.nextText}
                       </span>
-                      <span style={css("font-size: 17.5px; font-weight: 500; color: #f4f1ea")}>
-                        {"Abrir plano"}
+                      <span style={css("display: inline-flex; align-items: center; gap: 4px; font-size: 16.5px; font-weight: 500; color: var(--mint)")}>
+                        {"Abrir plano"}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
                       </span>
                     </button>
                   </>
@@ -2222,7 +2151,7 @@ Component.prototype.render = function render() {
                       <span className="kicker" style={css("color: #8fe3b0")}>
                         {"Plano de ação"}
                       </span>
-                      <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: rgba(244,241,234,.8)")}>
+                      <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.55; color: var(--ink-2)")}>
                         {"Esta pergunta ainda não tem plano. A Alma cria um passo a passo com datas e lembretes para você agir."}
                       </span>
                       <button className="cta" onClick={R.makePlanFromSheet} style={css("height: 50px; border-radius: 999px; font-size: 17.5px; font-weight: 500; color: #0c1f15; background: linear-gradient(120deg, #8fe3b0, #d4f7e0)")}>
@@ -2236,19 +2165,19 @@ Component.prototype.render = function render() {
                 </div>
                 {R.sheet?.none ? (
                   <>
-                    <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; color: rgba(244,241,234,.6)")}>
+                    <p style={css("margin: 0; font-size: 17.5px; font-weight: 300; color: var(--ink-2)")}>
                       {"Nenhuma resposta estrelada nesta pergunta."}
                     </p>
                   </>
                 ) : null}
                 {(R.sheet?.stars || []).map((L25_s, I25) => (
                   <React.Fragment key={I25}>
-                    <div className="glass" style={css("border-radius: 20px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px")}>
+                    <div className="glass" style={css("border-radius: var(--r-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px")}>
                       <div style={css("display: flex; align-items: center; gap: 8px")}>
                         <span style={css(`font-size: 17.5px; font-weight: 500; color: ${(L25_s?.color) ?? ''}`)}>
                           {L25_s?.name}
                         </span>
-                        <span style={css("flex-grow: 1; font-size: 17px; font-weight: 300; color: rgba(244,241,234,.55)")}>
+                        <span style={css("flex-grow: 1; font-size: 17px; font-weight: 300; color: var(--ink-3)")}>
                           {L25_s?.ref}
                         </span>
                         <button onClick={L25_s?.remove} aria-label="Tirar estrela" style={css("width: 44px; height: 44px; margin: -12px -10px -12px 0; display: flex; align-items: center; justify-content: center")}>
@@ -2264,7 +2193,7 @@ Component.prototype.render = function render() {
                   </React.Fragment>
                 ))}
                 <div style={css("height: 1px; margin: 6px 0; background: rgba(255,255,255,.1)")}></div>
-                <button className="glass pill" onClick={R.toggleResolved} style={css(`height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17.5px; ${(R.resolveStyle) ?? ''}`)}>
+                <button className="glass pill" onClick={R.toggleResolved} style={css(`height: 52px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17.5px; ${(R.resolveStyle) ?? ''}`)}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8fe3b0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M5 12.5l4.5 4.5L19 7.5" />
                   </svg>
@@ -2282,15 +2211,15 @@ Component.prototype.render = function render() {
                 ) : null}
                 {R.confirmOn ? (
                   <>
-                    <div className="fade" style={css("border-radius: 18px; padding: 14px 16px; background: rgba(255,120,120,.08); border: 1px solid rgba(255,150,150,.32); display: flex; flex-direction: column; gap: 12px")}>
+                    <div className="fade" style={css("border-radius: var(--r-sm); padding: 14px 16px; background: rgba(255,120,120,.08); border: 1px solid rgba(255,150,150,.32); display: flex; flex-direction: column; gap: 12px")}>
                       <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.5")}>
                         {"Apagar esta pergunta e as respostas estreladas? Não dá para desfazer."}
                       </span>
                       <div style={css("display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px")}>
-                        <button className="glass" onClick={R.cancelDelete} style={css("height: 44px; border-radius: 14px; font-size: 17.5px")}>
+                        <button className="glass" onClick={R.cancelDelete} style={css("height: 44px; border-radius: var(--r-sm); font-size: 17.5px")}>
                           {"Cancelar"}
                         </button>
-                        <button onClick={R.doDelete} style={css("height: 44px; border-radius: 14px; font-size: 17.5px; font-weight: 500; background: #ff9c9c; color: #2a0b0b")}>
+                        <button onClick={R.doDelete} style={css("height: 44px; border-radius: var(--r-sm); font-size: 17.5px; font-weight: 500; background: #ff9c9c; color: #2a0b0b")}>
                           {"Excluir"}
                         </button>
                       </div>

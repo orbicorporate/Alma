@@ -71,7 +71,30 @@ function planStepsOn(entries, dayIso) {
   (entries || []).forEach((e, ei) => (e.plan || []).forEach((s, j) => { if (s.iso === dayIso) out.push({ q: e.q, name: planNameOf(e), note: s.note || '', t: s.t, n: j + 1, total: e.plan.length, done: s.done, ei, j }); }));
   return out;
 }
-const ICON = { sonho: '☾', intencao: '✦', gratidao: '♡', decisao: '◇', nota: '✎' };
+// Ícones de traço único (mesma família, mesmo peso) para cada tipo de registro
+const ICON_PATHS = {
+  sonho: ['M19.5 14.6A8 8 0 1 1 9.4 4.5a6.4 6.4 0 0 0 10.1 10.1z'],
+  intencao: ['M12 3c.8 5.2 2.6 7.2 7.5 9-4.9 1.8-6.7 3.8-7.5 9-.8-5.2-2.6-7.2-7.5-9 4.9-1.8 6.7-3.8 7.5-9z'],
+  gratidao: ['M12 19.6s-7.4-4.5-7.4-10a4.2 4.2 0 0 1 7.4-2.7 4.2 4.2 0 0 1 7.4 2.7c0 5.5-7.4 10-7.4 10z'],
+  decisao: ['M12 3.6 20.4 12 12 20.4 3.6 12z', 'M12 8.2v7.6'],
+  nota: ['M4.5 19.5h3.8L18.9 8.9a2.7 2.7 0 0 0-3.8-3.8L4.5 15.7z', 'M13.6 6.6l3.8 3.8']
+};
+function TypeIcon({ type, size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {(ICON_PATHS[type] || ICON_PATHS.nota).map((d, i) => <path key={i} d={d} />)}
+    </svg>
+  );
+}
+// Sugestão de registro para um dia vazio, conforme a hora (manhã: intenção; tarde: nota; noite: gratidão)
+function suggestFor(isToday, isFuture) {
+  if (isFuture) return { type: 'intencao', t: 'Nada marcado para este dia', x: 'Deixe uma intenção pronta para quando ele chegar.', b: 'Definir intenção' };
+  if (!isToday) return { type: 'nota', t: 'Nada registrado neste dia', x: 'Você ainda pode anotar o que lembra dele.', b: 'Escrever sobre este dia' };
+  const h = new Date().getHours();
+  if (h >= 4 && h < 12) return { type: 'intencao', t: 'Comece com uma intenção', x: 'Uma frase sobre como você quer atravessar o dia de hoje.', b: 'Definir intenção', alt: true };
+  if (h >= 12 && h < 18) return { type: 'nota', t: 'Como está o seu dia até aqui?', x: 'Anote um pensamento, uma conversa, algo que ficou com você.', b: 'Escrever uma nota' };
+  return { type: 'gratidao', t: 'Feche o dia com uma gratidão', x: 'Algo pequeno já vale: um café, uma conversa, um momento de calma.', b: 'Registrar gratidão' };
+}
 
 export default function Diario() {
   const data0 = load();
@@ -128,6 +151,17 @@ export default function Diario() {
     flash(e.id ? 'Registro atualizado' : `${TYPES[e.type].label} ${TYPES[e.type].f ? 'guardada' : 'guardado'} no seu céu`);
   };
   const delEditor = () => { setJournal(journal.filter((j) => j.id !== editor.id)); setEditor(null); flash('Registro apagado'); };
+  // Saída das folhas: mais discreta que a entrada (180ms), depois desmonta
+  const [leaving, setLeaving] = useState(false);
+  const closeSheet = (fn) => { if (leaving) return; setLeaving(true); setTimeout(() => { fn(); setLeaving(false); }, 180); };
+  const closeEditor = () => closeSheet(() => setEditor(null));
+  const closeReading = () => closeSheet(() => setReading(null));
+  useEffect(() => {
+    if (!editor && !reading) return undefined;
+    const onKey = (ev) => { if (ev.key === 'Escape') { if (reading) closeReading(); else closeEditor(); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   const selDate = fromIso(sel);
   const adv = dayAdvice(selDate, profile);
@@ -167,15 +201,15 @@ export default function Diario() {
           })}
         </div>
         <div className="dz-legend">
-          <span><b className="dz-fav dz-fav-act" /> agir</span>
-          <span><b className="dz-fav dz-fav-dec" /> decidir</span>
-          <span><i className="dz-step" /> passo do plano</span>
+          <span><b className="dz-fav dz-fav-act" />Bom para agir</span>
+          <span><b className="dz-fav dz-fav-dec" />Bom para decidir</span>
+          <span><i className="dz-step" />Passo do plano</span>
         </div>
         <div className="glass dz-daysum">
           <Moon f={adv.phase.frac} size={36} />
           <span className="dz-daysum-t">
             <b>{sel === iso(today()) ? 'Hoje, ' : ''}{selDate.getDate()} de {MO_FULL[selDate.getMonth()]}</b>
-            <small>{adv.phase.name} · {(byDay[sel] || []).length} {(byDay[sel] || []).length === 1 ? 'registro' : 'registros'}</small>
+            <small>{adv.phase.name}, {(byDay[sel] || []).length} {(byDay[sel] || []).length === 1 ? 'registro' : 'registros'}</small>
           </span>
           <button className="dz-open" onClick={() => setView('dia')}>Abrir o dia</button>
         </div>
@@ -187,17 +221,20 @@ export default function Diario() {
   // ---------- Cartões de registro (curtos: título e duas linhas)
   const recCard = (r, showDate, showType) => {
     const t = TYPES[r.type], d = fromIso(r.iso);
-    const meta = [showType ? t.label : null, showDate ? `${d.getDate()} de ${MO_FULL[d.getMonth()]}` : null, r.wake ? `acordei ${r.wake.toLowerCase()}` : null, r.decideBy ? `decidir até ${fromIso(r.decideBy).getDate()}/${fromIso(r.decideBy).getMonth() + 1}` : null].filter(Boolean).join(' · ');
+    const meta = [showType ? t.label : null, showDate ? `${d.getDate()} de ${MO_FULL[d.getMonth()]}` : null, r.wake ? `acordei ${r.wake.toLowerCase()}` : null, r.decideBy ? `decidir até ${fromIso(r.decideBy).getDate()}/${fromIso(r.decideBy).getMonth() + 1}` : null].filter(Boolean).join(', ');
     return (
       <div key={r.id} className="dz-rec" style={{ '--c': t.color }}>
         <button className="dz-rec-main" onClick={() => openEditor(r.type, r)}>
-          {meta ? <span className="dz-rec-k">{meta}</span> : null}
-          <span className="dz-rec-t">{r.title || (r.text || '').split('\n')[0].slice(0, 60)}</span>
-          {r.text && r.title ? <span className="dz-rec-x">{r.text}</span> : null}
+          <span className="dz-rec-ic"><TypeIcon type={r.type} size={18} /></span>
+          <span className="dz-rec-body">
+            {meta ? <span className="dz-rec-k">{meta}</span> : null}
+            <span className="dz-rec-t">{r.title || (r.text || '').split('\n')[0].slice(0, 60)}</span>
+            {r.text && r.title ? <span className="dz-rec-x">{r.text}</span> : null}
+          </span>
         </button>
         {r.type === 'sonho' ? (
           <button className="dz-read" onClick={() => { setReadTab('psy'); setDeepSkip(false); setSymOpen(0); setExtraOpen(false); setReading(r); }}>
-            <span className="dz-read-ic">✦</span> Ver o que o sonho diz
+            <span className="dz-read-ic" aria-hidden="true">✦</span>Ver o que o sonho diz<span className="dz-read-chev" aria-hidden="true">›</span>
           </button>
         ) : null}
       </div>
@@ -223,29 +260,32 @@ export default function Diario() {
     const groups = Object.keys(TYPES).map((k) => [k, recs.filter((r) => r.type === k)]).filter((g) => g[1].length);
     const isToday = sel === iso(today());
     const good = adv.agir ? 'Bom dia para agir' : adv.decidir ? 'Bom dia para decidir' : adv.descansar ? 'Bom dia para descansar' : 'Dia de observar e preparar';
-    const goodC = adv.agir ? '#8fe3b0' : adv.decidir ? '#c9a8ff' : adv.descansar ? '#a8d8ff' : '#f3d98b';
+    const goodC = adv.agir ? 'var(--mint)' : adv.decidir ? 'var(--lilac)' : adv.descansar ? 'var(--sky)' : 'var(--gold)';
     const move = (n) => { const d = fromIso(sel); d.setDate(d.getDate() + n); setSel(iso(d)); setMonth({ y: d.getFullYear(), m: d.getMonth() }); };
+    const sugg = suggestFor(isToday, sel > iso(today()));
     return (
       <div className="dz-day-panel">
-        <div className="dz-daynav">
-          <button className="dz-ic" aria-label="Dia anterior" onClick={() => move(-1)}>‹</button>
-          <span className="dz-daynav-t">{isToday ? 'Hoje' : WD_FULL[selDate.getDay()].split('-')[0]}<small>{selDate.getDate()} de {MO_FULL[selDate.getMonth()]}</small></span>
-          <button className="dz-ic" aria-label="Próximo dia" onClick={() => move(1)}>›</button>
-        </div>
-        <div className="glass dz-sky">
-          <div className="dz-moon-big"><Moon f={adv.phase.frac} size={56} /><div className="dz-moon-glow" /></div>
-          <div className="dz-sky-txt">
-            <span className="dz-good" style={{ color: goodC }}>{good}{adv.strong ? ' · forte' : ''}</span>
-            <span className="dz-phase">{adv.phase.name}<small> · {adv.phase.lit}% iluminada</small></span>
-            {adv.pd ? <span className="dz-pd">Dia pessoal {adv.pd}: {PD_TEXT[adv.pd]}.</span> : null}
+        <div className="glass dz-sky" style={{ '--g': goodC }}>
+          <div className="dz-daynav">
+            <button className="dz-ic" aria-label="Dia anterior" onClick={() => move(-1)}>‹</button>
+            <span className="dz-daynav-t" aria-live="polite">{isToday ? 'Hoje' : WD_FULL[selDate.getDay()].split('-')[0]}<small>{selDate.getDate()} de {MO_FULL[selDate.getMonth()]}</small></span>
+            <button className="dz-ic" aria-label="Próximo dia" onClick={() => move(1)}>›</button>
           </div>
+          <div className="dz-sky-main">
+            <div className="dz-moon-big"><div className="dz-moon-glow" /><Moon f={adv.phase.frac} size={60} /></div>
+            <div className="dz-sky-txt">
+              <span className="dz-good">{good}{adv.strong ? <em>forte</em> : null}</span>
+              <span className="dz-phase">{adv.phase.name}<small>{adv.phase.lit}% iluminada</small></span>
+            </div>
+          </div>
+          {adv.pd ? <p className="dz-pd"><span>Dia pessoal {adv.pd}</span>{PD_TEXT[adv.pd].charAt(0).toUpperCase() + PD_TEXT[adv.pd].slice(1)}.</p> : null}
         </div>
         <div className="dz-group">
-          <span className="dz-group-h">{isToday ? 'Registrar hoje' : 'Registrar neste dia'}</span>
+          <span className="dz-group-h dz-area-h">{isToday ? 'Registrar hoje' : 'Registrar neste dia'}</span>
           <div className="dz-addgrid">
             {Object.entries(TYPES).map(([k, t]) => (
               <button key={k} className="dz-addtile" onClick={() => openEditor(k)} style={{ '--c': t.color }}>
-                <span className="dz-addic">{ICON[k]}</span>
+                <span className="dz-addic"><TypeIcon type={k} /></span>
                 <span>{k === 'nota' ? 'Nota' : t.label}</span>
               </button>
             ))}
@@ -253,7 +293,7 @@ export default function Diario() {
         </div>
         {steps.length ? (
           <div className="dz-group">
-            <span className="dz-group-h" style={{ color: '#8fe3b0' }}><i style={{ background: '#8fe3b0' }} />Passo de plano para este dia</span>
+            <span className="dz-group-h" style={{ color: 'var(--mint)' }}><i style={{ background: 'var(--mint)' }} />Passo de plano para este dia</span>
             {steps.map((st, i) => {
               const open = planOpen === i;
               return (
@@ -300,7 +340,17 @@ export default function Diario() {
             {list.map((r) => recCard(r, false))}
           </div>
         ))}
-        {!groups.length && !steps.length ? <p className="dz-empty-day">{isToday ? 'Nada registrado hoje ainda. Toque em um dos botões acima para começar.' : 'Nada registrado neste dia.'}</p> : null}
+        {!groups.length && !steps.length ? (
+          <div className="dz-invite" style={{ '--c': TYPES[sugg.type].color }}>
+            <span className="dz-invite-ic"><TypeIcon type={sugg.type} size={22} /></span>
+            <span className="dz-invite-t">{sugg.t}</span>
+            <span className="dz-invite-x">{sugg.x}</span>
+            <div className="dz-invite-btns">
+              <button className="dz-invite-cta" onClick={() => openEditor(sugg.type)}>{sugg.b}</button>
+              {sugg.alt ? <button className="dz-invite-alt" onClick={() => openEditor('sonho')} style={{ '--c': TYPES.sonho.color }}>Anotar um sonho</button> : null}
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   };
@@ -312,17 +362,23 @@ export default function Diario() {
     return (
       <div className="dz-fade">
         <div className="glass dz-hero" style={{ '--c': TYPES.sonho.color }}>
+          <span className="dz-hero-ic"><TypeIcon type="sonho" size={22} /></span>
           <span className="dz-hero-t">Seus sonhos</span>
           <span className="dz-hero-x">Anote ao acordar. A Alma lê cada sonho por dois caminhos: a psicanálise e a espiritualidade.</span>
-          <button className="dz-hero-cta" onClick={() => { setSel(iso(today())); setEditor({ id: null, type: 'sonho', iso: iso(today()), title: '', text: '', wake: '', decideBy: '' }); }}>+ Anotar um sonho</button>
+          <button className="dz-hero-cta" onClick={() => { setSel(iso(today())); setEditor({ id: null, type: 'sonho', iso: iso(today()), title: '', text: '', wake: '', decideBy: '' }); }}>Anotar um sonho</button>
         </div>
         {rec.length ? (
           <div className="dz-group">
-            <span className="dz-group-h">Símbolos que se repetem</span>
-            <div className="dz-chips">{rec.map((r) => <span key={r.name} className="dz-chip dz-chip-sm" style={{ borderColor: '#c9a8ff88', color: '#e4d6ff' }}>{r.name} · {r.n}×</span>)}</div>
+            <span className="dz-group-h" style={{ color: TYPES.sonho.color }}>Símbolos que se repetem</span>
+            <div className="dz-chips">{rec.map((r) => <span key={r.name} className="dz-chip dz-chip-sm dz-chip-sym">{r.name}<em>{r.n}×</em></span>)}</div>
           </div>
         ) : null}
-        {list.length ? list.map((r) => recCard(r, true)) : <p className="dz-empty-day">Nenhum sonho anotado ainda. Deixe o celular perto da cama e escreva o que lembrar logo ao acordar, mesmo que seja só uma imagem.</p>}
+        {list.length ? (
+          <div className="dz-group">
+            <span className="dz-group-h" style={{ color: TYPES.sonho.color }}>{list.length === 1 ? '1 sonho anotado' : `${list.length} sonhos anotados`}</span>
+            {list.map((r) => recCard(r, true))}
+          </div>
+        ) : <p className="dz-empty-note">Nenhum sonho anotado ainda. Deixe o celular perto da cama e escreva o que lembrar logo ao acordar, mesmo que seja só uma imagem.</p>}
       </div>
     );
   };
@@ -336,23 +392,23 @@ export default function Diario() {
     const addType = noteFilter === 'all' ? 'nota' : noteFilter;
     return (
       <div className="dz-fade">
-        <div className="dz-chips">
-          <button className="dz-chip" onClick={() => setNoteFilter('all')} style={{ borderColor: 'rgba(255,255,255,.3)', background: noteFilter === 'all' ? '#f4f1ea' : 'transparent', color: noteFilter === 'all' ? '#1a1030' : '#f4f1ea' }}>Tudo</button>
-          {NOTE_TYPES.map((k) => <button key={k} className="dz-chip" onClick={() => setNoteFilter(k)} style={{ borderColor: TYPES[k].color, background: noteFilter === k ? TYPES[k].color : 'transparent', color: noteFilter === k ? '#1a1408' : TYPES[k].color }}>{TYPES[k].plural}</button>)}
+        <div className="dz-chips dz-filter" role="group" aria-label="Filtrar anotações">
+          <button className={'dz-chip dz-fchip' + (noteFilter === 'all' ? ' on' : '')} onClick={() => setNoteFilter('all')} aria-pressed={noteFilter === 'all' ? 'true' : 'false'} style={{ '--c': 'var(--sky)' }}>Tudo</button>
+          {NOTE_TYPES.map((k) => <button key={k} className={'dz-chip dz-fchip' + (noteFilter === k ? ' on' : '')} onClick={() => setNoteFilter(k)} aria-pressed={noteFilter === k ? 'true' : 'false'} style={{ '--c': TYPES[k].color }}>{TYPES[k].plural}</button>)}
         </div>
-        <button className="dz-newline" onClick={() => { setSel(iso(today())); setEditor({ id: null, type: addType, iso: iso(today()), title: '', text: '', wake: '', decideBy: '' }); }} style={{ borderColor: TYPES[addType].color + '88' }}>
-          <i style={{ background: TYPES[addType].color }} />+ {noteFilter === 'all' ? 'Nova anotação' : `Nova ${TYPES[addType].label.toLowerCase()}`}
+        <button className="dz-newline" onClick={() => { setSel(iso(today())); setEditor({ id: null, type: addType, iso: iso(today()), title: '', text: '', wake: '', decideBy: '' }); }} style={{ '--c': TYPES[addType].color }}>
+          <span className="dz-newline-ic"><TypeIcon type={addType} size={18} /></span>{noteFilter === 'all' ? 'Nova anotação' : `Nova ${TYPES[addType].label.toLowerCase()}`}
         </button>
         {byDate.map(([d, rs]) => {
           const dd = fromIso(d);
           return (
             <div key={d} className="dz-group">
-              <span className="dz-group-h">{d === iso(today()) ? 'Hoje' : `${WD_FULL[dd.getDay()].split('-')[0]}, ${dd.getDate()} de ${MO_FULL[dd.getMonth()]}`}</span>
+              <span className="dz-group-h dz-area-h">{d === iso(today()) ? 'Hoje' : `${WD_FULL[dd.getDay()].split('-')[0]}, ${dd.getDate()} de ${MO_FULL[dd.getMonth()]}`}</span>
               {rs.map((r) => recCard(r, false, noteFilter === 'all'))}
             </div>
           );
         })}
-        {!list.length ? <p className="dz-empty-day">Nada por aqui ainda. Intenções, gratidões e decisões que você registrar aparecem nesta lista.</p> : null}
+        {!list.length ? <p className="dz-empty-note">Nada por aqui ainda. Intenções, gratidões e decisões que você registrar aparecem nesta lista.</p> : null}
       </div>
     );
   };
@@ -384,7 +440,7 @@ export default function Diario() {
     const qi = DEEP.findIndex((d) => !deep[d.k]);
     const askNow = qi >= 0 && !deepSkip;
     const psy = readTab === 'psy';
-    const acc = psy ? '#c9a8ff' : '#f3d98b';
+    const acc = psy ? TYPES.sonho.color : 'var(--gold)';
     const key = dreamKey(r);
     const ai = r.ai && r.aiKey === key ? r.ai : null;
     const loading = !askNow && !ai && dreamAi[r.id] === key;
@@ -405,15 +461,15 @@ export default function Diario() {
 
     return (
       <>
-        <button className="dz-scrim" aria-label="Fechar" onClick={() => setReading(null)} />
-        <div className="dz-sheet dz-reading" role="dialog" aria-modal="true" aria-label="Leitura do sonho">
+        <button className={'dz-scrim' + (leaving ? ' dz-out' : '')} aria-label="Fechar" onClick={closeReading} />
+        <div className={'dz-sheet dz-reading' + (leaving ? ' dz-out' : '')} role="dialog" aria-modal="true" aria-label="Leitura do sonho" style={{ '--c': TYPES.sonho.color }}>
           <div className="dz-handle" />
-          <span className="kicker" style={{ fontSize: 15, color: '#c9a8ff' }}>Leitura do sonho</span>
+          <span className="dz-label" style={{ color: TYPES.sonho.color }}>Leitura do sonho</span>
           <span className="dz-read-title">{r.title || 'Seu sonho'}</span>
           {askNow ? (
             <div className="dz-deep" key={qi}>
               <div className="dz-deep-top">
-                <span className="kicker" style={{ fontSize: 15, color: '#f3d98b' }}>Antes de ler · {qi + 1} de {DEEP.length}</span>
+                <span className="dz-label" style={{ color: 'var(--gold)' }}>Antes de ler, {qi + 1} de {DEEP.length}</span>
                 <button className="dz-deep-skip" onClick={() => setDeepSkip(true)}>Pular</button>
               </div>
               <span className="dz-deep-q">{DEEP[qi].q}</span>
@@ -459,7 +515,7 @@ export default function Diario() {
                 </div>
               </div>
               <div className="dz-question">
-                <span className="kicker" style={{ fontSize: 15, color: '#f3d98b' }}>Pergunta para levar</span>
+                <span className="dz-label" style={{ color: 'var(--gold)' }}>Pergunta para levar</span>
                 <p>{question}</p>
               </div>
               {extraOpen ? (
@@ -475,8 +531,8 @@ export default function Diario() {
             </>
           )}
           <div className="dz-sheet-actions">
-            <button className="dz-del" style={{ color: 'rgba(244,241,234,.8)' }} onClick={() => setReading(null)}>Fechar</button>
-            {!askNow && !loading ? <button className="dz-save cta" onClick={keepQ} style={{ background: 'linear-gradient(120deg, #fff4d1, #f3d98b)', padding: '0 22px' }}>Guardar a pergunta</button> : null}
+            <button className="dz-del dz-ghost" onClick={closeReading}>Fechar</button>
+            {!askNow && !loading ? <button className="dz-save cta" onClick={keepQ} style={{ '--c': 'var(--gold)', padding: '0 22px' }}>Guardar a pergunta</button> : null}
           </div>
         </div>
       </>
@@ -504,7 +560,7 @@ export default function Diario() {
               dots.push(<i key={d} className={'dz-ydot' + (di === iso(today()) ? ' dz-ytoday' : '')} style={c ? { background: c, boxShadow: `0 0 6px ${c}` } : undefined} />);
             }
             return (
-              <button key={m} className="glass dz-ymonth pill" onClick={() => { setMonth({ y, m }); setView('mes'); }}>
+              <button key={m} className={'glass dz-ymonth' + (y === today().getFullYear() && m === today().getMonth() ? ' dz-ynow' : '')} onClick={() => { setMonth({ y, m }); setView('mes'); }}>
                 <span>{mn.slice(0, 3)}</span>
                 <div className="dz-ygrid">{dots}</div>
               </button>
@@ -542,10 +598,15 @@ export default function Diario() {
     <div className="dz-fade">
       <div className="dz-boardbar">
         <span className="dz-hint">Arraste, escreva e mude a cor.</span>
-        <button className="dz-new pill" onClick={addPost}>+ Post-it</button>
+        <button className="dz-new" onClick={addPost}>Novo post-it</button>
       </div>
       <div ref={board} className="dz-board" onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
-        {postits.length === 0 ? <p className="dz-empty">Seu quadro está vazio. Toque em “+ Post-it”.</p> : null}
+        {postits.length === 0 ? (
+          <div className="dz-empty">
+            <span>Seu quadro está vazio.</span>
+            <button className="dz-empty-cta" onClick={addPost}>Colar o primeiro post-it</button>
+          </div>
+        ) : null}
         {postits.map((p) => (
           <div key={p.id} className={'dz-post' + (dropped && dropped.startsWith(p.id + ':') ? ' dz-wobble' : '')} style={{ left: p.x, top: p.y, background: p.color, '--r': `${p.rot}deg` }} onPointerDown={(e) => onDown(e, p)}>
             <textarea value={p.text} placeholder="Escreva aqui" aria-label="Texto do post-it" onChange={(e) => setPostits(postits.map((q) => (q.id === p.id ? Object.assign({}, q, { text: e.target.value }) : q)))} />
@@ -565,29 +626,30 @@ export default function Diario() {
     const sugg = e.type === 'decisao' ? nextFavorable('decidir', today(), profile, 3) : [];
     return (
       <>
-        <button className="dz-scrim" aria-label="Fechar" onClick={() => setEditor(null)} />
-        <div className="dz-sheet">
+        <button className={'dz-scrim' + (leaving ? ' dz-out' : '')} aria-label="Fechar" onClick={closeEditor} />
+        <div className={'dz-sheet dz-editor' + (leaving ? ' dz-out' : '')} role="dialog" aria-modal="true" aria-label={t.label} style={{ '--c': t.color }}>
           <div className="dz-handle" />
-          <div className="dz-edhead" style={{ '--c': t.color }}>
-            <span className="dz-addic">{ICON[e.type]}</span>
+          <div className="dz-edhead">
+            <span className="dz-addic"><TypeIcon type={e.type} /></span>
             <span className="dz-edhead-t">{e.id ? 'Editar ' + t.label.toLowerCase() : e.type === 'nota' ? 'Nova anotação' : (t.f ? 'Nova ' : 'Novo ') + t.label.toLowerCase()}<small>{fromIso(e.iso).getDate()} de {MO_FULL[fromIso(e.iso).getMonth()]}</small></span>
+            <button className="dz-ic dz-close" aria-label="Fechar" onClick={closeEditor}>×</button>
           </div>
-          <input className="dz-input" value={e.title} placeholder={e.type === 'sonho' ? 'Um nome para o sonho' : e.type === 'decisao' ? 'O que você precisa decidir?' : 'Título'} onChange={(ev) => setEditor(Object.assign({}, e, { title: ev.target.value }))} />
-          <textarea className="dz-area" value={e.text} rows={5} placeholder={e.type === 'sonho' ? 'Conte o sonho: lugares, pessoas, cores, sensações.' : e.type === 'gratidao' ? 'Pelo que você é grato hoje?' : e.type === 'intencao' ? 'Qual intenção você quer sustentar?' : e.type === 'decisao' ? 'Quais são as opções e o que pesa em cada uma?' : 'Escreva livremente.'} onChange={(ev) => setEditor(Object.assign({}, e, { text: ev.target.value }))} />
+          <input className="dz-input" value={e.title} aria-label="Título" placeholder={e.type === 'sonho' ? 'Um nome para o sonho' : e.type === 'decisao' ? 'O que você precisa decidir?' : 'Título'} onChange={(ev) => setEditor(Object.assign({}, e, { title: ev.target.value }))} />
+          <textarea className="dz-area" value={e.text} rows={5} aria-label="Texto" placeholder={e.type === 'sonho' ? 'Conte o sonho: lugares, pessoas, cores, sensações.' : e.type === 'gratidao' ? 'Pelo que você é grato hoje?' : e.type === 'intencao' ? 'Qual intenção você quer sustentar?' : e.type === 'decisao' ? 'Quais são as opções e o que pesa em cada uma?' : 'Escreva livremente.'} onChange={(ev) => setEditor(Object.assign({}, e, { text: ev.target.value }))} />
           {e.type === 'sonho' ? <span className="dz-hint">Ao guardar, a Alma lê o seu sonho pela psicanálise e pela espiritualidade.</span> : null}
           {e.type === 'sonho' ? (
             <div className="dz-sub">
-              <span className="kicker" style={{ fontSize: 15 }}>Como você acordou?</span>
-              <div className="dz-chips">{WAKE.map((w) => <button key={w} className="dz-chip" onClick={() => setEditor(Object.assign({}, e, { wake: e.wake === w ? '' : w }))} style={{ borderColor: t.color, background: e.wake === w ? t.color : 'transparent', color: e.wake === w ? '#1a1408' : '#f4f1ea' }}>{w}</button>)}</div>
+              <span className="dz-label">Como você acordou?</span>
+              <div className="dz-chips">{WAKE.map((w) => <button key={w} className={'dz-chip dz-fchip' + (e.wake === w ? ' on' : '')} aria-pressed={e.wake === w ? 'true' : 'false'} onClick={() => setEditor(Object.assign({}, e, { wake: e.wake === w ? '' : w }))}>{w}</button>)}</div>
             </div>
           ) : null}
           {e.type === 'decisao' ? (
             <div className="dz-sub">
-              <span className="kicker" style={{ fontSize: 15, color: '#c9a8ff' }}>Dias favoráveis para decidir</span>
+              <span className="dz-label">Dias favoráveis para decidir</span>
               <div className="dz-chips">
                 {sugg.map((s, i) => {
                   const di = iso(s.date);
-                  return <button key={i} className="dz-chip" onClick={() => setEditor(Object.assign({}, e, { decideBy: di }))} style={{ borderColor: '#c9a8ff', background: e.decideBy === di ? '#c9a8ff' : 'transparent', color: e.decideBy === di ? '#1a1030' : '#f4f1ea' }}>{WD_FULL[s.date.getDay()].slice(0, 3)} {s.date.getDate()}/{s.date.getMonth() + 1} · {s.advice.phase.name}</button>;
+                  return <button key={i} className={'dz-chip dz-fchip' + (e.decideBy === di ? ' on' : '')} aria-pressed={e.decideBy === di ? 'true' : 'false'} onClick={() => setEditor(Object.assign({}, e, { decideBy: di }))}>{WD_FULL[s.date.getDay()].slice(0, 3)} {s.date.getDate()}/{s.date.getMonth() + 1}, {s.advice.phase.name.toLowerCase()}</button>;
                 })}
               </div>
               <span className="dz-hint">Escolha um dia para decidir. Ele aparece marcado no seu calendário.</span>
@@ -595,7 +657,7 @@ export default function Diario() {
           ) : null}
           <div className="dz-sheet-actions">
             {e.id ? <button className="dz-del" onClick={delEditor}>Apagar</button> : <span />}
-            <button className="dz-save cta" onClick={saveEditor} style={{ background: t.color }}>Guardar</button>
+            <button className="dz-save cta" onClick={saveEditor}>{e.type === 'sonho' ? 'Guardar e ler o sonho' : e.type === 'nota' ? 'Guardar anotação' : 'Guardar ' + t.label.toLowerCase()}</button>
           </div>
         </div>
       </>
@@ -616,12 +678,12 @@ export default function Diario() {
       <div className="dz-top">
         <span className="dz-headtxt">
           <span className="dz-title">Meu diário</span>
-          <span className="dz-purpose">{{ dia: 'Seu dia, a Lua e o que você registrou.', sonhos: 'Anote sonhos e veja o que eles podem dizer.', notas: 'Intenções, gratidões e decisões em um só lugar.', quadro: 'Lembretes soltos para arrastar e colorir.', mes: 'A Lua e os dias bons para agir e decidir.', ano: 'Seu ano em cores.' }[view]}</span>
+          <span className="dz-purpose">{{ dia: 'Seu dia, a Lua e o que você registrou.', sonhos: 'Anote sonhos e veja o que eles dizem.', notas: 'Intenções, gratidões e decisões.', quadro: 'Lembretes soltos para arrastar e colorir.', mes: 'A Lua e os dias bons para agir e decidir.', ano: 'Seu ano em cores.' }[view]}</span>
         </span>
-        {sel !== iso(today()) && (view === 'dia' || view === 'mes') ? <button className="dz-ic dz-todaybtn" onClick={() => { const t = today(); setSel(iso(t)); setMonth({ y: t.getFullYear(), m: t.getMonth() }); }}>Voltar a hoje</button> : null}
+        {sel !== iso(today()) && (view === 'dia' || view === 'mes') ? <button className="dz-todaybtn" onClick={() => { const t = today(); setSel(iso(t)); setMonth({ y: t.getFullYear(), m: t.getMonth() }); }}>Voltar a hoje</button> : null}
       </div>
       <div className="dz-tabs">
-        {TABS.map(([k, l]) => <button key={k} className={'dz-tab' + (view === k || (k === 'mes' && view === 'ano') ? ' dz-tab-on' : '')} onClick={() => setView(k)} aria-pressed={view === k ? 'true' : 'false'}>{l}</button>)}
+        {TABS.map(([k, l]) => { const on = view === k || (k === 'mes' && view === 'ano'); return <button key={k} className={'dz-tab' + (on ? ' dz-tab-on' : '')} onClick={() => setView(k)} aria-pressed={on ? 'true' : 'false'}>{l}</button>; })}
       </div>
       <div className="dz-body" key={view}>
         {view === 'mes' ? renderMonth() : view === 'dia' ? <div className="dz-fade">{renderDayCard()}</div> : view === 'ano' ? renderYear() : view === 'sonhos' ? renderDreams() : view === 'notas' ? renderNotes() : renderBoard()}

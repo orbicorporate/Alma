@@ -17,10 +17,10 @@ export const TABS = [
 ];
 const TOUR = [
   { tab: null, title: 'Bem-vindo à Alma', text: 'Um lugar para pensar com calma, ouvir muitas sabedorias e transformar reflexão em ação. Veja em 4 passos como funciona.' },
-  { tab: 'perguntar', title: '1 · Perguntar', text: 'Traga uma dúvida, um medo ou uma alegria. A Alma faz 3 perguntas rápidas e 14 sabedorias respondem com você. No fim, você cria um plano de ação.' },
-  { tab: 'diario', title: '2 · Diário', text: 'Registre sonhos, gratidões, intenções e decisões. O calendário mostra a Lua e os dias bons para agir e decidir.' },
-  { tab: 'ceu', title: '3 · Céu', text: 'Seu mapa natal, horóscopo, numerologia e tarô guiado, a partir dos seus dados de nascimento.' },
-  { tab: 'minha', title: '4 · Minha Alma', text: 'Tudo o que você vive aqui vira uma estrela: perguntas, respostas favoritas, planos e registros. Entre com sua conta para guardar em qualquer aparelho.' }
+  { tab: 'perguntar', title: 'Perguntar', text: 'Traga uma dúvida, um medo ou uma alegria. A Alma faz 3 perguntas rápidas e 14 sabedorias respondem com você. No fim, você cria um plano de ação.' },
+  { tab: 'diario', title: 'Diário', text: 'Registre sonhos, gratidões, intenções e decisões. O calendário mostra a Lua e os dias bons para agir e decidir.' },
+  { tab: 'ceu', title: 'Céu', text: 'Seu mapa natal, horóscopo, numerologia e tarô guiado, a partir dos seus dados de nascimento.' },
+  { tab: 'minha', title: 'Minha Alma', text: 'Tudo o que você vive aqui vira uma estrela: perguntas, respostas favoritas, planos e registros. Entre com sua conta para guardar em qualquer aparelho.' }
 ];
 
 export default function TabBar({ active, visible, onTab, route }) {
@@ -49,14 +49,14 @@ export default function TabBar({ active, visible, onTab, route }) {
             if (t.k === 'perguntar') {
               return (
                 <button key={t.k} className={'tb-ask' + (on ? ' tb-on' : '') + (lit ? ' tb-lit' : '')} onClick={() => onTab(t.k)} aria-current={on ? 'page' : undefined}>
-                  <span className="tb-orb" />
+                  <span className="tb-orb" aria-hidden="true" />
                   <span className="tb-label">{t.label}</span>
                 </button>
               );
             }
             return (
               <button key={t.k} className={'tb-item' + (on ? ' tb-on' : '') + (lit ? ' tb-lit' : '')} onClick={() => onTab(t.k)} aria-current={on ? 'page' : undefined}>
-                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{I[t.k]}</svg>
+                <span className="tb-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{I[t.k]}</svg></span>
                 <span className="tb-label">{t.label}</span>
               </button>
             );
@@ -67,7 +67,10 @@ export default function TabBar({ active, visible, onTab, route }) {
         <div className="tt" role="dialog" aria-modal="true" aria-label="Como a Alma funciona">
           <div className="tt-scrim" onClick={endTour} />
           <div className="tt-card" key={tour} style={tIdx >= 0 ? { bottom: 118 } : { top: '30%' }}>
-            <div className="tt-dots">{TOUR.map((_, i) => <i key={i} className={i === tour ? 'on' : ''} />)}</div>
+            <div className="tt-meta">
+              <div className="tt-dots" aria-hidden="true">{TOUR.map((_, i) => <i key={i} className={i === tour ? 'on' : i < tour ? 'done' : ''} />)}</div>
+              {tour > 0 ? <span className="tt-count">Passo {tour} de {TOUR.length - 1}</span> : null}
+            </div>
             <div className="tt-title">{step.title}</div>
             <p className="tt-text">{step.text}</p>
             <div className="tt-actions">
