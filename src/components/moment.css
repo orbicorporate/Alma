@@ -1,0 +1,52 @@
+/* Cartão do momento (Início).
+   Motion: entra materializando (opacidade + 8px + blur 4px, 420ms, curva sem quique),
+   sai mais discreto (180ms, 6px). Botões dão retorno de toque em 120ms, sem animar layout. */
+:root { --mm-ease-out: cubic-bezier(.22, .8, .24, 1); --mm-ease-in: cubic-bezier(.45, 0, .9, .4); }
+
+.hm .mm { gap: var(--s3); padding: 18px var(--s4) var(--s4); border-color: color-mix(in srgb, var(--c) 38%, transparent);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--c) 13%, transparent), rgba(255,255,255,.04) 62%);
+  animation: mmIn .42s var(--mm-ease-out) both; transition: opacity .18s var(--mm-ease-in), transform .18s var(--mm-ease-in), filter .18s var(--mm-ease-in); }
+.hm .mm.mm-out { opacity: 0; transform: translateY(-6px); filter: blur(4px); }
+@keyframes mmIn { from { opacity: 0; transform: translateY(8px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+
+.mm-body { display: flex; flex-direction: column; gap: var(--s2); animation: mmSwap .28s var(--mm-ease-out) both; }
+@keyframes mmSwap { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.mm-k { font-size: 14px; letter-spacing: .16em; text-transform: uppercase; padding-right: 96px; line-height: 1.4; }
+.mm-title { margin: 0; font-size: 20px; font-weight: 300; line-height: 1.3; color: #f4f1ea; text-wrap: balance; }
+.mm-line { margin: 0; font-size: 15.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.74); }
+.mm-sky { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 15px; line-height: 1.45; color: rgba(243,217,139,.92); }
+.mm-sky svg { flex-shrink: 0; }
+.mm-why { margin: 0; font-size: 13.5px; line-height: 1.45; color: rgba(244,241,234,.5); }
+
+.hm .mm-later { position: absolute; top: 6px; right: 6px; z-index: 2; height: 44px; padding: 0 12px; font-size: 15px; color: rgba(244,241,234,.6); border-radius: 999px; transition: color .12s ease-out, background-color .12s ease-out; }
+.hm .mm-later:active { background: rgba(255,255,255,.08); color: #f4f1ea; }
+
+.mm-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); margin-top: var(--s1); }
+.hm .mm-btn { height: 48px; border-radius: 999px; text-align: center; font-size: 16.5px; border: 1px solid rgba(255,255,255,.2); color: #f4f1ea;
+  transition: transform .12s var(--mm-ease-out), background-color .12s ease-out; }
+.hm .mm-btn:active, .hm .mm-chip:active { transform: scale(.97); }
+.hm .mm-primary { border: 0; font-weight: 500; color: #120e22; background: linear-gradient(120deg, var(--c), color-mix(in srgb, var(--c) 40%, #ffffff)); }
+.hm .mm-btn:focus-visible, .hm .mm-chip:focus-visible, .hm .mm-later:focus-visible { outline: 2px solid #f4f1ea; outline-offset: 2px; }
+
+.mm-chips { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s1); }
+.mm-chips-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.hm .mm-chip { min-height: 46px; padding: 10px 16px; border-radius: 16px; font-size: 16.5px; line-height: 1.35; color: #f4f1ea; text-align: left;
+  background: rgba(255,255,255,.05); border: 1px solid color-mix(in srgb, var(--c) 34%, rgba(255,255,255,.12));
+  transition: transform .12s var(--mm-ease-out), background-color .12s ease-out; }
+.mm-chips-4 .mm-chip { padding: 0 4px; text-align: center; border-radius: 999px; }
+.hm .mm-chip:active { background: color-mix(in srgb, var(--c) 18%, transparent); }
+
+.mm-done { display: flex; align-items: center; gap: var(--s3); min-height: 64px; font-size: 18px; font-weight: 300; line-height: 1.4; color: #f4f1ea; animation: mmSwap .28s var(--mm-ease-out) both; }
+.mm-done svg { flex-shrink: 0; color: var(--c); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hm .mm, .mm-body, .mm-done { animation: none; }
+  .hm .mm { transition: opacity .01ms; }
+  .hm .mm.mm-out { transform: none; filter: none; }
+  .hm .mm-btn, .hm .mm-chip { transition: none; }
+  .hm .mm-btn:active, .hm .mm-chip:active { transform: none; }
+}
+
+/* Ritmo do dia: o céu do Início muda de tom com o período */
+html[data-daypart="manha"] .hm-aurora { background: radial-gradient(ellipse 50% 30% at 50% 0%, rgba(243,190,140,.38), transparent 70%), radial-gradient(ellipse 45% 32% at 20% 8%, rgba(150,120,235,.4), transparent 70%), radial-gradient(ellipse 40% 30% at 70% 95%, rgba(80,110,190,.24), transparent 70%), linear-gradient(180deg, #2a1f4e 0%, #17123a 50%, #0b0a18 100%); }
+html[data-daypart="noite"] .hm-aurora { background: radial-gradient(ellipse 45% 30% at 50% 0%, rgba(80,70,190,.42), transparent 70%), radial-gradient(ellipse 40% 30% at 70% 95%, rgba(60,90,170,.2), transparent 70%), linear-gradient(180deg, #120f30 0%, #0c0a22 50%, #07060f 100%); }

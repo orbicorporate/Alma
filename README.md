@@ -10,6 +10,19 @@ Um conselheiro que responde às suas dúvidas com a sabedoria de muitas tradiç�
 - Céu e Símbolos: perfil de nascimento, mapa natal calculado, horóscopo (dia a 1 ano), numerologia completa e tarô guiado.
 - Login por link no e-mail (Supabase) para guardar tudo na nuvem; sem login, os dados ficam no aparelho.
 
+## Intuição (o app que adivinha)
+
+Tudo em `src/insight.js`, sem rede e sem tabela nova:
+
+- Cartão do momento no Início: uma ação só, na ordem passo do plano que vence hoje, pergunta em aberto pedindo notícia (Resolvi / Ainda pesa), intenção da manhã, reflexão da noite, dica do dia. "Agora não" esconde até amanhã.
+- Continuar em vez de recomeçar: ao escrever, a Alma reconhece uma pergunta parecida já guardada e oferece seguir de lá.
+- Perguntas de aprofundamento buscadas enquanto a pessoa ainda escreve; a resposta que ela costuma dar já vem marcada.
+- Suas vozes: tradições mais estreladas aparecem primeiro, com o motivo dito em uma linha.
+- O céu do dia acompanha o passo sugerido (e vai para a IA como contexto); o tarô sugere a pergunta em aberto.
+- Ações de um toque na resposta: virar plano e lembrar amanhã no horário em que a pessoa costuma usar o app.
+- Ritmo do dia: o céu do Início muda de tom de manhã, à tarde e à noite.
+- Hábitos de uso (horários, sugestões dispensadas) ficam só no aparelho; o check-in fica na própria pergunta e sincroniza.
+
 ## Rodar localmente
 
 ```bash

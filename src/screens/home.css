@@ -76,7 +76,7 @@
 /* Início em órbita */
 .hm-scroll2 { gap: var(--s3); align-items: stretch; }
 .hm-hello2 h1 { font-size: 28px; }
-.hm-orbit { position: relative; width: 340px; height: 340px; align-self: center; margin: 8px 0 44px; }
+.hm-orbit { position: relative; width: 340px; height: 340px; align-self: center; margin: 4px 0 28px; }
 .hm-ring { position: absolute; inset: 22px; border-radius: 50%; border: 1px solid rgba(201,184,255,.18); box-shadow: 0 0 40px rgba(122,92,255,.12) inset; }
 .hm-ring2 { inset: 72px; border-style: dashed; border-color: rgba(255,255,255,.08); animation: hmSpin 90s linear infinite reverse; }
 .hm-spin { position: absolute; inset: 0; animation: hmSpin 140s linear infinite; }

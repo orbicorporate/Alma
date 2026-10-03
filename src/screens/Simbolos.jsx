@@ -2,6 +2,7 @@
 import React from 'react';
 import { DCLogic, css } from '../dc/runtime.js';
 import { load, save, onData } from '../store.js';
+import { planNameOf } from '../questions.js';
 import { today, addDays, addMonths, WD_FULL } from '../dates.js';
 import NatalSphere from '../components/NatalSphere.jsx';
 import SkyHero from '../components/SkyHero.jsx';
@@ -508,7 +509,9 @@ class Component extends DCLogic {
         adv: cards[2][5]
       };
     }
-    const tqChips = ['O que preciso saber hoje?', 'Como está meu caminho profissional?', 'O que o amor me pede agora?'].map((t) => ({ t, pick: () => this.setState({ tq: t }) }));
+    // A pergunta que a pessoa está vivendo agora vira a primeira sugestão de intenção do tarô.
+    const openQ = (load().entries || []).filter((e) => e && !e.resolved && e.q).slice(-1)[0];
+    const tqChips = (openQ ? [`Sobre “${planNameOf(openQ)}”: o que preciso ver?`] : []).concat(['O que preciso saber hoje?', 'Como está meu caminho profissional?', 'O que o amor me pede agora?']).map((t) => ({ t, pick: () => this.setState({ tq: t }) }));
     const CRUMB = { profile: 'Perfil', calc: 'Calculando', map: 'Mapa natal', horo: 'Horóscopo', num: 'Numerologia', tSpread: 'Tarô', tQuestion: 'Tarô · Intenção', tShuffle: 'Tarô · Embaralhar', tCut: 'Tarô · Cortar', tFan: 'Tarô · Escolher', tReveal: 'Tarô · Leitura' };
     const calcRing = SG.map((g, i) => {
       const t = (-90 + i * 30) * Math.PI / 180;
@@ -1564,7 +1567,7 @@ Component.prototype.render = function render() {
                 <div style={css("display: flex; flex-wrap: wrap; gap: 8px")}>
                   {(R.tqChips || []).map((L17_c, I17) => (
                     <React.Fragment key={I17}>
-                      <button className="pill" onClick={L17_c?.pick} style={css("height: 40px; padding: 0 14px; border-radius: 999px; font-size: 17.5px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12)")}>
+                      <button className="pill" onClick={L17_c?.pick} style={css("min-height: 44px; max-width: 100%; padding: 6px 14px; border-radius: 22px; text-align: left; line-height: 1.35; font-size: 17px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12)")}>
                         {L17_c?.t}
                       </button>
                     </React.Fragment>

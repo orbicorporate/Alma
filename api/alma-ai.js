@@ -74,6 +74,7 @@ const A_TOOL = {
     ponto_cego: { type: 'string', description: 'O ponto cego dela, com gentileza e honestidade. 1 frase.' },
     mudaria: { type: 'string', description: 'Em que condição você mudaria a recomendação. 1 frase curta, começando com "Se".' },
     pergunta: { type: 'string', description: 'Uma pergunta que incomoda, para ela levar. 1 frase.' },
+    ceu: { type: 'string', description: 'Opcional. Meia frase ligando o céu do dia (informado no contexto) ao passo das próximas 24 horas, como convite simbólico e nunca como previsão. Deixe vazio se não ajudar.' },
     step: { type: 'string', description: 'Uma ação concreta para as próximas 24 horas' },
     plan: { type: 'array', minItems: 4, maxItems: 5, items: { type: 'string' }, description: 'Passos curtos: verbo + algo específico + resultado. O primeiro cabe em 24h; o último é um ponto de decisão.' }
   } }
@@ -128,7 +129,8 @@ Cada pergunta tem 5 opções curtas (1 a 4 palavras), concretas, mutuamente dife
       const qs = (body.questions || []).slice(0, 3).map((q) => String(q).slice(0, 200));
       const voices = (body.voices || []).slice(0, 14).map((v) => ({ name: String(v.name), ref: String(v.ref).slice(0, 80), tr: String(v.tr).slice(0, 300) }));
       const qa = qs.map((q, i) => `${q} → ${answers[i] || '(pulou)'}`).join('\n');
-      const ctx = `A pessoa trouxe (${kind}): "${text}"\nAprofundamento:\n${qa || '(sem respostas)'}`;
+      const sky = String(body.sky || '').slice(0, 160);
+      const ctx = `A pessoa trouxe (${kind}): "${text}"\nAprofundamento:\n${qa || '(sem respostas)'}${sky ? `\nCéu do dia (tradição simbólica, use só no campo ceu): ${sky}` : ''}`;
       const voiceBatch = (list, offset) => claude(MODEL_C, `${ctx}
 
 Escreva a reflexão de cada tradição abaixo sobre ESSA situação. Regras para cada reflexão:
@@ -146,7 +148,7 @@ Devolva exatamente ${list.length} reflexões, na mesma ordem.`, V_TOOL, 2500).th
       const reflections = new Array(voices.length).fill('');
       [v1, v2].forEach((b) => b.list.forEach((r, i) => { if (b.offset + i < reflections.length) reflections[b.offset + i] = String(r); }));
       const trad = (alma.tradicoes || []).slice(0, 3).map((t) => ({ nome: String(t.nome || ''), ideia: String(t.ideia || '') }));
-      const sec = { tensao: alma.tensao, leitura: alma.leitura, tradicoes: trad, ponto_cego: alma.ponto_cego, mudaria: alma.mudaria, pergunta: alma.pergunta };
+      const sec = { tensao: alma.tensao, leitura: alma.leitura, tradicoes: trad, ponto_cego: alma.ponto_cego, mudaria: alma.mudaria, pergunta: alma.pergunta, ceu: alma.ceu ? String(alma.ceu).slice(0, 220) : undefined };
       const p2 = [alma.leitura, trad.map((t) => `${t.nome}: ${t.ideia}`).join(' '), alma.ponto_cego, alma.pergunta].filter(Boolean).join(' ');
       return json({ reflections, alma: { p1: alma.tensao, p2, step: alma.step, sec }, plan: alma.plan });
     }

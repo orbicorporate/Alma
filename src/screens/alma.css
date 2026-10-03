@@ -157,3 +157,34 @@
 .sc-main .c14-tr { margin: 0; font-size: 16px; font-style: italic; line-height: 1.5; color: rgba(244,241,234,.6); }
 .sc-main .c14-tr small { font-style: normal; font-size: 14.5px; color: rgba(244,241,234,.45); }
 .sc-main .c14-close { flex-shrink: 0; height: 50px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); font-size: 17px; text-align: center; }
+
+/* Intuição no fluxo de perguntar.
+   Motion (peso Jakub, depois Emil): sugestões entram materializando em 320ms; nada pulsa;
+   toques respondem em 120ms com escala leve e sem mexer no layout. */
+.sc-main { --al-out: cubic-bezier(.22, .8, .24, 1); }
+.sc-main .al-sim { width: 100%; display: flex; align-items: stretch; gap: 8px; animation: alSugIn .32s var(--al-out) both; }
+.sc-main .al-sim-go { flex-grow: 1; min-width: 0; min-height: 48px; padding: 6px 16px; border-radius: 18px; display: flex; flex-direction: column; justify-content: center; gap: 1px; text-align: left;
+  background: rgba(201,184,255,.1); border: 1px solid rgba(201,184,255,.42); transition: transform .12s var(--al-out), background-color .12s ease-out; }
+.sc-main .al-sim-k { font-size: 13.5px; letter-spacing: .14em; text-transform: uppercase; color: #c9b8ff; }
+.sc-main .al-sim-q { font-size: 16px; font-weight: 300; color: #f4f1ea; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sc-main .al-sim-x { flex-shrink: 0; min-width: 72px; min-height: 48px; padding: 0 14px; border-radius: 18px; font-size: 16px; color: rgba(244,241,234,.75); border: 1px solid rgba(255,255,255,.14);
+  transition: transform .12s var(--al-out), background-color .12s ease-out; }
+.sc-main .al-sim-go:active, .sc-main .al-sim-x:active, .sc-main .al-quick button:active, .sc-main .al-sugg-all:active { transform: scale(.97); }
+.sc-main .al-sugg { margin: -6px 0 0; text-align: center; font-size: 15.5px; font-weight: 300; line-height: 1.45; color: rgba(255,244,209,.72); animation: alSugIn .32s var(--al-out) both; }
+.sc-main .al-sugg-all { align-self: center; min-height: 44px; padding: 8px 18px; border-radius: 999px; font-size: 16.5px; color: #f3d98b; background: rgba(243,217,139,.08); border: 1px solid rgba(243,217,139,.35);
+  animation: alSugIn .32s .08s var(--al-out) both; transition: transform .12s var(--al-out); }
+.sc-main .al-sky { margin: 10px 0 0; display: flex; align-items: flex-start; gap: 6px; font-size: 15.5px; line-height: 1.45; color: rgba(243,217,139,.9); }
+.sc-main .al-sky svg { flex-shrink: 0; margin-top: 3px; }
+.sc-main .al-quick { position: relative; margin-top: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.sc-main .al-quick button { min-height: 46px; padding: 6px 10px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 999px; font-size: 16px; text-align: center; color: #f4f1ea; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.05);
+  transition: transform .12s var(--al-out), background-color .2s ease-out, color .2s ease-out; }
+.sc-main .al-quick .al-q1 { border-color: rgba(143,227,176,.5); color: #d4f7e0; }
+.sc-main .al-quick button[aria-pressed="true"] { color: #f3d98b; border-color: rgba(243,217,139,.45); background: rgba(243,217,139,.08); cursor: default; }
+.sc-main .al-fav { margin-top: 4px; font-size: 15.5px; font-weight: 300; line-height: 1.45; color: rgba(243,217,139,.85); }
+.sc-main :is(.al-sim-go, .al-sim-x, .al-quick button, .al-sugg-all):focus-visible { outline: 2px solid #f4f1ea; outline-offset: 2px; }
+@keyframes alSugIn { from { opacity: 0; transform: translateY(6px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .sc-main :is(.al-sim, .al-sugg, .al-sugg-all) { animation: none; }
+  .sc-main :is(.al-sim-go, .al-sim-x, .al-quick button, .al-sugg-all) { transition: none; }
+  .sc-main :is(.al-sim-go, .al-sim-x, .al-quick button, .al-sugg-all):active { transform: none; }
+}

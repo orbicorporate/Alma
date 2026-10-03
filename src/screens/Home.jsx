@@ -8,6 +8,7 @@ import { planNameOf } from '../questions.js';
 import { Moon } from './Diario.jsx';
 import './home.css';
 import Starfield from '../components/Starfield.jsx';
+import Moment from '../components/Moment.jsx';
 
 // Início: o lugar onde a pessoa se encontra todos os dias.
 const go = (hash, detail) => {
@@ -99,6 +100,8 @@ export default function Home() {
         <section className="hm-hello hm-hello2">
           <h1>{hello}{name ? `, ${name}` : ''}.</h1>
         </section>
+
+        <Moment data={data} onData={(patch) => setData((d) => Object.assign({}, d, patch))} onWhy={() => { setWhyD(true); setSheet('lua'); }} />
 
         <div className="hm-orbit">
           <div className="hm-ring" />

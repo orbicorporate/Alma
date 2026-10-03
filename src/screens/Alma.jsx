@@ -9,6 +9,7 @@ import { aiQuestions, aiCouncil } from '../ai.js';
 import MovieTip from '../components/MovieTip.jsx';
 import { contextQS, contextOf, stepFor, planSteps, planNameOf, moodOf } from '../questions.js';
 import { load, save, getAuth, onAuth, onData, sendMagicLink, signInWithGoogle, signOut } from '../store.js';
+import { similarEntry, suggestTags, voiceRank, namesLine, reminderHour, skyLine, track, buzz } from '../insight.js';
 
 class Component extends DCLogic {
   constructor(props) {
@@ -110,8 +111,11 @@ class Component extends DCLogic {
       kind: 'Dúvida', step: 0, voicesOpen: false, ans: [null, null, null], other: false, otherText: '', jfilter: 'all', confirmDel: false, lit: 0, focus: -1, open: -1, stars: [], filter: 'all',
       savedNow: false, toast: '', sheet: -1, tx: 0, ty: 0, planEdit: null, nameEdit: null,
       entries: load().entries || [],
-      auth: getAuth(), loginEmail: '', loginMsg: ''
+      auth: getAuth(), loginEmail: '', loginMsg: '', simOff: -1
     };
+    // Perguntas de aprofundamento buscadas enquanto a pessoa ainda escreve, por texto.
+    this.qCache = new Map();
+    this.qReady = new Set();
   }
   componentDidMount() {
     this.checkHandoff = this.checkHandoff.bind(this);
@@ -137,7 +141,7 @@ class Component extends DCLogic {
   }
   componentWillUnmount() {
     window.removeEventListener('alma:show', this.checkHandoff); window.removeEventListener('alma:go', this.onGo); window.removeEventListener('alma:saved', this.onSaved); this.offAuth && this.offAuth(); this.offData && this.offData();
-    clearTimeout(this.k); clearInterval(this.b); clearTimeout(this.t1); clearInterval(this.ci); clearTimeout(this.ts); clearTimeout(this.tq);
+    clearTimeout(this.k); clearInterval(this.b); clearTimeout(this.t1); clearTimeout(this.pf); clearInterval(this.ci); clearTimeout(this.ts); clearTimeout(this.tq);
   }
   flash(msg) {
     this.setState({ toast: msg });
@@ -153,7 +157,7 @@ class Component extends DCLogic {
     const s0 = this.state, text = s0.text;
     const qs = (s0.aiQs || contextQS(s0.text, s0.kind, this.QS)).map((q) => q.q);
     const voices = this.AG.map((a, i) => { const v = this.voice(i); return { name: v.name, ref: v.ref, tr: v.tr }; });
-    aiCouncil({ text, kind: s0.kind, questions: qs, answers: s0.ans, voices }).then((r) => {
+    aiCouncil({ text, kind: s0.kind, questions: qs, answers: s0.ans, voices, sky: skyLine(load().profile) }).then((r) => {
       if (this.state.text !== text) return;
       this.setState({ aiCouncil: r, aiState: r ? 'ok' : 'off' });
     });
@@ -166,6 +170,7 @@ class Component extends DCLogic {
   }
   advance() {
     const s = this.state;
+    if (s.step === 2) track();
     this.setState({ other: false, otherText: '' });
     if (s.step < 2) this.setState({ step: s.step + 1 });
     else this.startCouncil();
@@ -296,7 +301,7 @@ class Component extends DCLogic {
           cancel: () => this.setState({ planEdit: null }),
           remove: () => { this.updAt(idx, (en) => { en.plan = en.plan.filter((_, k) => k !== j); return en; }); this.setState({ planEdit: null }); this.flash('Passo removido'); },
           canRemove: total > 1,
-          n: j + 1, t: x.t, date: x.date, kicker: `Passo ${j + 1} de ${total}`,
+          n: j + 1, t: x.t, date: x.date + (x.hour != null && !x.done ? ` · ${x.hour}h` : ''), kicker: `Passo ${j + 1} de ${total}`,
           done, todo: !done, isCurrent: isCurrent && !editing, isFuture: !done && !isCurrent && !editing,
           badgeOn: done || isCurrent, badge: done ? 'Concluído' : 'Agora',
           badgeStyle: done ? 'background: rgba(143,227,176,.16); color: #8fe3b0' : 'background: rgba(243,217,139,.18); color: #f3d98b',
@@ -355,6 +360,20 @@ class Component extends DCLogic {
         {sec.pergunta ? <section className="al-sec"><span className="al-h">Uma pergunta para levar</span><p className="al-q">{sec.pergunta}</p></section> : null}
       </div>
     );
+  }
+  // A tela recalcula a cada movimento do mouse (aurora); o que é caro só roda quando muda.
+  memo(name, deps, fn) {
+    const m = (this._m = this._m || {}), c = m[name];
+    if (c && c.deps.length === deps.length && c.deps.every((d, i) => d === deps[i])) return c.v;
+    const v = fn(); m[name] = { deps, v }; return v;
+  }
+  entryNow() {
+    const st = this.state, a = this.composeAlma();
+    return {
+      date: dayMonth(today()), at: Date.now(), kind: st.kind, q: st.text, tags: st.ans.filter(Boolean), resolved: false, plan: null,
+      alma: a.p1 + ' ' + a.p2, step: a.step, sec: a.sec || undefined, council: this.councilSnap(),
+      stars: st.stars.map((i) => { const v = this.voice(i); return { name: v.name, ref: v.ref, color: v.color, tr: v.tr }; })
+    };
   }
   KP(k) {
     return { 'Pensamento': 'um pensamento', 'Dúvida': 'uma dúvida', 'Aflição': 'uma aflição', 'Medo': 'um medo', 'Alegria': 'uma alegria', 'Sugestão': 'um pedido de sugestão' }[k] || 'algo seu';
@@ -425,11 +444,15 @@ class Component extends DCLogic {
     const qs = s.aiQs || contextQS(s.text, s.kind, this.QS);
     const cq = qs[Math.min(s.step, 2)];
     const bars = [0, 1, 2].map((i) => ({ style: i <= s.step ? 'background: #f3d98b; box-shadow: 0 0 10px rgba(243,217,139,.6)' : 'background: rgba(255,255,255,.16)' }));
-    const dtags = cq.tags.map((tg) => {
-      const on = s.ans[s.step] === tg;
+    // Respostas que a pessoa provavelmente daria: vêm marcadas, ela só confirma ou troca.
+    const sugg = s.screen === 'deepen' ? this.memo('sugg', [s.aiQs, s.kind, s.entries, s.text], () => suggestTags(qs, s.entries, similarEntry(s.text, s.entries))) : [null, null, null];
+    const sg = s.ans[s.step] == null ? sugg[Math.min(s.step, 2)] : null;
+    const tagOrder = sg ? [sg].concat(cq.tags.filter((x) => x !== sg)) : cq.tags;
+    const dtags = tagOrder.map((tg) => {
+      const on = s.ans[s.step] === tg, pre = !on && sg === tg;
       return {
-        label: tg, pressed: on ? 'true' : 'false',
-        style: on ? 'background: rgba(243,217,139,.18); border-color: #f3d98b; box-shadow: 0 0 26px rgba(243,217,139,.45); color: #fff4d1' : 'background: rgba(255,255,255,.05)',
+        label: tg, pressed: on ? 'true' : 'false', pre,
+        style: on ? 'background: rgba(243,217,139,.18); border-color: #f3d98b; box-shadow: 0 0 26px rgba(243,217,139,.45); color: #fff4d1' : pre ? 'background: rgba(243,217,139,.1); border: 1px dashed rgba(243,217,139,.75); color: #fff4d1' : 'background: rgba(255,255,255,.05)',
         pick: () => {
           const ans = this.state.ans.slice();
           ans[this.state.step] = tg;
@@ -504,7 +527,10 @@ class Component extends DCLogic {
       han: "font-family: 'Noto Sans TC', sans-serif; font-size: 24px; letter-spacing: .08em",
       gurmukhi: "font-family: 'Noto Sans Gurmukhi', sans-serif; font-size: 21px"
     };
-    let idx = AG.map((a, i) => i);
+    // Suas vozes: as tradições que a pessoa mais marca com estrela aparecem primeiro.
+    const rank = this.memo('rank', [s.entries], () => voiceRank(s.entries));
+    const order = AG.map((a, i) => i).sort((a, b) => { const ra = rank.indexOf(AG[a].name), rb = rank.indexOf(AG[b].name); return (ra < 0 ? 99 : ra) - (rb < 0 ? 99 : rb) || a - b; });
+    let idx = order.slice();
     if (s.filter === 'stars') idx = idx.filter((i) => s.stars.includes(i));
     else if (typeof s.filter === 'number') idx = [s.filter];
     const cards = idx.map((i, pos) => {
@@ -525,7 +551,7 @@ class Component extends DCLogic {
         star: () => {
           const st = this.state.stars.slice();
           const k = st.indexOf(i);
-          if (k >= 0) st.splice(k, 1); else st.push(i);
+          if (k >= 0) st.splice(k, 1); else { st.push(i); buzz(); }
           this.setState({ stars: st, savedNow: false });
         }
       });
@@ -679,7 +705,8 @@ class Component extends DCLogic {
       rays, councilAgents, councilStatus, councilSub, statusColor, councilReady: s.lit >= N && s.aiState !== 'c', councilThinking: s.lit >= N && s.aiState === 'c',
       cards, filters, noCards: cards.length === 0,
       voicesOpen: s.voicesOpen, voicesClosed: !s.voicesOpen, voiceCount: AG.length,
-      voiceSyms: AG.map((a, i) => Object.assign(icon(a), {
+      favLine: rank.length ? `Suas vozes vêm primeiro: ${namesLine(rank)}, porque você costuma marcá-las com estrela.` : '',
+      voiceSyms: order.map((i) => AG[i]).map((a, k) => ({ a, i: order[k] })).map(({ a, i }) => Object.assign(icon(a), {
         name: a.name, color: a.color,
         border: s.stars.includes(i) ? 'rgba(243,217,139,.7)' : a.color + '44',
         pick: () => this.setState({ voicesOpen: true, filter: i, open: i })
@@ -771,7 +798,19 @@ class Component extends DCLogic {
         const r = e.currentTarget.getBoundingClientRect();
         this.setState({ tx: ((e.clientX - r.left) / r.width - 0.5) * 2, ty: ((e.clientY - r.top) / r.height - 0.5) * 2 });
       },
-      onText: (e) => this.setState({ text: e.target.value }),
+      onText: (e) => {
+        const v = e.target.value;
+        this.setState({ text: v });
+        // Pausou de escrever? A Alma já começa a pensar nas perguntas, para a resposta chegar sem espera.
+        clearTimeout(this.pf);
+        if (v.trim().length < 24) return;
+        this.pf = setTimeout(() => {
+          const t = this.state.text;
+          if (t !== v || this.qCache.has(t)) return;
+          if (this.qCache.size > 6) this.qCache.clear();
+          this.qCache.set(t, aiQuestions(t, this.state.kind).then((r) => { this.qReady.add(t); return r; }));
+        }, 1100);
+      },
       enter: () => this.setState({ screen: 'ask' }),
       breathDone: () => this.setState(this.state.medit ? { screen: 'answers', medit: false } : { screen: 'ask' }),
       release: () => {
@@ -782,16 +821,44 @@ class Component extends DCLogic {
         this.setState({ screen: 'releasing', step: 0, ans: [null, null, null], kind, aiQs: null, aiCouncil: null, aiState: 'q', councilKey: null });
         clearTimeout(this.t1);
         const text = this.state.text, t0 = Date.now();
+        // Se as perguntas já chegaram enquanto ela escrevia, o ritual fica mais curto.
+        const ready = this.qReady.has(text), wait = ready ? 1700 : 3000;
         let done = false;
         const go = () => { if (this.state.screen === 'releasing') this.setState({ screen: 'deepen' }); };
-        aiQuestions(text, kind).then((r) => {
+        clearTimeout(this.pf);
+        track();
+        (this.qCache.get(text) || aiQuestions(text, kind)).then((r) => {
           done = true;
           if (r && this.state.text === text) this.setState(Object.assign({ aiQs: r.questions }, !this.state.kindPicked && r.kind ? { kind: r.kind } : {}));
-          setTimeout(go, Math.max(0, 3000 - (Date.now() - t0)));
+          setTimeout(go, Math.max(0, wait - (Date.now() - t0)));
         });
-        this.t1 = setTimeout(() => { if (!done) this.t1 = setTimeout(go, 6000); else go(); }, 3000);
+        this.t1 = setTimeout(() => { if (!done) this.t1 = setTimeout(go, 6000); else go(); }, wait);
       },
       skipQ: () => this.advance(),
+      suggHint: !!sg,
+      allSugg: s.step === 0 && sugg.every(Boolean) && !s.ans.some(Boolean),
+      useAllSugg: () => { clearTimeout(this.tq); buzz(); this.setState({ ans: sugg.slice(0, 3), step: 2 }, () => { track(); this.startCouncil(); }); },
+      sim: s.screen === 'ask' && !s.fromWhere ? this.memo('sim', [s.text, s.entries, s.simOff], () => similarEntry(s.text, s.entries, s.simOff)) : null,
+      followSim: (i) => this.setState({ prev: 'ask', screen: 'journal', sheet: i, confirmDel: false }),
+      dropSim: (i) => this.setState({ simOff: i }),
+      skyNow: (s.aiCouncil && s.aiCouncil.alma && s.aiCouncil.alma.sec && s.aiCouncil.alma.sec.ceu) || this.memo('sky', [iso(today())], () => skyLine(load().profile)),
+      remindH: this.memo('rh', [s.screen], () => reminderHour()),
+      reminded: s.remindedKey === this.councilKey(),
+      remindTomorrow: () => {
+        const st = this.state, h = reminderHour();
+        const list = st.entries.slice();
+        let idx = st.savedIdx;
+        if (!st.savedNow || idx < 0 || !list[idx]) { list.push(this.entryNow()); idx = list.length - 1; }
+        const e = Object.assign({}, list[idx]);
+        if (!e.plan) e.plan = this.planFor(e.kind, e.q);
+        const tIso = iso(addDays(today(), 1));
+        let moved = false;
+        e.plan = e.plan.map((x) => { if (moved || x.done) return x; moved = true; return Object.assign({}, x, { iso: tIso, remind: true, hour: h }); });
+        list[idx] = e;
+        buzz(); track();
+        this.setState({ entries: list, savedNow: true, savedIdx: idx, remindedKey: this.councilKey() });
+        this.flash(`Combinado. Amanhã às ${h}h eu te lembro.`);
+      },
       hear: () => this.setState({ screen: 'answers', open: -1, filter: 'all', voicesOpen: false }),
       meditate: () => this.setState({ screen: 'breath', medit: true, count: 0 }),
       share: () => this.flash('Card de compartilhamento pronto'),
@@ -817,7 +884,7 @@ class Component extends DCLogic {
         else this.setState({ screen: st.prev || 'ask', sheet: -1 });
       },
       closeSheet: () => this.setState({ sheet: -1, confirmDel: false }),
-      restart: () => this.setState({ councilKey: null, screen: 'ask', open: -1, lit: 0, stars: [], filter: 'all', savedNow: false, ans: [null, null, null], step: 0, text: '', fromWhere: '', kindPicked: false, kind: 'Dúvida' })
+      restart: () => this.setState({ simOff: -1, councilKey: null, screen: 'ask', open: -1, lit: 0, stars: [], filter: 'all', savedNow: false, ans: [null, null, null], step: 0, text: '', fromWhere: '', kindPicked: false, kind: 'Dúvida' })
     };
   }
 }
@@ -1120,7 +1187,7 @@ Component.prototype.render = function render() {
                   </span>
                 </React.Fragment>
               ))}
-              <div style={css("position: absolute; inset: 0; box-sizing: border-box; padding: 252px 14px 28px; display: flex; flex-direction: column; gap: 20px")}>
+              <div style={css(`position: absolute; inset: 0; box-sizing: border-box; padding: ${R.sim ? 236 : 252}px 14px 28px; display: flex; flex-direction: column; gap: ${R.sim ? 12 : 20}px`)}>
                 <div style={css("display: flex; flex-direction: column; align-items: center; gap: 10px")}>
                   <div className="kicker">
                     {"A Alma sente "}
@@ -1149,13 +1216,24 @@ Component.prototype.render = function render() {
                   </label>
                   <textarea id="alma-q" value={R.text} onChange={R.onText} placeholder="Uma dúvida, um medo, uma alegria. Ninguém está com pressa aqui." style={css("flex-grow: 1; font-size: 18px; font-weight: 300; line-height: 1.45")}></textarea>
                 </div>
+                {R.sim ? (
+                  <div className="al-sim" role="status">
+                    <button className="al-sim-go" onClick={() => R.followSim(R.sim.i)}>
+                      <span className="al-sim-k">Parece continuação de</span>
+                      <span className="al-sim-q">“{R.sim.name}” · {R.sim.e.date}</span>
+                    </button>
+                    <button className="al-sim-x" onClick={() => R.dropSim(R.sim.i)} aria-label="É uma pergunta nova">É nova</button>
+                  </div>
+                ) : null}
                 <div style={css("display: flex; flex-direction: column; align-items: center; gap: 12px")}>
                   <button className="cta" onClick={R.release} style={css("width: 100%; height: 58px; border-radius: 999px; font-size: 17px; font-weight: 500; letter-spacing: .02em; text-align: center; color: #1a1408; background: linear-gradient(120deg, #f3d98b, #fff1c9 45%, #ffc79a); box-shadow: 0 0 30px rgba(243,217,139,.22)")}>
                     {"Soltar para a Alma"}
                   </button>
-                  <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.5)")}>
-                    {"Catorze sabedorias vão refletir com você"}
-                  </span>
+                  {R.sim ? null : (
+                    <span style={css("font-size: 17px; font-weight: 300; color: rgba(244,241,234,.5)")}>
+                      {"Catorze sabedorias vão refletir com você"}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -1207,12 +1285,17 @@ Component.prototype.render = function render() {
                   <div style={css("display: flex; flex-wrap: wrap; justify-content: center; gap: 10px")}>
                     {(R.dtags || []).map((L10_t, I10) => (
                       <React.Fragment key={I10}>
-                        <button className="pill" onClick={L10_t?.pick} aria-pressed={L10_t?.pressed} style={css(`height: 46px; padding: 0 20px; border-radius: 999px; font-size: 17.5px; font-weight: 400; border: 1px solid rgba(255,255,255,.16); ${(L10_t?.style) ?? ''}`)}>
+                        <button className="pill" onClick={L10_t?.pick} aria-pressed={L10_t?.pressed} aria-label={L10_t?.pre ? `${L10_t?.label}, sugerida pelo que você costuma responder` : undefined} style={css(`height: 46px; padding: 0 20px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 17.5px; font-weight: 400; border: 1px solid rgba(255,255,255,.16); ${(L10_t?.style) ?? ''}`)}>
+                          {L10_t?.pre ? <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ marginRight: 6, flexShrink: 0, opacity: .9 }}><path d="M12 3l1.8 5.6L19.5 10l-5.7 1.6L12 17.5l-1.8-5.9L4.5 10l5.7-1.4z" /></svg> : null}
                           {L10_t?.label}
                         </button>
                       </React.Fragment>
                     ))}
                   </div>
+                  {R.suggHint ? <p className="al-sugg">Já deixei marcada a resposta que você costuma dar. Toque para confirmar ou escolha outra.</p> : null}
+                  {R.allSugg ? (
+                    <button className="pill al-sugg-all" onClick={R.useAllSugg}>Usar as três sugestões e ouvir o Conselho <span aria-hidden="true">›</span></button>
+                  ) : null}
                   {R.showOtherBtn ? (
                     <>
                       <button className="pill" onClick={R.openOther} style={css("align-self: center; height: 44px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; font-size: 17.5px; color: rgba(244,241,234,.75); border: 1px dashed rgba(255,255,255,.28)")}>
@@ -1374,6 +1457,16 @@ Component.prototype.render = function render() {
                     <p style={css("margin: 6px 0 0; font-size: 17.5px; font-weight: 400; line-height: 1.55")}>
                       {R.almaStep}
                     </p>
+                    {R.skyNow ? (
+                      <p className="al-sky">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19.5 14.5A7.5 7.5 0 1 1 9.5 4.5a6 6 0 0 0 10 10z" /></svg>
+                        <span>O céu de hoje: {R.skyNow}</span>
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="al-quick">
+                    <button className="pill al-q1" onClick={R.createPlan}>{R.planCta === 'Ver meu plano de ação' ? 'Ver o plano' : 'Virar plano'}</button>
+                    <button className="pill al-q2" onClick={R.remindTomorrow} aria-pressed={R.reminded ? 'true' : 'false'} disabled={R.reminded} aria-label={R.reminded ? `Lembrete marcado para amanhã às ${R.remindH}h` : `Lembrar amanhã às ${R.remindH}h`}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" /><path d="M10 20.5a2.2 2.2 0 0 0 4 0" /></svg>{`Amanhã, ${R.remindH}h`}</button>
                   </div>
                 </div>
                 {R.voicesClosed ? (
@@ -1389,6 +1482,7 @@ Component.prototype.render = function render() {
                         <span style={css("font-size: 17.5px; font-weight: 300; line-height: 1.5; color: rgba(244,241,234,.62)")}>
                           {"Cada uma traz um texto original e uma reflexão. Toque num símbolo para ouvir uma voz, ou veja todas."}
                         </span>
+                        {R.favLine ? <span className="al-fav">{R.favLine}</span> : null}
                       </div>
                       <div style={css("display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px")}>
                         {(R.voiceSyms || []).map((L15_v, I15) => (

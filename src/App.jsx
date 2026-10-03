@@ -9,6 +9,7 @@ import Ajustes, { applyPrefs } from './screens/Ajustes.jsx';
 import Estilo from './screens/Estilo.jsx';
 import { applyTheme } from './theme.js';
 import TabBar from './components/TabBar.jsx';
+import { daypart } from './insight.js';
 
 const routeOf = () => { const h = window.location.hash; return h.startsWith('#/simbolos') ? 'simbolos' : h.startsWith('#/diario') ? 'diario' : h.startsWith('#/constelacao') ? 'constelacao' : h.startsWith('#/inicio') ? 'inicio' : h.startsWith('#/banhos') ? 'banhos' : h.startsWith('#/ajustes') ? 'ajustes' : h.startsWith('#/estilo') ? 'estilo' : 'alma'; };
 
@@ -47,6 +48,13 @@ export default function App() {
   };
 
   useEffect(() => { applyPrefs(); applyTheme(); }, []);
+  // Ritmo do dia: manhã, tarde ou noite mudam o tom do céu e o que a Alma sugere.
+  useEffect(() => {
+    const set = () => { document.documentElement.dataset.daypart = daypart(); };
+    set();
+    const k = setInterval(set, 10 * 60 * 1000);
+    return () => clearInterval(k);
+  }, []);
   useLayoutEffect(() => {
     const fit = () => {
       const w = window.innerWidth;
